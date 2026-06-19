@@ -276,24 +276,11 @@ export function Builder() {
       }}
     >
       <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0, marginRight: 16 }}>
-        <div
-          style={{
-            width: 28,
-            height: 28,
-            borderRadius: 7,
-            background: "linear-gradient(135deg, #5865F2, #7c3aed)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            color: "#fff",
-            fontSize: 11,
-            fontWeight: 800,
-            letterSpacing: "-0.03em",
-            flexShrink: 0,
-          }}
-        >
-          OE
-        </div>
+        <img
+          src="/logo.png"
+          alt="OpenEmbedded"
+          style={{ width: 28, height: 28, borderRadius: 7, flexShrink: 0, objectFit: "cover" }}
+        />
         {!isMobile && (
           <span style={{ color: "#e6edf3", fontSize: 14, fontWeight: 700, letterSpacing: "-0.01em" }}>
             OpenEmbedded
