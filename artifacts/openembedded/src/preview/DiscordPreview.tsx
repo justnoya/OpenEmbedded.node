@@ -1,9 +1,11 @@
 import { usePreviewStore } from "@/lib/previewStore";
+import { AlertTriangle } from "lucide-react";
 
 interface DiscordComponent {
   type: number;
   content?: string;
   components?: DiscordComponent[];
+  accessory?: DiscordComponent;
   accent_color?: number;
   spoiler?: boolean;
   media?: { url: string };
@@ -26,53 +28,113 @@ interface DiscordEmbed {
   image?: { url: string };
 }
 
-const BUTTON_STYLE_COLORS: Record<number, { bg: string; color: string }> = {
+const BUTTON_STYLE_COLORS: Record<number, { bg: string; color: string; border?: string }> = {
   1: { bg: "#5865F2", color: "#fff" },
-  2: { bg: "#4E5058", color: "#fff" },
+  2: { bg: "#4e5058", color: "#fff" },
   3: { bg: "#57F287", color: "#000" },
   4: { bg: "#ED4245", color: "#fff" },
-  5: { bg: "transparent", color: "#00b0f4" },
+  5: { bg: "transparent", color: "#00b0f4", border: "1px solid rgba(0,176,244,0.35)" },
 };
 
 function RenderComponent({ comp }: { comp: DiscordComponent }) {
   switch (comp.type) {
-    case 17:
+    case 17: {
+      const accent = comp.accent_color != null
+        ? `#${comp.accent_color.toString(16).padStart(6, "0")}`
+        : null;
       return (
         <div
           style={{
-            border: comp.accent_color
-              ? `2px solid #${comp.accent_color.toString(16).padStart(6, "0")}`
-              : "1px solid rgba(255,255,255,0.1)",
+            border: accent ? `2px solid ${accent}` : "1px solid rgba(255,255,255,0.09)",
             borderRadius: 8,
-            padding: 12,
-            background: comp.spoiler ? "#000" : "rgba(0,0,0,0.15)",
+            padding: 10,
+            background: comp.spoiler
+              ? "rgba(0,0,0,0.8)"
+              : "rgba(255,255,255,0.02)",
             marginBottom: 8,
           }}
         >
+          {accent && (
+            <div
+              style={{
+                width: 36,
+                height: 3,
+                borderRadius: 2,
+                background: accent,
+                marginBottom: 8,
+              }}
+            />
+          )}
           {(comp.components ?? []).map((c, i) => (
             <RenderComponent key={i} comp={c} />
           ))}
         </div>
       );
-    case 9:
+    }
+    case 9: {
+      const textComps = (comp.components ?? []).filter((c) => c.type !== 11);
+      const accessory = comp.accessory ?? (comp.components ?? []).find((c) => c.type === 11);
       return (
-        <div style={{ display: "flex", gap: 8, alignItems: "flex-start", marginBottom: 6 }}>
-          <div style={{ flex: 1 }}>
-            {(comp.components ?? []).map((c, i) => (
+        <div
+          style={{
+            display: "flex",
+            gap: 10,
+            alignItems: "flex-start",
+            marginBottom: 6,
+          }}
+        >
+          <div style={{ flex: 1, minWidth: 0 }}>
+            {textComps.map((c, i) => (
               <RenderComponent key={i} comp={c} />
             ))}
           </div>
+          {accessory && (
+            <div style={{ flexShrink: 0 }}>
+              {accessory.media?.url ? (
+                <img
+                  src={accessory.media.url}
+                  alt={accessory.description ?? ""}
+                  style={{
+                    width: 72,
+                    height: 72,
+                    objectFit: "cover",
+                    borderRadius: 6,
+                    border: "1px solid rgba(255,255,255,0.08)",
+                  }}
+                />
+              ) : (
+                <div
+                  style={{
+                    width: 72,
+                    height: 72,
+                    background: "rgba(255,255,255,0.04)",
+                    borderRadius: 6,
+                    border: "1px dashed rgba(255,255,255,0.12)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    color: "#484f58",
+                    fontSize: 10,
+                  }}
+                >
+                  no img
+                </div>
+              )}
+            </div>
+          )}
         </div>
       );
+    }
     case 10:
       return (
         <div
           style={{
-            color: "#F2F3F5",
+            color: "#dbdee1",
             fontSize: 14,
             lineHeight: 1.6,
-            marginBottom: 6,
+            marginBottom: 5,
             whiteSpace: "pre-wrap",
+            wordBreak: "break-word",
           }}
         >
           {comp.content ?? ""}
@@ -83,21 +145,29 @@ function RenderComponent({ comp }: { comp: DiscordComponent }) {
         <img
           src={comp.media.url}
           alt={comp.description ?? ""}
-          style={{ width: 80, height: 80, objectFit: "cover", borderRadius: 4, marginBottom: 6 }}
+          style={{
+            width: 80,
+            height: 80,
+            objectFit: "cover",
+            borderRadius: 5,
+            marginBottom: 5,
+            border: "1px solid rgba(255,255,255,0.08)",
+          }}
         />
       ) : (
         <div
           style={{
             width: 80,
             height: 80,
-            background: "#424549",
-            borderRadius: 4,
+            background: "rgba(255,255,255,0.04)",
+            borderRadius: 5,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            color: "#949B9D",
+            color: "#484f58",
             fontSize: 10,
-            marginBottom: 6,
+            marginBottom: 5,
+            border: "1px dashed rgba(255,255,255,0.1)",
           }}
         >
           no image
@@ -105,14 +175,20 @@ function RenderComponent({ comp }: { comp: DiscordComponent }) {
       );
     case 12:
       return (
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginBottom: 6 }}>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 3, marginBottom: 5 }}>
           {(comp.items ?? []).map((item, i) =>
             item.url ? (
               <img
                 key={i}
                 src={item.url}
                 alt={item.description ?? ""}
-                style={{ width: 60, height: 60, objectFit: "cover", borderRadius: 4 }}
+                style={{
+                  width: 58,
+                  height: 58,
+                  objectFit: "cover",
+                  borderRadius: 4,
+                  border: "1px solid rgba(255,255,255,0.08)",
+                }}
               />
             ) : null
           )}
@@ -122,11 +198,14 @@ function RenderComponent({ comp }: { comp: DiscordComponent }) {
       return (
         <div
           style={{
-            margin: comp.spacing === 2 ? "12px 0" : comp.spacing === 0 ? "4px 0" : "8px 0",
+            margin:
+              comp.spacing === 2 ? "12px 0" : comp.spacing === 0 ? "4px 0" : "8px 0",
           }}
         >
           {comp.divider && (
-            <div style={{ borderTop: "1px solid rgba(255,255,255,0.15)", margin: "0" }} />
+            <div
+              style={{ borderTop: "1px solid rgba(255,255,255,0.12)", margin: 0 }}
+            />
           )}
         </div>
       );
@@ -139,7 +218,7 @@ function RenderComponent({ comp }: { comp: DiscordComponent }) {
         </div>
       );
     case 2: {
-      const s = BUTTON_STYLE_COLORS[comp.style ?? 1];
+      const s = BUTTON_STYLE_COLORS[comp.style ?? 1] ?? BUTTON_STYLE_COLORS[1];
       return (
         <div
           style={{
@@ -151,8 +230,9 @@ function RenderComponent({ comp }: { comp: DiscordComponent }) {
             fontWeight: 500,
             padding: "6px 14px",
             borderRadius: 4,
-            border: comp.style === 5 ? "1px solid rgba(0,176,244,0.4)" : "none",
+            border: s.border ?? "none",
             cursor: "default",
+            userSelect: "none",
           }}
         >
           {comp.label ?? "Button"}
@@ -165,12 +245,15 @@ function RenderComponent({ comp }: { comp: DiscordComponent }) {
 }
 
 function RenderEmbed({ embed }: { embed: DiscordEmbed }) {
-  const accentColor = embed.color != null ? `#${embed.color.toString(16).padStart(6, "0")}` : "#5865F2";
+  const accentColor =
+    embed.color != null
+      ? `#${embed.color.toString(16).padStart(6, "0")}`
+      : "#5865F2";
   return (
     <div
       style={{
         display: "flex",
-        background: "#2B2D31",
+        background: "#2b2d31",
         borderRadius: 4,
         overflow: "hidden",
         marginBottom: 8,
@@ -179,17 +262,29 @@ function RenderEmbed({ embed }: { embed: DiscordEmbed }) {
     >
       <div style={{ padding: "12px 16px", flex: 1 }}>
         {embed.author && (
-          <div style={{ color: "#F2F3F5", fontSize: 12, fontWeight: 500, marginBottom: 4 }}>
+          <div
+            style={{ color: "#dbdee1", fontSize: 12, fontWeight: 600, marginBottom: 3 }}
+          >
             {embed.author.name}
           </div>
         )}
         {embed.title && (
-          <div style={{ color: "#00b0f4", fontSize: 15, fontWeight: 600, marginBottom: 4 }}>
+          <div
+            style={{ color: "#00b0f4", fontSize: 15, fontWeight: 700, marginBottom: 4 }}
+          >
             {embed.title}
           </div>
         )}
         {embed.description && (
-          <div style={{ color: "#D5D9DF", fontSize: 13, lineHeight: 1.5, marginBottom: 4 }}>
+          <div
+            style={{
+              color: "#b5bac1",
+              fontSize: 13,
+              lineHeight: 1.5,
+              marginBottom: 4,
+              whiteSpace: "pre-wrap",
+            }}
+          >
             {embed.description}
           </div>
         )}
@@ -201,7 +296,9 @@ function RenderEmbed({ embed }: { embed: DiscordEmbed }) {
           />
         )}
         {embed.footer && (
-          <div style={{ color: "#949B9D", fontSize: 11, marginTop: 8 }}>{embed.footer.text}</div>
+          <div style={{ color: "#949ba4", fontSize: 11, marginTop: 8 }}>
+            {embed.footer.text}
+          </div>
         )}
       </div>
     </div>
@@ -222,66 +319,82 @@ export function DiscordPreview() {
       <div
         style={{
           padding: "10px 14px",
-          borderBottom: "1px solid rgba(255,255,255,0.063)",
-          color: "#B5BAC1",
-          fontSize: 11,
-          fontWeight: 600,
-          letterSpacing: "0.08em",
-          textTransform: "uppercase",
+          borderBottom: "1px solid rgba(255,255,255,0.06)",
           display: "flex",
           alignItems: "center",
-          gap: 8,
+          justifyContent: "space-between",
+          flexShrink: 0,
         }}
       >
-        Discord Preview
+        <span
+          style={{
+            color: "#7d8590",
+            fontSize: 10,
+            fontWeight: 700,
+            textTransform: "uppercase",
+            letterSpacing: "0.08em",
+          }}
+        >
+          Live Preview
+        </span>
         {!isValid && errors.length > 0 && (
-          <span style={{ color: "#ED4245", fontSize: 10 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 4, color: "#f85149", fontSize: 11 }}>
+            <AlertTriangle size={11} />
             {errors.length} error{errors.length !== 1 ? "s" : ""}
-          </span>
+          </div>
         )}
       </div>
+
       <div style={{ flex: 1, overflowY: "auto", padding: 12 }}>
-        {/* Discord mock message background */}
         <div
           style={{
             background: "#313338",
             borderRadius: 8,
-            padding: 12,
+            padding: "12px 14px",
             minHeight: 80,
+            fontFamily: '"gg sans","Noto Sans",Whitney,"Helvetica Neue",Helvetica,Arial,sans-serif',
           }}
         >
-          {/* Bot avatar + header */}
-          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 10,
+              marginBottom: 10,
+            }}
+          >
             <div
               style={{
-                width: 36,
-                height: 36,
+                width: 38,
+                height: 38,
                 borderRadius: "50%",
                 background: "#5865F2",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
                 color: "#fff",
-                fontSize: 14,
-                fontWeight: 700,
+                fontSize: 13,
+                fontWeight: 800,
                 flexShrink: 0,
               }}
             >
               OE
             </div>
             <div>
-              <div style={{ color: "#F2F3F5", fontSize: 14, fontWeight: 600 }}>OpenEmbedded Bot</div>
-              <div style={{ color: "#949B9D", fontSize: 11 }}>Today</div>
+              <div style={{ color: "#f2f3f5", fontSize: 14, fontWeight: 600 }}>
+                OpenEmbedded Bot
+              </div>
+              <div style={{ color: "#949ba4", fontSize: 11 }}>Today at 12:00 PM</div>
             </div>
           </div>
 
           {!hasContent ? (
             <div
               style={{
-                color: "#949B9D",
+                color: "#484f58",
                 fontSize: 13,
-                padding: "12px 0",
                 fontStyle: "italic",
+                padding: "8px 0",
               }}
             >
               Add nodes and connect them to see a preview
@@ -304,15 +417,19 @@ export function DiscordPreview() {
               <div
                 key={i}
                 style={{
-                  background: "rgba(237,66,69,0.1)",
-                  border: "1px solid rgba(237,66,69,0.3)",
-                  borderRadius: 4,
-                  padding: "4px 8px",
-                  color: "#ED4245",
+                  background: "rgba(248,81,73,0.08)",
+                  border: "1px solid rgba(248,81,73,0.2)",
+                  borderRadius: 5,
+                  padding: "5px 9px",
+                  color: "#f85149",
                   fontSize: 11,
                   marginBottom: 4,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 5,
                 }}
               >
+                <AlertTriangle size={10} />
                 {e.message}
               </div>
             ))}

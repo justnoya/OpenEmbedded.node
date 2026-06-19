@@ -1,12 +1,19 @@
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { useGraphStore, AppNode, AppNodeData } from "@/lib/graphStore";
+import {
+  Box, Layers, Type, Image, LayoutGrid,
+  SeparatorHorizontal, AlignJustify, MousePointerClick, MessageSquare,
+  Search, ChevronDown, ChevronRight,
+} from "lucide-react";
+import { ReactNode } from "react";
 
 interface NodeDef {
   type: string;
   label: string;
   description: string;
   componentType: number | null;
-  badgeColor: string;
+  accentColor: string;
+  icon: ReactNode;
   defaultData: Partial<AppNodeData>;
 }
 
@@ -14,81 +21,99 @@ const NODE_DEFS: NodeDef[] = [
   {
     type: "container",
     label: "Container",
-    description: "Root wrapper · type 17",
+    description: "Root wrapper with accent & spoiler",
     componentType: 17,
-    badgeColor: "#3d2e5a",
+    accentColor: "#8b5cf6",
+    icon: <Box size={15} />,
     defaultData: { componentType: 17, accent_color: null, spoiler: false },
   },
   {
     type: "section",
     label: "Section",
-    description: "Text + accessory · type 9",
+    description: "Text + thumbnail accessory",
     componentType: 9,
-    badgeColor: "#1d3d3a",
+    accentColor: "#10b981",
+    icon: <Layers size={15} />,
     defaultData: { componentType: 9 },
   },
   {
     type: "textDisplay",
     label: "Text Display",
-    description: "Markdown text · type 10",
+    description: "Markdown content block",
     componentType: 10,
-    badgeColor: "#2d2d2d",
+    accentColor: "#3b82f6",
+    icon: <Type size={15} />,
     defaultData: { componentType: 10, content: "" },
   },
   {
     type: "thumbnail",
     label: "Thumbnail",
-    description: "Image accessory · type 11",
+    description: "Image accessory for sections",
     componentType: 11,
-    badgeColor: "#3d2b1a",
+    accentColor: "#f59e0b",
+    icon: <Image size={15} />,
     defaultData: { componentType: 11, url: "", description: "" },
   },
   {
     type: "mediaGallery",
     label: "Media Gallery",
-    description: "Image grid · type 12",
+    description: "Image grid layout",
     componentType: 12,
-    badgeColor: "#3d1d35",
+    accentColor: "#ec4899",
+    icon: <LayoutGrid size={15} />,
     defaultData: { componentType: 12, items: [] },
   },
   {
     type: "separator",
     label: "Separator",
-    description: "Divider / spacing · type 14",
+    description: "Spacing with optional divider",
     componentType: 14,
-    badgeColor: "#2a2a2a",
+    accentColor: "#6b7280",
+    icon: <SeparatorHorizontal size={15} />,
     defaultData: { componentType: 14, spacing: "md", divider: false },
   },
   {
     type: "actionRow",
     label: "Action Row",
-    description: "Button container · type 1",
+    description: "Container for buttons",
     componentType: 1,
-    badgeColor: "#1a1a2e",
+    accentColor: "#14b8a6",
+    icon: <AlignJustify size={15} />,
     defaultData: { componentType: 1 },
   },
   {
     type: "button",
     label: "Button",
-    description: "Clickable button · type 2",
+    description: "Clickable button component",
     componentType: 2,
-    badgeColor: "#1d1d3e",
-    defaultData: { componentType: 2, label: "Button", style: "Primary", custom_id: "" },
+    accentColor: "#5865F2",
+    icon: <MousePointerClick size={15} />,
+    defaultData: { componentType: 2, label: "Click me", style: "Primary", custom_id: "" },
   },
   {
     type: "embed",
     label: "Embed",
-    description: "Legacy embed",
+    description: "Legacy rich embed message",
     componentType: 0,
-    badgeColor: "#2e2a14",
+    accentColor: "#f59e0b",
+    icon: <MessageSquare size={15} />,
     defaultData: { componentType: 0, title: "", description: "", color: 0x5865f2 },
   },
 ];
 
-let nodeIdCounter = 1;
+const GROUPS = [
+  { label: "Layout", types: ["container", "section"] },
+  { label: "Content", types: ["textDisplay", "thumbnail", "mediaGallery", "separator"] },
+  { label: "Interactive", types: ["actionRow", "button"] },
+  { label: "Legacy", types: ["embed"] },
+];
+
+let nodeIdCounter = Date.now();
 
 export function NodeLibraryPanel() {
   const addNode = useGraphStore((s) => s.addNode);
+  const [search, setSearch] = useState("");
+  const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
 
   const handleAdd = useCallback(
     (def: NodeDef) => {
@@ -96,7 +121,7 @@ export function NodeLibraryPanel() {
       const node: AppNode = {
         id,
         type: def.type,
-        position: { x: 300 + Math.random() * 200, y: 100 + Math.random() * 200 },
+        position: { x: 200 + Math.random() * 300, y: 80 + Math.random() * 300 },
         data: { ...def.defaultData } as AppNodeData,
       };
       addNode(node);
@@ -104,13 +129,90 @@ export function NodeLibraryPanel() {
     [addNode]
   );
 
+  const q = search.toLowerCase().trim();
+  const filtered = q
+    ? NODE_DEFS.filter(
+        (d) =>
+          d.label.toLowerCase().includes(q) ||
+          d.description.toLowerCase().includes(q)
+      )
+    : null;
+
+  const toggleGroup = (label: string) =>
+    setCollapsed((prev) => ({ ...prev, [label]: !prev[label] }));
+
+  const NodeCard = ({ def }: { def: NodeDef }) => (
+    <button
+      key={def.type}
+      data-testid={`add-node-${def.type}`}
+      onClick={() => handleAdd(def)}
+      title={`Add ${def.label}`}
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: 10,
+        width: "100%",
+        padding: "8px 10px",
+        background: "transparent",
+        border: "1px solid rgba(255,255,255,0.05)",
+        borderLeft: `2px solid ${def.accentColor}`,
+        borderRadius: 6,
+        cursor: "pointer",
+        textAlign: "left",
+        marginBottom: 3,
+        transition: "background 0.12s, border-color 0.12s",
+      }}
+      onMouseEnter={(e) => {
+        (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.04)";
+        (e.currentTarget as HTMLElement).style.borderColor = def.accentColor + "66";
+      }}
+      onMouseLeave={(e) => {
+        (e.currentTarget as HTMLElement).style.background = "transparent";
+        (e.currentTarget as HTMLElement).style.borderColor = "rgba(255,255,255,0.05)";
+        (e.currentTarget as HTMLElement).style.borderLeftColor = def.accentColor;
+      }}
+    >
+      <div
+        style={{
+          width: 30,
+          height: 30,
+          borderRadius: 6,
+          background: def.accentColor + "18",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          color: def.accentColor,
+          flexShrink: 0,
+        }}
+      >
+        {def.icon}
+      </div>
+      <div style={{ minWidth: 0 }}>
+        <div style={{ color: "#e6edf3", fontSize: 12, fontWeight: 600, marginBottom: 1 }}>
+          {def.label}
+        </div>
+        <div
+          style={{
+            color: "#7d8590",
+            fontSize: 10,
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+          }}
+        >
+          {def.description}
+        </div>
+      </div>
+    </button>
+  );
+
   return (
     <div
       style={{
-        width: 240,
+        width: 256,
         flexShrink: 0,
-        background: "#1E2124",
-        borderRight: "1px solid rgba(255,255,255,0.063)",
+        background: "#161b22",
+        borderRight: "1px solid rgba(255,255,255,0.07)",
         display: "flex",
         flexDirection: "column",
         overflow: "hidden",
@@ -118,62 +220,103 @@ export function NodeLibraryPanel() {
     >
       <div
         style={{
-          padding: "12px 16px",
-          borderBottom: "1px solid rgba(255,255,255,0.063)",
-          color: "#B5BAC1",
-          fontSize: 11,
-          fontWeight: 600,
-          letterSpacing: "0.08em",
-          textTransform: "uppercase",
+          padding: "14px 14px 10px",
+          borderBottom: "1px solid rgba(255,255,255,0.07)",
         }}
       >
-        Node Library
-      </div>
-      <div style={{ overflowY: "auto", flex: 1, padding: 8 }}>
-        {NODE_DEFS.map((def) => (
-          <button
-            key={def.type}
-            data-testid={`add-node-${def.type}`}
-            onClick={() => handleAdd(def)}
+        <div style={{ color: "#e6edf3", fontSize: 13, fontWeight: 700, marginBottom: 2 }}>
+          Components
+        </div>
+        <div style={{ color: "#7d8590", fontSize: 11, marginBottom: 10 }}>
+          Click to add to canvas
+        </div>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 6,
+            background: "#0d1117",
+            border: "1px solid rgba(255,255,255,0.07)",
+            borderRadius: 6,
+            padding: "5px 8px",
+          }}
+        >
+          <Search size={12} color="#484f58" />
+          <input
+            type="text"
+            placeholder="Search components…"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
             style={{
-              display: "flex",
-              flexDirection: "column",
-              width: "100%",
-              padding: "8px 10px",
+              flex: 1,
               background: "transparent",
-              border: "1px solid rgba(255,255,255,0.063)",
-              borderRadius: 6,
-              cursor: "pointer",
-              marginBottom: 4,
-              textAlign: "left",
-              transition: "background 0.15s",
+              border: "none",
+              outline: "none",
+              color: "#e6edf3",
+              fontSize: 12,
             }}
-            onMouseEnter={(e) => {
-              (e.currentTarget as HTMLButtonElement).style.background = "#282B30";
-            }}
-            onMouseLeave={(e) => {
-              (e.currentTarget as HTMLButtonElement).style.background = "transparent";
-            }}
-          >
-            <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 2 }}>
-              <div
-                style={{
-                  background: def.badgeColor,
-                  width: 8,
-                  height: 8,
-                  borderRadius: 2,
-                  flexShrink: 0,
-                }}
-              />
-              <span style={{ color: "#F2F3F5", fontSize: 13, fontWeight: 500 }}>
-                {def.label}
-              </span>
+          />
+        </div>
+      </div>
+
+      <div style={{ overflowY: "auto", flex: 1, padding: "8px 10px" }}>
+        {filtered ? (
+          filtered.length > 0 ? (
+            filtered.map((def) => <NodeCard key={def.type} def={def} />)
+          ) : (
+            <div
+              style={{
+                color: "#484f58",
+                fontSize: 12,
+                textAlign: "center",
+                padding: "20px 0",
+              }}
+            >
+              No matches
             </div>
-            <div style={{ color: "#949B9D", fontSize: 11, paddingLeft: 14 }}>
-              {def.description}
-            </div>
-          </button>
-        ))}
+          )
+        ) : (
+          GROUPS.map((group) => {
+            const defs = NODE_DEFS.filter((d) => group.types.includes(d.type));
+            const isCollapsed = !!collapsed[group.label];
+            return (
+              <div key={group.label} style={{ marginBottom: 6 }}>
+                <button
+                  onClick={() => toggleGroup(group.label)}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 5,
+                    width: "100%",
+                    background: "transparent",
+                    border: "none",
+                    cursor: "pointer",
+                    padding: "5px 2px",
+                    marginBottom: 3,
+                  }}
+                >
+                  {isCollapsed ? (
+                    <ChevronRight size={12} color="#484f58" />
+                  ) : (
+                    <ChevronDown size={12} color="#484f58" />
+                  )}
+                  <span
+                    style={{
+                      color: "#7d8590",
+                      fontSize: 10,
+                      fontWeight: 700,
+                      textTransform: "uppercase",
+                      letterSpacing: "0.08em",
+                    }}
+                  >
+                    {group.label}
+                  </span>
+                </button>
+                {!isCollapsed && defs.map((def) => <NodeCard key={def.type} def={def} />)}
+              </div>
+            );
+          })
+        )}
       </div>
     </div>
   );

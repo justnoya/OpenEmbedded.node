@@ -19,9 +19,14 @@ import {
   useListProjects,
   useCreateProject,
   useUpdateProject,
+  useDeleteProject,
   getListProjectsQueryKey,
 } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
+import {
+  Undo2, Redo2, Save, Upload, Plus, FolderOpen, ChevronDown,
+  Eye, Settings2, Trash2, Loader2, Check, AlertCircle, LayoutGrid,
+} from "lucide-react";
 
 type RightTab = "properties" | "preview";
 type MobilePanel = "library" | "canvas" | "properties" | "preview";
@@ -36,6 +41,14 @@ function useIsMobile() {
   return isMobile;
 }
 
+type Project = {
+  id: string;
+  name: string;
+  graph: { nodes: object[]; edges: object[] };
+};
+
+type SaveStatus = "saved" | "saving" | "unsaved" | "error";
+
 export function Builder() {
   const nodes = useGraphStore((s) => s.nodes);
   const edges = useGraphStore((s) => s.edges);
@@ -45,7 +58,13 @@ export function Builder() {
   const setSelectedNode = useGraphStore((s) => s.setSelectedNode);
   const setGraph = useGraphStore((s) => s.setGraph);
   const clear = useGraphStore((s) => s.clear);
+  const undo = useGraphStore((s) => s.undo);
+  const redo = useGraphStore((s) => s.redo);
+  const canUndo = useGraphStore((s) => s.canUndo);
+  const canRedo = useGraphStore((s) => s.canRedo);
+
   const compile = usePreviewStore((s) => s.compile);
+  const previewPayload = usePreviewStore((s) => s.payload);
 
   const isMobile = useIsMobile();
   const [rightTab, setRightTab] = useState<RightTab>("properties");
@@ -54,14 +73,20 @@ export function Builder() {
   const [currentProjectId, setCurrentProjectId] = useState<string | null>(null);
   const [projectName, setProjectName] = useState("Untitled Project");
   const [editingName, setEditingName] = useState(false);
-  const [savedFlash, setSavedFlash] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<SaveStatus>("saved");
   const [showProjectList, setShowProjectList] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+  const [hasLoaded, setHasLoaded] = useState(false);
+
   const nameInputRef = useRef<HTMLInputElement>(null);
+  const autoSaveTimer = useRef<ReturnType<typeof setTimeout>>();
+  const projectListRef = useRef<HTMLDivElement>(null);
 
   const queryClient = useQueryClient();
   const { data: projects } = useListProjects();
   const createProject = useCreateProject();
   const updateProject = useUpdateProject();
+  const deleteProject = useDeleteProject();
 
   useEffect(() => {
     compile(nodes, edges);
@@ -70,168 +95,250 @@ export function Builder() {
   useEffect(() => {
     if (currentProjectId) return;
     if (projects === undefined) return;
-    const existing = (projects as { id: string; name: string; graph: { nodes: object[]; edges: object[] } }[])[0];
-    if (existing) {
-      setCurrentProjectId(existing.id);
-      setProjectName(existing.name);
-      if (existing.graph?.nodes) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        setGraph(existing.graph.nodes as any, existing.graph.edges as any);
-      }
+    const list = projects as Project[];
+    if (list.length > 0) {
+      const p = list[0];
+      setCurrentProjectId(p.id);
+      setProjectName(p.name);
+      if (p.graph?.nodes) setGraph(p.graph.nodes as never, p.graph.edges as never);
+      setTimeout(() => setHasLoaded(true), 100);
     } else {
       createProject.mutate(
         { data: { name: "Untitled Project", graph: { nodes: [], edges: [] } } },
         {
           onSuccess: (p) => {
-            const proj = p as { id: string; name: string };
+            const proj = p as Project;
             setCurrentProjectId(proj.id);
             setProjectName(proj.name);
             queryClient.invalidateQueries({ queryKey: getListProjectsQueryKey() });
+            setTimeout(() => setHasLoaded(true), 100);
           },
         }
       );
     }
-  }, [projects, currentProjectId]); // eslint-disable-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [projects, currentProjectId]);
 
-  const handleSave = useCallback(() => {
-    if (!currentProjectId) return;
-    updateProject.mutate(
-      {
-        id: currentProjectId,
-        data: {
-          name: projectName,
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          graph: { nodes: nodes as any, edges: edges as any },
+  const doSave = useCallback(
+    (manual?: boolean) => {
+      if (!currentProjectId) return;
+      setSaveStatus("saving");
+      updateProject.mutate(
+        {
+          id: currentProjectId,
+          data: {
+            name: projectName,
+            graph: { nodes: nodes as never, edges: edges as never },
+            payload: previewPayload as never,
+          },
         },
-      },
-      {
-        onSuccess: () => {
-          setSavedFlash(true);
-          setTimeout(() => setSavedFlash(false), 1500);
-          queryClient.invalidateQueries({ queryKey: getListProjectsQueryKey() });
-        },
+        {
+          onSuccess: () => {
+            setSaveStatus("saved");
+            if (manual) {
+              queryClient.invalidateQueries({ queryKey: getListProjectsQueryKey() });
+            }
+          },
+          onError: () => setSaveStatus("error"),
+        }
+      );
+    },
+    [currentProjectId, projectName, nodes, edges, previewPayload, updateProject, queryClient]
+  );
+
+  useEffect(() => {
+    if (!hasLoaded || !currentProjectId) return;
+    setSaveStatus("unsaved");
+    clearTimeout(autoSaveTimer.current);
+    autoSaveTimer.current = setTimeout(() => doSave(false), 2000);
+    return () => clearTimeout(autoSaveTimer.current);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [nodes, edges, projectName]);
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      const mod = e.metaKey || e.ctrlKey;
+      if (!mod) return;
+      if (e.key === "s") { e.preventDefault(); clearTimeout(autoSaveTimer.current); doSave(true); }
+      if (e.key === "z" && !e.shiftKey) { e.preventDefault(); undo(); }
+      if (e.key === "z" && e.shiftKey) { e.preventDefault(); redo(); }
+      if (e.key === "y") { e.preventDefault(); redo(); }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [doSave, undo, redo]);
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (showProjectList && projectListRef.current && !projectListRef.current.contains(e.target as Node)) {
+        setShowProjectList(false);
       }
-    );
-  }, [currentProjectId, projectName, nodes, edges, updateProject, queryClient]);
+    };
+    window.addEventListener("mousedown", handler);
+    return () => window.removeEventListener("mousedown", handler);
+  }, [showProjectList]);
 
   const handleNewProject = () => {
-    const name = "Untitled Project";
     createProject.mutate(
-      { data: { name, graph: { nodes: [] as Record<string, unknown>[], edges: [] as Record<string, unknown>[] } } },
+      { data: { name: "Untitled Project", graph: { nodes: [], edges: [] } } },
       {
         onSuccess: (p) => {
-          const proj = p as { id: string; name: string };
+          const proj = p as Project;
           setCurrentProjectId(proj.id);
           setProjectName(proj.name);
           clear();
+          setSaveStatus("saved");
+          setShowProjectList(false);
           queryClient.invalidateQueries({ queryKey: getListProjectsQueryKey() });
         },
       }
     );
   };
 
-  const handleLoadProject = (proj: { id: string; name: string; graph: { nodes: object[]; edges: object[] } }) => {
-    setCurrentProjectId(proj.id);
-    setProjectName(proj.name);
-    if (proj.graph?.nodes) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      setGraph(proj.graph.nodes as any, proj.graph.edges as any);
-    } else {
-      clear();
-    }
+  const handleLoadProject = (p: Project) => {
+    clearTimeout(autoSaveTimer.current);
+    setCurrentProjectId(p.id);
+    setProjectName(p.name);
+    if (p.graph?.nodes) setGraph(p.graph.nodes as never, p.graph.edges as never);
+    else clear();
+    setSaveStatus("saved");
     setShowProjectList(false);
+    setDeleteConfirm(null);
   };
 
-  const btn = (active: boolean, onClick: () => void, label: string) => (
-    <button
-      onClick={onClick}
-      style={{
-        background: active ? "#5865F2" : "#36393E",
-        border: active ? "none" : "1px solid rgba(255,255,255,0.1)",
-        borderRadius: 6,
-        color: active ? "#fff" : "#B5BAC1",
-        fontSize: 12,
-        fontWeight: active ? 600 : 400,
-        padding: "5px 10px",
-        cursor: "pointer",
-        whiteSpace: "nowrap",
-      }}
-    >
-      {label}
-    </button>
-  );
+  const handleDeleteProject = (id: string) => {
+    deleteProject.mutate(
+      { id },
+      {
+        onSuccess: () => {
+          queryClient.invalidateQueries({ queryKey: getListProjectsQueryKey() });
+          if (id === currentProjectId) {
+            const remaining = ((projects as Project[]) ?? []).filter((p) => p.id !== id);
+            if (remaining.length > 0) {
+              handleLoadProject(remaining[0]);
+            } else {
+              handleNewProject();
+            }
+          }
+          setDeleteConfirm(null);
+        },
+      }
+    );
+  };
 
-  const tabBtn = (tab: RightTab, label: string) => (
-    <button
-      onClick={() => setRightTab(tab)}
-      style={{
-        flex: 1,
-        padding: "6px 0",
-        background: rightTab === tab ? "#424549" : "transparent",
-        border: "none",
-        borderRadius: 4,
-        color: rightTab === tab ? "#F2F3F5" : "#B5BAC1",
-        fontSize: 12,
-        fontWeight: rightTab === tab ? 600 : 400,
-        cursor: "pointer",
-      }}
-    >
-      {label}
-    </button>
-  );
+  const SaveIndicator = () => {
+    const configs = {
+      saved:   { color: "#3fb950", icon: <Check size={11} />,    text: "Saved" },
+      saving:  { color: "#d29922", icon: <Loader2 size={11} style={{ animation: "spin 1s linear infinite" }} />, text: "Saving…" },
+      unsaved: { color: "#7d8590", icon: null,                   text: "Unsaved" },
+      error:   { color: "#f85149", icon: <AlertCircle size={11} />, text: "Error" },
+    };
+    const cfg = configs[saveStatus];
+    return (
+      <div
+        style={{ display: "flex", alignItems: "center", gap: 5, color: cfg.color, fontSize: 11, fontWeight: 600 }}
+        title={saveStatus === "saved" ? "Auto-saved · Ctrl+S to force save" : ""}
+      >
+        {cfg.icon}
+        {cfg.text}
+      </div>
+    );
+  };
 
-  /* ── TOOLBAR ── */
+  const projectList = (projects as Project[] | undefined) ?? [];
+
   const toolbar = (
     <div
       style={{
-        height: isMobile ? 52 : 48,
+        height: 52,
         flexShrink: 0,
         display: "flex",
         alignItems: "center",
-        padding: "0 12px",
-        background: "#1E2124",
-        borderBottom: "1px solid rgba(255,255,255,0.063)",
-        gap: 8,
-        zIndex: 10,
+        padding: "0 16px",
+        background: "#161b22",
+        borderBottom: "1px solid rgba(255,255,255,0.07)",
+        gap: 0,
+        zIndex: 20,
         overflowX: "auto",
+        scrollbarWidth: "none",
       }}
     >
-      {/* Brand */}
-      <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}>
-        <div style={{
-          width: 24, height: 24, borderRadius: 6, background: "#5865F2",
-          display: "flex", alignItems: "center", justifyContent: "center",
-          color: "#fff", fontSize: 12, fontWeight: 700,
-        }}>OE</div>
-        {!isMobile && <span style={{ color: "#F2F3F5", fontSize: 14, fontWeight: 700 }}>OpenEmbedded</span>}
+      <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0, marginRight: 16 }}>
+        <div
+          style={{
+            width: 28,
+            height: 28,
+            borderRadius: 7,
+            background: "linear-gradient(135deg, #5865F2, #7c3aed)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            color: "#fff",
+            fontSize: 11,
+            fontWeight: 800,
+            letterSpacing: "-0.03em",
+            flexShrink: 0,
+          }}
+        >
+          OE
+        </div>
+        {!isMobile && (
+          <span style={{ color: "#e6edf3", fontSize: 14, fontWeight: 700, letterSpacing: "-0.01em" }}>
+            OpenEmbedded
+          </span>
+        )}
       </div>
 
-      {!isMobile && <div style={{ width: 1, height: 20, background: "rgba(255,255,255,0.1)", flexShrink: 0 }} />}
+      <div style={{ width: 1, height: 20, background: "rgba(255,255,255,0.07)", flexShrink: 0, marginRight: 16 }} />
 
-      {/* Project name */}
-      <div style={{ position: "relative", flexShrink: 0 }}>
+      <div style={{ position: "relative", flexShrink: 0, marginRight: 8 }}>
         {editingName ? (
           <input
             ref={nameInputRef}
             value={projectName}
             onChange={(e) => setProjectName(e.target.value)}
             onBlur={() => setEditingName(false)}
-            onKeyDown={(e) => { if (e.key === "Enter") setEditingName(false); }}
+            onKeyDown={(e) => { if (e.key === "Enter" || e.key === "Escape") setEditingName(false); }}
             autoFocus
             style={{
-              background: "#282B30", border: "1px solid #5865F2", borderRadius: 4,
-              color: "#F2F3F5", fontSize: 13, padding: "3px 8px",
-              minWidth: isMobile ? 100 : 140, maxWidth: isMobile ? 120 : 200,
+              background: "#0d1117",
+              border: "1px solid rgba(88,101,242,0.6)",
+              borderRadius: 6,
+              color: "#e6edf3",
+              fontSize: 13,
+              fontWeight: 600,
+              padding: "4px 9px",
+              minWidth: 120,
+              maxWidth: isMobile ? 130 : 220,
+              outline: "none",
             }}
           />
         ) : (
           <button
             onClick={() => setEditingName(true)}
+            title="Click to rename"
             style={{
-              background: "transparent", border: "1px solid transparent", borderRadius: 4,
-              color: "#F2F3F5", fontSize: isMobile ? 12 : 13, padding: "3px 8px",
-              cursor: "text", maxWidth: isMobile ? 120 : 200,
-              overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+              background: "transparent",
+              border: "1px solid transparent",
+              borderRadius: 6,
+              color: "#e6edf3",
+              fontSize: 13,
+              fontWeight: 600,
+              padding: "4px 9px",
+              cursor: "text",
+              maxWidth: isMobile ? 130 : 220,
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+              transition: "border-color 0.15s, background 0.15s",
+            }}
+            onMouseEnter={(e) => {
+              (e.currentTarget as HTMLElement).style.borderColor = "rgba(255,255,255,0.1)";
+              (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.03)";
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget as HTMLElement).style.borderColor = "transparent";
+              (e.currentTarget as HTMLElement).style.background = "transparent";
             }}
           >
             {projectName}
@@ -241,94 +348,341 @@ export function Builder() {
 
       <div style={{ flex: 1 }} />
 
-      {/* Projects */}
-      <div style={{ position: "relative", flexShrink: 0 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 2 }}>
+          <button
+            onClick={undo}
+            disabled={!canUndo()}
+            title="Undo (Ctrl+Z)"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              width: 30,
+              height: 30,
+              background: "transparent",
+              border: "1px solid rgba(255,255,255,0.07)",
+              borderRadius: 6,
+              color: canUndo() ? "#7d8590" : "#2d333b",
+              cursor: canUndo() ? "pointer" : "not-allowed",
+              transition: "all 0.12s",
+            }}
+            onMouseEnter={(e) => { if (canUndo()) (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.05)"; }}
+            onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "transparent"; }}
+          >
+            <Undo2 size={14} />
+          </button>
+          <button
+            onClick={redo}
+            disabled={!canRedo()}
+            title="Redo (Ctrl+Shift+Z)"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              width: 30,
+              height: 30,
+              background: "transparent",
+              border: "1px solid rgba(255,255,255,0.07)",
+              borderRadius: 6,
+              color: canRedo() ? "#7d8590" : "#2d333b",
+              cursor: canRedo() ? "pointer" : "not-allowed",
+              transition: "all 0.12s",
+            }}
+            onMouseEnter={(e) => { if (canRedo()) (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.05)"; }}
+            onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "transparent"; }}
+          >
+            <Redo2 size={14} />
+          </button>
+        </div>
+
+        <div style={{ width: 1, height: 20, background: "rgba(255,255,255,0.07)" }} />
+
+        <div style={{ position: "relative" }} ref={projectListRef}>
+          <button
+            onClick={() => setShowProjectList(!showProjectList)}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 5,
+              background: showProjectList ? "rgba(255,255,255,0.07)" : "transparent",
+              border: "1px solid rgba(255,255,255,0.07)",
+              borderRadius: 6,
+              color: "#7d8590",
+              fontSize: 12,
+              fontWeight: 500,
+              padding: "5px 10px",
+              cursor: "pointer",
+              transition: "all 0.12s",
+              whiteSpace: "nowrap",
+            }}
+          >
+            <FolderOpen size={13} />
+            {!isMobile && `Projects (${projectList.length})`}
+            <ChevronDown size={11} style={{ transform: showProjectList ? "rotate(180deg)" : "none", transition: "transform 0.15s" }} />
+          </button>
+
+          {showProjectList && (
+            <div
+              style={{
+                position: "absolute",
+                top: 40,
+                right: 0,
+                background: "#161b22",
+                border: "1px solid rgba(255,255,255,0.1)",
+                borderRadius: 10,
+                padding: 6,
+                minWidth: 220,
+                zIndex: 200,
+                boxShadow: "0 16px 48px rgba(0,0,0,0.7)",
+              }}
+            >
+              <div
+                style={{
+                  padding: "4px 8px 6px",
+                  color: "#484f58",
+                  fontSize: 10,
+                  fontWeight: 700,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.07em",
+                }}
+              >
+                Your Projects
+              </div>
+              {projectList.length === 0 ? (
+                <div style={{ color: "#484f58", fontSize: 12, padding: "8px 10px" }}>No projects yet</div>
+              ) : (
+                projectList.map((p) => {
+                  const isActive = p.id === currentProjectId;
+                  const isConfirming = deleteConfirm === p.id;
+                  return (
+                    <div
+                      key={p.id}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        borderRadius: 6,
+                        background: isActive ? "rgba(88,101,242,0.1)" : "transparent",
+                        marginBottom: 2,
+                        overflow: "hidden",
+                      }}
+                    >
+                      <button
+                        onClick={() => handleLoadProject(p)}
+                        style={{
+                          flex: 1,
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 7,
+                          background: "transparent",
+                          border: "none",
+                          color: isActive ? "#818cf8" : "#b1bac4",
+                          fontSize: 12,
+                          fontWeight: isActive ? 600 : 400,
+                          padding: "7px 10px",
+                          cursor: "pointer",
+                          textAlign: "left",
+                          overflow: "hidden",
+                        }}
+                      >
+                        {isActive && <div style={{ width: 5, height: 5, borderRadius: "50%", background: "#818cf8", flexShrink: 0 }} />}
+                        <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                          {p.name}
+                        </span>
+                      </button>
+
+                      {isConfirming ? (
+                        <div style={{ display: "flex", gap: 3, paddingRight: 6 }}>
+                          <button
+                            onClick={() => handleDeleteProject(p.id)}
+                            style={{
+                              background: "rgba(248,81,73,0.15)",
+                              border: "1px solid rgba(248,81,73,0.3)",
+                              borderRadius: 4,
+                              color: "#f85149",
+                              fontSize: 10,
+                              fontWeight: 700,
+                              padding: "2px 7px",
+                              cursor: "pointer",
+                            }}
+                          >
+                            Delete
+                          </button>
+                          <button
+                            onClick={() => setDeleteConfirm(null)}
+                            style={{
+                              background: "rgba(255,255,255,0.05)",
+                              border: "1px solid rgba(255,255,255,0.08)",
+                              borderRadius: 4,
+                              color: "#7d8590",
+                              fontSize: 10,
+                              padding: "2px 7px",
+                              cursor: "pointer",
+                            }}
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={(e) => { e.stopPropagation(); setDeleteConfirm(p.id); }}
+                          title="Delete project"
+                          style={{
+                            background: "transparent",
+                            border: "none",
+                            color: "#484f58",
+                            padding: "7px 8px",
+                            cursor: "pointer",
+                            display: "flex",
+                            alignItems: "center",
+                            borderRadius: 4,
+                            transition: "color 0.12s",
+                          }}
+                          onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "#f85149"; }}
+                          onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "#484f58"; }}
+                        >
+                          <Trash2 size={12} />
+                        </button>
+                      )}
+                    </div>
+                  );
+                })
+              )}
+              <div style={{ borderTop: "1px solid rgba(255,255,255,0.06)", marginTop: 4, paddingTop: 6 }}>
+                <button
+                  onClick={handleNewProject}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 6,
+                    width: "100%",
+                    background: "transparent",
+                    border: "none",
+                    borderRadius: 6,
+                    color: "#5865F2",
+                    fontSize: 12,
+                    fontWeight: 600,
+                    padding: "6px 10px",
+                    cursor: "pointer",
+                  }}
+                  onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "rgba(88,101,242,0.1)"; }}
+                  onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "transparent"; }}
+                >
+                  <Plus size={13} />
+                  New Project
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div style={{ width: 1, height: 20, background: "rgba(255,255,255,0.07)" }} />
+
+        <SaveIndicator />
+
         <button
-          onClick={() => setShowProjectList(!showProjectList)}
+          onClick={() => { clearTimeout(autoSaveTimer.current); doSave(true); }}
+          disabled={updateProject.isPending || !currentProjectId}
+          title="Save (Ctrl+S)"
           style={{
-            background: "#36393E", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 6,
-            color: "#B5BAC1", fontSize: 12, padding: "5px 10px", cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            gap: 5,
+            background: "#5865F2",
+            border: "none",
+            borderRadius: 6,
+            color: "#fff",
+            fontSize: 12,
+            fontWeight: 600,
+            padding: "6px 12px",
+            cursor: "pointer",
+            opacity: updateProject.isPending ? 0.7 : 1,
+            transition: "all 0.15s",
+            flexShrink: 0,
+          }}
+          onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "#4752c4"; }}
+          onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "#5865F2"; }}
+        >
+          <Save size={13} />
+          {!isMobile && "Save"}
+        </button>
+
+        <button
+          onClick={() => setExportOpen(!exportOpen)}
+          title="Export"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 5,
+            background: exportOpen ? "rgba(88,101,242,0.15)" : "rgba(255,255,255,0.05)",
+            border: `1px solid ${exportOpen ? "rgba(88,101,242,0.4)" : "rgba(255,255,255,0.07)"}`,
+            borderRadius: 6,
+            color: exportOpen ? "#818cf8" : "#7d8590",
+            fontSize: 12,
+            fontWeight: 600,
+            padding: "6px 12px",
+            cursor: "pointer",
+            transition: "all 0.15s",
+            flexShrink: 0,
           }}
         >
-          {isMobile ? `📁 ${(projects as object[] | undefined)?.length ?? 0}` : `Projects (${(projects as object[] | undefined)?.length ?? 0})`}
+          <Upload size={13} />
+          {!isMobile && "Export"}
         </button>
-        {showProjectList && (
-          <div style={{
-            position: "absolute", top: 36, right: 0,
-            background: "#282B30", border: "1px solid rgba(255,255,255,0.1)",
-            borderRadius: 8, padding: 8, minWidth: 180, zIndex: 200,
-            boxShadow: "0 8px 32px rgba(0,0,0,0.6)",
-          }}>
-            {((projects as { id: string; name: string; graph: { nodes: object[]; edges: object[] } }[]) ?? []).map((p) => (
-              <button key={p.id} onClick={() => handleLoadProject(p)} style={{
-                display: "block", width: "100%", textAlign: "left",
-                background: p.id === currentProjectId ? "#36393E" : "transparent",
-                border: "none", borderRadius: 4,
-                color: p.id === currentProjectId ? "#F2F3F5" : "#B5BAC1",
-                fontSize: 12, padding: "6px 10px", cursor: "pointer",
-              }}>{p.name}</button>
-            ))}
-            {(!projects || (projects as object[]).length === 0) && (
-              <div style={{ color: "#949B9D", fontSize: 12, padding: "6px 10px" }}>No projects</div>
-            )}
-          </div>
-        )}
       </div>
-
-      <button onClick={handleNewProject} style={{
-        background: "#36393E", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 6,
-        color: "#B5BAC1", fontSize: 12, padding: "5px 10px", cursor: "pointer", flexShrink: 0,
-      }}>{isMobile ? "+" : "New"}</button>
-
-      <button
-        onClick={handleSave}
-        disabled={updateProject.isPending || !currentProjectId}
-        style={{
-          background: savedFlash ? "#57F287" : "#5865F2", border: "none", borderRadius: 6,
-          color: savedFlash ? "#000" : "#fff", fontSize: 12, fontWeight: 600,
-          padding: "5px 12px", cursor: "pointer", transition: "background 0.2s", flexShrink: 0,
-        }}
-      >{savedFlash ? "✓" : isMobile ? "💾" : updateProject.isPending ? "Saving..." : "Save"}</button>
-
-      <button
-        onClick={() => setExportOpen(!exportOpen)}
-        style={{
-          background: exportOpen ? "#4752C4" : "#424549",
-          border: "1px solid rgba(88,101,242,0.4)", borderRadius: 6,
-          color: "#F2F3F5", fontSize: 12, padding: "5px 12px", cursor: "pointer", flexShrink: 0,
-        }}
-      >{isMobile ? "⬆" : "Export"}</button>
     </div>
   );
 
-  /* ── MOBILE BOTTOM NAV ── */
   const mobileNav = isMobile && (
-    <div style={{
-      height: 52, flexShrink: 0, display: "flex", alignItems: "stretch",
-      background: "#1E2124", borderTop: "1px solid rgba(255,255,255,0.063)",
-      zIndex: 10,
-    }}>
+    <div
+      style={{
+        height: 56,
+        flexShrink: 0,
+        display: "flex",
+        alignItems: "stretch",
+        background: "#161b22",
+        borderTop: "1px solid rgba(255,255,255,0.07)",
+        zIndex: 10,
+      }}
+    >
       {(["library", "canvas", "properties", "preview"] as MobilePanel[]).map((panel) => {
-        const labels: Record<MobilePanel, string> = { library: "Nodes", canvas: "Canvas", properties: "Props", preview: "Preview" };
-        const icons: Record<MobilePanel, string> = { library: "⊞", canvas: "◈", properties: "⚙", preview: "👁" };
+        const meta = {
+          library: { label: "Nodes", icon: <LayoutGrid size={18} /> },
+          canvas: { label: "Canvas", icon: <Settings2 size={18} /> },
+          properties: { label: "Props", icon: <Settings2 size={18} /> },
+          preview: { label: "Preview", icon: <Eye size={18} /> },
+        };
         const active = mobilePanel === panel;
         return (
-          <button key={panel} onClick={() => setMobilePanel(panel)} style={{
-            flex: 1, display: "flex", flexDirection: "column", alignItems: "center",
-            justifyContent: "center", gap: 2, background: "transparent",
-            border: "none", borderTop: active ? "2px solid #5865F2" : "2px solid transparent",
-            color: active ? "#5865F2" : "#B5BAC1", cursor: "pointer",
-            fontSize: 10, padding: "6px 0",
-          }}>
-            <span style={{ fontSize: 16 }}>{icons[panel]}</span>
-            {labels[panel]}
+          <button
+            key={panel}
+            onClick={() => setMobilePanel(panel)}
+            style={{
+              flex: 1,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 3,
+              background: "transparent",
+              border: "none",
+              borderTop: active ? "2px solid #5865F2" : "2px solid transparent",
+              color: active ? "#818cf8" : "#484f58",
+              cursor: "pointer",
+              fontSize: 10,
+              fontWeight: active ? 600 : 400,
+              padding: "6px 0",
+              transition: "all 0.12s",
+            }}
+          >
+            {meta[panel].icon}
+            {meta[panel].label}
           </button>
         );
       })}
     </div>
   );
 
-  /* ── CANVAS ── */
   const canvas = (
     <div style={{ flex: 1, position: "relative", overflow: "hidden" }}>
       <ReactFlow
@@ -340,57 +694,149 @@ export function Builder() {
         onPaneClick={() => setSelectedNode(null)}
         nodeTypes={nodeTypes}
         fitView
-        style={{ background: "#282B30" }}
-        defaultEdgeOptions={{ style: { stroke: "#5865F2", strokeWidth: 2 } }}
+        style={{ background: "#0d1117" }}
+        defaultEdgeOptions={{
+          style: { stroke: "#5865F2", strokeWidth: 2, strokeDasharray: undefined },
+          animated: false,
+        }}
+        proOptions={{ hideAttribution: false }}
       >
-        <Background variant={BackgroundVariant.Dots} color="#5865F215" gap={20} size={1} />
-        <Controls style={{ background: "#36393E", border: "1px solid rgba(255,255,255,0.063)", borderRadius: 8 }} />
+        <Background
+          variant={BackgroundVariant.Dots}
+          color="rgba(255,255,255,0.06)"
+          gap={22}
+          size={1.2}
+        />
+        <Controls
+          style={{
+            background: "#161b22",
+            border: "1px solid rgba(255,255,255,0.07)",
+            borderRadius: 8,
+            boxShadow: "0 4px 16px rgba(0,0,0,0.4)",
+          }}
+        />
         {!isMobile && (
-          <MiniMap nodeColor="#5865F240" style={{ background: "#1E2124", border: "1px solid rgba(255,255,255,0.063)", borderRadius: 8 }} />
+          <MiniMap
+            nodeColor={(node) => {
+              const colorMap: Record<number, string> = {
+                17: "#8b5cf6", 9: "#10b981", 10: "#3b82f6",
+                11: "#f59e0b", 12: "#ec4899", 14: "#6b7280",
+                1: "#14b8a6", 2: "#5865F2", 0: "#f59e0b",
+              };
+              return colorMap[(node.data as { componentType?: number })?.componentType ?? -1] ?? "#5865F2";
+            }}
+            style={{
+              background: "#161b22",
+              border: "1px solid rgba(255,255,255,0.07)",
+              borderRadius: 8,
+            }}
+          />
         )}
         <Panel position="top-center">
-          <div style={{ color: "#949B9D", fontSize: 11, background: "rgba(30,33,36,0.8)", padding: "3px 10px", borderRadius: 4 }}>
-            {nodes.length === 0 ? "Click a node type to add it to the canvas" : `${nodes.length} node${nodes.length !== 1 ? "s" : ""} · ${edges.length} edge${edges.length !== 1 ? "s" : ""}`}
+          <div
+            style={{
+              color: "#484f58",
+              fontSize: 11,
+              background: "rgba(13,17,23,0.85)",
+              border: "1px solid rgba(255,255,255,0.06)",
+              padding: "3px 12px",
+              borderRadius: 20,
+              backdropFilter: "blur(8px)",
+              fontWeight: 500,
+            }}
+          >
+            {nodes.length === 0
+              ? "← Click a component to add it to the canvas"
+              : `${nodes.length} node${nodes.length !== 1 ? "s" : ""} · ${edges.length} edge${edges.length !== 1 ? "s" : ""}`}
           </div>
         </Panel>
       </ReactFlow>
     </div>
   );
 
-  /* ── RIGHT PANEL ── */
   const rightPanel = (
-    <div style={{
-      width: isMobile ? "100%" : 300,
-      flexShrink: 0,
-      background: "#1E2124",
-      borderLeft: isMobile ? "none" : "1px solid rgba(255,255,255,0.063)",
-      display: "flex", flexDirection: "column", overflow: "hidden",
-      flex: isMobile ? 1 : undefined,
-    }}>
-      <div style={{
-        display: "flex", padding: "8px 8px 0", gap: 4,
-        background: "#1E2124", borderBottom: "1px solid rgba(255,255,255,0.063)",
-      }}>
-        {tabBtn("properties", "Properties")}
-        {tabBtn("preview", "Preview")}
+    <div
+      style={{
+        width: isMobile ? "100%" : 312,
+        flexShrink: 0,
+        background: "#161b22",
+        borderLeft: isMobile ? "none" : "1px solid rgba(255,255,255,0.07)",
+        display: "flex",
+        flexDirection: "column",
+        overflow: "hidden",
+        flex: isMobile ? 1 : undefined,
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          padding: "6px 8px 0",
+          gap: 2,
+          background: "#161b22",
+          borderBottom: "1px solid rgba(255,255,255,0.06)",
+          flexShrink: 0,
+        }}
+      >
+        {(["properties", "preview"] as RightTab[]).map((tab) => {
+          const meta = { properties: { label: "Properties", icon: <Settings2 size={12} /> }, preview: { label: "Preview", icon: <Eye size={12} /> } };
+          const active = rightTab === tab;
+          return (
+            <button
+              key={tab}
+              onClick={() => setRightTab(tab)}
+              style={{
+                flex: 1,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 5,
+                padding: "6px 0",
+                background: active ? "rgba(88,101,242,0.1)" : "transparent",
+                border: "none",
+                borderRadius: 5,
+                color: active ? "#818cf8" : "#7d8590",
+                fontSize: 12,
+                fontWeight: active ? 600 : 400,
+                cursor: "pointer",
+                transition: "all 0.12s",
+                marginBottom: 4,
+              }}
+            >
+              {meta[tab].icon}
+              {meta[tab].label}
+            </button>
+          );
+        })}
       </div>
-      <div style={{ flex: 1, overflow: "hidden" }}>
+      <div style={{ flex: 1, overflow: "hidden", display: "flex", flexDirection: "column" }}>
         {rightTab === "properties" ? <PropertiesPanel /> : <DiscordPreview />}
       </div>
     </div>
   );
 
-  /* ── EXPORT DRAWER ── */
   const exportDrawer = exportOpen && (
-    <div style={{ height: isMobile ? 240 : 280, flexShrink: 0, borderTop: "1px solid rgba(255,255,255,0.063)" }}>
+    <div
+      style={{
+        height: isMobile ? 260 : 280,
+        flexShrink: 0,
+        borderTop: "1px solid rgba(255,255,255,0.07)",
+      }}
+    >
       <ExportPanel />
     </div>
   );
 
-  /* ── DESKTOP LAYOUT ── */
   if (!isMobile) {
     return (
-      <div style={{ display: "flex", flexDirection: "column", height: "100dvh", background: "#1E2124", overflow: "hidden" }}>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          height: "100dvh",
+          background: "#0d1117",
+          overflow: "hidden",
+        }}
+      >
         {toolbar}
         <div style={{ flex: 1, display: "flex", overflow: "hidden" }}>
           <NodeLibraryPanel />
@@ -398,13 +844,37 @@ export function Builder() {
           {rightPanel}
         </div>
         {exportDrawer}
+        <style>{`
+          @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+          .react-flow__controls button {
+            background: #1c2128 !important;
+            border-color: rgba(255,255,255,0.07) !important;
+            color: #7d8590 !important;
+            fill: #7d8590 !important;
+          }
+          .react-flow__controls button:hover {
+            background: #21262d !important;
+          }
+          .react-flow__edge-path { stroke-width: 2px; }
+          ::-webkit-scrollbar { width: 5px; height: 5px; }
+          ::-webkit-scrollbar-track { background: transparent; }
+          ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+          ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.18); }
+        `}</style>
       </div>
     );
   }
 
-  /* ── MOBILE LAYOUT ── */
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "100dvh", background: "#1E2124", overflow: "hidden" }}>
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        height: "100dvh",
+        background: "#0d1117",
+        overflow: "hidden",
+      }}
+    >
       {toolbar}
       <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
         {mobilePanel === "library" && (
@@ -415,26 +885,42 @@ export function Builder() {
         {mobilePanel === "canvas" && canvas}
         {(mobilePanel === "properties" || mobilePanel === "preview") && (
           <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
-            <div style={{
-              display: "flex", padding: "8px 8px 0", gap: 4,
-              background: "#1E2124", borderBottom: "1px solid rgba(255,255,255,0.063)",
-            }}>
-              <button onClick={() => { setMobilePanel("properties"); setRightTab("properties"); }} style={{
-                flex: 1, padding: "6px 0",
-                background: mobilePanel === "properties" ? "#424549" : "transparent",
-                border: "none", borderRadius: 4,
-                color: mobilePanel === "properties" ? "#F2F3F5" : "#B5BAC1",
-                fontSize: 12, fontWeight: mobilePanel === "properties" ? 600 : 400, cursor: "pointer",
-              }}>Properties</button>
-              <button onClick={() => { setMobilePanel("preview"); setRightTab("preview"); }} style={{
-                flex: 1, padding: "6px 0",
-                background: mobilePanel === "preview" ? "#424549" : "transparent",
-                border: "none", borderRadius: 4,
-                color: mobilePanel === "preview" ? "#F2F3F5" : "#B5BAC1",
-                fontSize: 12, fontWeight: mobilePanel === "preview" ? 600 : 400, cursor: "pointer",
-              }}>Preview</button>
+            <div
+              style={{
+                display: "flex",
+                padding: "6px 8px 0",
+                gap: 2,
+                background: "#161b22",
+                borderBottom: "1px solid rgba(255,255,255,0.06)",
+                flexShrink: 0,
+              }}
+            >
+              {(["properties", "preview"] as RightTab[]).map((tab) => {
+                const labels = { properties: "Properties", preview: "Preview" };
+                const active = (mobilePanel === tab);
+                return (
+                  <button
+                    key={tab}
+                    onClick={() => setMobilePanel(tab as MobilePanel)}
+                    style={{
+                      flex: 1,
+                      padding: "6px 0",
+                      background: active ? "rgba(88,101,242,0.1)" : "transparent",
+                      border: "none",
+                      borderRadius: 5,
+                      color: active ? "#818cf8" : "#7d8590",
+                      fontSize: 12,
+                      fontWeight: active ? 600 : 400,
+                      cursor: "pointer",
+                      marginBottom: 4,
+                    }}
+                  >
+                    {labels[tab]}
+                  </button>
+                );
+              })}
             </div>
-            <div style={{ flex: 1, overflow: "hidden" }}>
+            <div style={{ flex: 1, overflow: "hidden", display: "flex", flexDirection: "column" }}>
               {mobilePanel === "properties" ? <PropertiesPanel /> : <DiscordPreview />}
             </div>
           </div>
@@ -442,6 +928,11 @@ export function Builder() {
       </div>
       {exportDrawer}
       {mobileNav}
+      <style>{`
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        ::-webkit-scrollbar { width: 5px; } ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+      `}</style>
     </div>
   );
 }

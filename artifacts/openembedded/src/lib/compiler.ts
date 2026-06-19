@@ -54,7 +54,14 @@ export function compileGraph(nodes: AppNode[], edges: Edge[]): CompileResult {
       }
       case 9: {
         hasV2 = true;
-        return { type: 9, components: kids.map(buildComponent).filter(Boolean) };
+        const thumbnailKid = kids.find((kid) => nodeMap.get(kid)?.data?.componentType === 11);
+        const textKids = kids.filter((kid) => nodeMap.get(kid)?.data?.componentType !== 11);
+        const result: Record<string, unknown> = {
+          type: 9,
+          components: textKids.map(buildComponent).filter(Boolean),
+        };
+        if (thumbnailKid) result.accessory = buildComponent(thumbnailKid);
+        return result;
       }
       case 10: {
         hasV2 = true;
@@ -97,19 +104,20 @@ export function compileGraph(nodes: AppNode[], edges: Edge[]): CompileResult {
         else btn.custom_id = d.custom_id ?? `btn_${id}`;
         return btn;
       }
-      case 0: {
-        // Legacy embed
-        const embed: Record<string, unknown> = {};
-        if (d.title) embed.title = d.title;
-        if (d.description) embed.description = d.description;
-        if (d.color != null) embed.color = d.color;
-        if (d.author) embed.author = { name: d.author };
-        if (d.footer) embed.footer = { text: d.footer };
-        if (d.imageUrl) embed.image = { url: d.imageUrl };
-        return embed;
-      }
-      default:
+      case 0:
+      default: {
+        if (node.type === "embed" || d.componentType === 0 || d.componentType == null) {
+          const embed: Record<string, unknown> = {};
+          if (d.title) embed.title = d.title;
+          if (d.description) embed.description = d.description;
+          if (d.color != null) embed.color = d.color;
+          if (d.author) embed.author = { name: d.author };
+          if (d.footer) embed.footer = { text: d.footer };
+          if (d.imageUrl) embed.image = { url: d.imageUrl };
+          return embed;
+        }
         return null;
+      }
     }
   }
 

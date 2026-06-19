@@ -1,14 +1,19 @@
 import { memo } from "react";
 import { Handle, Position, NodeProps } from "@xyflow/react";
 import { NodeWrapper } from "./NodeWrapper";
+import { AlignJustify } from "lucide-react";
 
 function ActionRowNodeComponent({ id }: NodeProps) {
   return (
-    <NodeWrapper id={id} typeBadge="ActionRow · 1" badgeColor="#1a1a2e">
-      <div style={{ color: "#F2F3F5", fontSize: 13, fontWeight: 600 }}>Action Row</div>
-      <div style={{ color: "#B5BAC1", fontSize: 11, marginTop: 4 }}>buttons / select</div>
-      <Handle type="target" position={Position.Left} style={{ background: "#57F287" }} />
-      <Handle type="source" position={Position.Right} style={{ background: "#5865F2" }} />
+    <NodeWrapper id={id} typeName="Action Row · 1" icon={<AlignJustify size={13} />} accentColor="#14b8a6">
+      <div style={{ color: "#e6edf3", fontSize: 13, fontWeight: 600, marginBottom: 3 }}>
+        Action Row
+      </div>
+      <div style={{ color: "#7d8590", fontSize: 11 }}>
+        Buttons &amp; select menus
+      </div>
+      <Handle type="target" position={Position.Left} style={{ background: "#3fb950", border: "2px solid #1c2128", width: 10, height: 10 }} />
+      <Handle type="source" position={Position.Right} style={{ background: "#14b8a6", border: "2px solid #1c2128", width: 10, height: 10 }} />
     </NodeWrapper>
   );
 }

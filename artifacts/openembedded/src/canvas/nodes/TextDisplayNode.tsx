@@ -1,28 +1,29 @@
 import { memo } from "react";
 import { Handle, Position, NodeProps } from "@xyflow/react";
 import { NodeWrapper } from "./NodeWrapper";
+import { Type } from "lucide-react";
 
 function TextDisplayNodeComponent({ id, data }: NodeProps) {
   const content = (data.content as string) ?? "";
   return (
-    <NodeWrapper id={id} typeBadge="TextDisplay · 10" badgeColor="#2d2d2d">
-      <div style={{ color: "#F2F3F5", fontSize: 13, fontWeight: 600, marginBottom: 4 }}>
-        Text Display
-      </div>
+    <NodeWrapper id={id} typeName="Text Display · 10" icon={<Type size={13} />} accentColor="#3b82f6">
       <div
         style={{
-          color: "#B5BAC1",
+          color: "#e6edf3",
           fontSize: 12,
-          maxWidth: 200,
+          lineHeight: 1.5,
+          maxWidth: 220,
           overflow: "hidden",
-          textOverflow: "ellipsis",
-          whiteSpace: "nowrap",
+          display: "-webkit-box",
+          WebkitLineClamp: 2,
+          WebkitBoxOrient: "vertical",
+          wordBreak: "break-word",
         }}
       >
-        {content || <em style={{ color: "#949B9D" }}>empty</em>}
+        {content || <span style={{ color: "#484f58", fontStyle: "italic" }}>Empty text…</span>}
       </div>
-      <Handle type="target" position={Position.Left} style={{ background: "#57F287" }} />
-      <Handle type="source" position={Position.Right} style={{ background: "#5865F2" }} />
+      <Handle type="target" position={Position.Left} style={{ background: "#3fb950", border: "2px solid #1c2128", width: 10, height: 10 }} />
+      <Handle type="source" position={Position.Right} style={{ background: "#3b82f6", border: "2px solid #1c2128", width: 10, height: 10 }} />
     </NodeWrapper>
   );
 }

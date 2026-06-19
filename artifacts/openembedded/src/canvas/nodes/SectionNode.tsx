@@ -1,14 +1,19 @@
 import { memo } from "react";
 import { Handle, Position, NodeProps } from "@xyflow/react";
 import { NodeWrapper } from "./NodeWrapper";
+import { Layers } from "lucide-react";
 
 function SectionNodeComponent({ id }: NodeProps) {
   return (
-    <NodeWrapper id={id} typeBadge="Section · 9" badgeColor="#1d3d3a">
-      <div style={{ color: "#F2F3F5", fontSize: 13, fontWeight: 600 }}>Section</div>
-      <div style={{ color: "#B5BAC1", fontSize: 11, marginTop: 4 }}>text[] + accessory</div>
-      <Handle type="target" position={Position.Left} style={{ background: "#57F287" }} />
-      <Handle type="source" position={Position.Right} style={{ background: "#5865F2" }} />
+    <NodeWrapper id={id} typeName="Section · 9" icon={<Layers size={13} />} accentColor="#10b981">
+      <div style={{ color: "#e6edf3", fontSize: 13, fontWeight: 600, marginBottom: 3 }}>
+        Section
+      </div>
+      <div style={{ color: "#7d8590", fontSize: 11 }}>
+        Text + thumbnail accessory
+      </div>
+      <Handle type="target" position={Position.Left} style={{ background: "#3fb950", border: "2px solid #1c2128", width: 10, height: 10 }} />
+      <Handle type="source" position={Position.Right} style={{ background: "#10b981", border: "2px solid #1c2128", width: 10, height: 10 }} />
     </NodeWrapper>
   );
 }

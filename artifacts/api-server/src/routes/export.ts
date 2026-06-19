@@ -7,7 +7,7 @@ interface NodeData {
   componentType?: number;
   content?: string;
   label?: string;
-  style?: number;
+  style?: string;
   custom_id?: string;
   url?: string;
   accent_color?: number;
@@ -16,7 +16,6 @@ interface NodeData {
   divider?: boolean;
   imageUrl?: string;
   items?: Array<{ url: string; description?: string }>;
-  thumbnailUrl?: string;
   description?: string;
   title?: string;
   color?: number;
@@ -34,8 +33,6 @@ interface FlowEdge {
   id: string;
   source: string;
   target: string;
-  sourceHandle?: string;
-  targetHandle?: string;
 }
 
 function compileGraph(
@@ -58,10 +55,7 @@ function compileGraph(
     parentOf.set(edge.target, edge.source);
   }
 
-  const rootNodeIds = nodes
-    .filter((n) => !parentOf.has(n.id))
-    .map((n) => n.id);
-
+  const rootNodeIds = nodes.filter((n) => !parentOf.has(n.id)).map((n) => n.id);
   let hasV2 = false;
 
   function buildComponent(nodeId: string): Record<string, unknown> | null {
@@ -73,20 +67,24 @@ function compileGraph(
     switch (data.componentType) {
       case 17: {
         hasV2 = true;
-        const builtChildren = children
-          .map((c) => buildComponent(c))
-          .filter(Boolean);
-        const comp: Record<string, unknown> = { type: 17, components: builtChildren };
+        const comp: Record<string, unknown> = {
+          type: 17,
+          components: children.map(buildComponent).filter(Boolean),
+        };
         if (data.accent_color != null) comp.accent_color = data.accent_color;
         if (data.spoiler) comp.spoiler = true;
         return comp;
       }
       case 9: {
         hasV2 = true;
-        const textChildren = children
-          .map((c) => buildComponent(c))
-          .filter(Boolean);
-        return { type: 9, components: textChildren };
+        const thumbnailKid = children.find((kid) => nodeMap.get(kid)?.data?.componentType === 11);
+        const textKids = children.filter((kid) => nodeMap.get(kid)?.data?.componentType !== 11);
+        const result: Record<string, unknown> = {
+          type: 9,
+          components: textKids.map(buildComponent).filter(Boolean),
+        };
+        if (thumbnailKid) result.accessory = buildComponent(thumbnailKid);
+        return result;
       }
       case 10: {
         hasV2 = true;
@@ -107,10 +105,7 @@ function compileGraph(
       }
       case 1: {
         hasV2 = true;
-        const buttonChildren = children
-          .map((c) => buildComponent(c))
-          .filter(Boolean);
-        return { type: 1, components: buttonChildren };
+        return { type: 1, components: children.map(buildComponent).filter(Boolean) };
       }
       case 2: {
         hasV2 = true;
@@ -128,7 +123,7 @@ function compileGraph(
         return btn;
       }
       default: {
-        if (node.type === "embed" || (data as { componentType?: number }).componentType == null) {
+        if (node.type === "embed" || data.componentType === 0 || data.componentType == null) {
           const embed: Record<string, unknown> = {};
           if (data.title) embed.title = data.title;
           if (data.description) embed.description = data.description;
@@ -142,34 +137,19 @@ function compileGraph(
     }
   }
 
-  const rootComponents = rootNodeIds
-    .map((id) => {
-      const node = nodeMap.get(id);
-      if (!node) return null;
-      if (node.type === "embed") {
-        return buildComponent(id);
-      }
-      return buildComponent(id);
-    })
-    .filter(Boolean);
-
-  const embedComponents = rootComponents.filter(
-    (c) => c && !("type" in c)
-  );
-  const v2Components = rootComponents.filter((c) => c && "type" in c);
+  const allBuilt = rootNodeIds.map(buildComponent).filter(Boolean) as Record<string, unknown>[];
+  const embedComponents = allBuilt.filter((c) => !("type" in c));
+  const v2Components = allBuilt.filter((c) => "type" in c);
 
   const payload: Record<string, unknown> = {};
-
-  if (v2Components.length > 0) {
+  if (hasV2 || v2Components.length > 0) {
     payload.flags = 32768;
     payload.components = v2Components;
   }
-
   if (embedComponents.length > 0) {
     payload.embeds = embedComponents;
   }
-
-  if (v2Components.length === 0 && embedComponents.length === 0) {
+  if (!hasV2 && v2Components.length === 0 && embedComponents.length === 0) {
     payload.flags = 32768;
     payload.components = [];
   }
@@ -178,49 +158,56 @@ function compileGraph(
 }
 
 function generateDiscordJsCode(payload: Record<string, unknown>): string {
-  const lines: string[] = [];
-  lines.push(
+  const lines: string[] = [
     `const { ContainerBuilder, TextDisplayBuilder, SeparatorBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');`,
-    ``
-  );
+    ``,
+  ];
 
-  function buildCode(
-    comp: Record<string, unknown>,
-    varName: string
-  ): string[] {
+  function buildCode(comp: Record<string, unknown>, varName: string): string[] {
     const out: string[] = [];
     const type = comp.type as number;
     switch (type) {
       case 17: {
         out.push(`const ${varName} = new ContainerBuilder()`);
-        if (comp.accent_color != null)
-          out.push(`  .setAccentColor(${comp.accent_color})`);
+        if (comp.accent_color != null) out.push(`  .setAccentColor(${comp.accent_color})`);
         const children = (comp.components as Record<string, unknown>[]) ?? [];
         children.forEach((child, i) => {
-          const childVar = `${varName}_child${i}`;
+          const childVar = `${varName}_c${i}`;
           out.push(...buildCode(child, childVar));
-          out.push(`  .addComponent(${childVar})`);
+          out[out.length - 1] = out[out.length - 1].replace(/;$/, "");
+          out.push(`${varName}.addComponent(${childVar});`);
         });
-        out[out.length - 1] = out[out.length - 1] + ";";
+        if (!out[out.length - 1].endsWith(";")) out[out.length - 1] += ";";
+        break;
+      }
+      case 9: {
+        out.push(`const ${varName} = new SectionBuilder()`);
+        const comps = (comp.components as Record<string, unknown>[]) ?? [];
+        comps.forEach((child, i) => {
+          const childVar = `${varName}_c${i}`;
+          out.push(...buildCode(child, childVar));
+        });
+        out[out.length - 1] += ";";
         break;
       }
       case 10:
-        out.push(
-          `const ${varName} = new TextDisplayBuilder().setContent(${JSON.stringify(comp.content ?? "")});`
-        );
+        out.push(`const ${varName} = new TextDisplayBuilder().setContent(${JSON.stringify(comp.content ?? "")});`);
         break;
       case 14:
-        out.push(
-          `const ${varName} = new SeparatorBuilder().setSpacing(${comp.spacing ?? 1}).setDivider(${comp.divider ?? false});`
-        );
+        out.push(`const ${varName} = new SeparatorBuilder().setSpacing(${comp.spacing ?? 1}).setDivider(${comp.divider ?? false});`);
         break;
+      case 1: {
+        const btns = (comp.components as Record<string, unknown>[]) ?? [];
+        btns.forEach((btn, i) => {
+          out.push(...buildCode(btn, `${varName}_btn${i}`));
+        });
+        out.push(`const ${varName} = new ActionRowBuilder().addComponents(${btns.map((_, i) => `${varName}_btn${i}`).join(", ")});`);
+        break;
+      }
       case 2: {
         const styleNames: Record<number, string> = {
-          1: "ButtonStyle.Primary",
-          2: "ButtonStyle.Secondary",
-          3: "ButtonStyle.Success",
-          4: "ButtonStyle.Danger",
-          5: "ButtonStyle.Link",
+          1: "ButtonStyle.Primary", 2: "ButtonStyle.Secondary",
+          3: "ButtonStyle.Success", 4: "ButtonStyle.Danger", 5: "ButtonStyle.Link",
         };
         const style = styleNames[comp.style as number] ?? "ButtonStyle.Primary";
         out.push(
@@ -252,31 +239,16 @@ function generateDiscordJsCode(payload: Record<string, unknown>): string {
 
 router.post("/v1/export/json", async (req, res) => {
   const parsed = ExportJsonBody.safeParse(req.body);
-  if (!parsed.success) {
-    res.status(400).json({ error: "Invalid request body" });
-    return;
-  }
-  const { graph } = parsed.data;
-  const result = compileGraph(
-    graph.nodes as FlowNode[],
-    graph.edges as FlowEdge[]
-  );
+  if (!parsed.success) { res.status(400).json({ error: "Invalid request body" }); return; }
+  const result = compileGraph(parsed.data.graph.nodes as FlowNode[], parsed.data.graph.edges as FlowEdge[]);
   res.json(result);
 });
 
 router.post("/v1/export/code", async (req, res) => {
   const parsed = ExportCodeBody.safeParse(req.body);
-  if (!parsed.success) {
-    res.status(400).json({ error: "Invalid request body" });
-    return;
-  }
-  const { graph } = parsed.data;
-  const { payload } = compileGraph(
-    graph.nodes as FlowNode[],
-    graph.edges as FlowEdge[]
-  );
-  const code = generateDiscordJsCode(payload);
-  res.json({ code });
+  if (!parsed.success) { res.status(400).json({ error: "Invalid request body" }); return; }
+  const { payload } = compileGraph(parsed.data.graph.nodes as FlowNode[], parsed.data.graph.edges as FlowEdge[]);
+  res.json({ code: generateDiscordJsCode(payload) });
 });
 
 export default router;
