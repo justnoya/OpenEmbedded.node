@@ -1,0 +1,1 @@
+- [Replit artifact port routing](artifact-port-routing.md) — new react-vite artifacts may get path-based IDs that break proxy routing; serve frontend from Express API server instead.

@@ -3,20 +3,25 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: OpenEmbedded API — visual Discord embed builder
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: projects
+    description: Project CRUD
+  - name: export
+    description: Export and validation
+  - name: webhook
+    description: Discord webhook proxy
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,6 +29,169 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /v1/projects:
+    get:
+      operationId: listProjects
+      tags: [projects]
+      summary: List all saved projects
+      responses:
+        "200":
+          description: List of projects
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Project"
+    post:
+      operationId: createProject
+      tags: [projects]
+      summary: Create a new project
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProjectInput"
+      responses:
+        "201":
+          description: Created project
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Project"
+
+  /v1/projects/{id}:
+    get:
+      operationId: getProject
+      tags: [projects]
+      summary: Load a project by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Project
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Project"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    put:
+      operationId: updateProject
+      tags: [projects]
+      summary: Update a project
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProjectUpdate"
+      responses:
+        "200":
+          description: Updated project
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Project"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    delete:
+      operationId: deleteProject
+      tags: [projects]
+      summary: Delete a project
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Deleted
+
+  /v1/export/json:
+    post:
+      operationId: exportJson
+      tags: [export]
+      summary: Validate and return Discord payload JSON
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GraphInput"
+      responses:
+        "200":
+          description: Discord payload
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExportResult"
+
+  /v1/export/code:
+    post:
+      operationId: exportCode
+      tags: [export]
+      summary: Return discord.js v14 code string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GraphInput"
+      responses:
+        "200":
+          description: Code string
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CodeExportResult"
+
+  /v1/webhook/send:
+    post:
+      operationId: sendWebhook
+      tags: [webhook]
+      summary: Proxy send payload to Discord webhook URL
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WebhookSendInput"
+      responses:
+        "200":
+          description: Send result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WebhookSendResult"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +202,106 @@ components:
       required:
         - status
 
+    Project:
+      type: object
+      required: [id, name, graph, createdAt, updatedAt]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        graph:
+          $ref: "#/components/schemas/GraphData"
+        payload:
+          type: ["object", "null"]
+          description: Last compiled Discord payload
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+
+    ProjectInput:
+      type: object
+      required: [name, graph]
+      properties:
+        name:
+          type: string
+          minLength: 1
+        graph:
+          $ref: "#/components/schemas/GraphData"
+
+    ProjectUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+        graph:
+          $ref: "#/components/schemas/GraphData"
+        payload:
+          type: ["object", "null"]
+
+    GraphData:
+      type: object
+      required: [nodes, edges]
+      properties:
+        nodes:
+          type: array
+          items:
+            type: object
+        edges:
+          type: array
+          items:
+            type: object
+
+    GraphInput:
+      type: object
+      required: [graph]
+      properties:
+        graph:
+          $ref: "#/components/schemas/GraphData"
+
+    ExportResult:
+      type: object
+      required: [payload, isValid]
+      properties:
+        payload:
+          type: object
+        isValid:
+          type: boolean
+        errors:
+          type: array
+          items:
+            type: string
+
+    CodeExportResult:
+      type: object
+      required: [code]
+      properties:
+        code:
+          type: string
+
+    WebhookSendInput:
+      type: object
+      required: [webhookUrl, payload]
+      properties:
+        webhookUrl:
+          type: string
+        payload:
+          type: object
+
+    WebhookSendResult:
+      type: object
+      required: [success]
+      properties:
+        success:
+          type: boolean
+        message:
+          type: ["string", "null"]
+
+    ErrorResponse:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: string
