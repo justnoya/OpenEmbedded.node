@@ -4,6 +4,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Builder } from "@/pages/Builder";
 import NotFound from "@/pages/not-found";
+import { DiscordProvider } from "@/lib/discordContext";
+import { DiscordActivityOverlay } from "@/components/DiscordActivityOverlay";
 
 const queryClient = new QueryClient();
 
@@ -20,10 +22,13 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-          <Router />
-        </WouterRouter>
-        <Toaster />
+        <DiscordProvider>
+          <DiscordActivityOverlay />
+          <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+            <Router />
+          </WouterRouter>
+          <Toaster />
+        </DiscordProvider>
       </TooltipProvider>
     </QueryClientProvider>
   );

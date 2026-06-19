@@ -1,2 +1,3 @@
 - [Replit artifact port routing](artifact-port-routing.md) — new react-vite artifacts may get path-based IDs that break proxy routing; serve frontend from Express API server instead.
 - [OpenEmbedded workflow setup](openembedded-workflows.md) — API Server needs PORT=8080 explicitly in workflow command; both workflows must be configured via configureWorkflow().
+- [Discord Activity SDK types](discord-sdk-types.md) — DiscordSDKMock needs 4 args; use sdk.channelId/guildId properties not getSelectedVoiceChannel; useRef needs explicit undefined initial in React 19.

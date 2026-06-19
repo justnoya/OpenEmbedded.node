@@ -75,6 +75,7 @@
     "zod": "catalog:"
   },
   "dependencies": {
+    "@discord/embedded-app-sdk": "^2.5.0",
     "@xyflow/react": "^12.11.0",
     "zustand": "^5.0.14"
   }

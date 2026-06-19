@@ -15,6 +15,9 @@ import { NodeLibraryPanel } from "@/panels/NodeLibraryPanel";
 import { PropertiesPanel } from "@/panels/PropertiesPanel";
 import { DiscordPreview } from "@/preview/DiscordPreview";
 import { ExportPanel } from "@/panels/ExportPanel";
+import { DiscordActivityBadge } from "@/components/DiscordActivityBadge";
+import { useRichPresence } from "@/lib/useRichPresence";
+import { useDiscord } from "@/lib/discordContext";
 import {
   useListProjects,
   useCreateProject,
@@ -66,6 +69,8 @@ export function Builder() {
   const compile = usePreviewStore((s) => s.compile);
   const previewPayload = usePreviewStore((s) => s.payload);
 
+  const { isDiscord } = useDiscord();
+
   const isMobile = useIsMobile();
   const [rightTab, setRightTab] = useState<RightTab>("properties");
   const [mobilePanel, setMobilePanel] = useState<MobilePanel>("canvas");
@@ -79,7 +84,7 @@ export function Builder() {
   const [hasLoaded, setHasLoaded] = useState(false);
 
   const nameInputRef = useRef<HTMLInputElement>(null);
-  const autoSaveTimer = useRef<ReturnType<typeof setTimeout>>();
+  const autoSaveTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const projectListRef = useRef<HTMLDivElement>(null);
 
   const queryClient = useQueryClient();
@@ -87,6 +92,13 @@ export function Builder() {
   const createProject = useCreateProject();
   const updateProject = useUpdateProject();
   const deleteProject = useDeleteProject();
+
+  useRichPresence({
+    projectName,
+    nodeCount: nodes.length,
+    edgeCount: edges.length,
+    action: exportOpen ? "exporting" : rightTab === "preview" ? "previewing" : "designing",
+  });
 
   useEffect(() => {
     compile(nodes, edges);
@@ -575,6 +587,8 @@ export function Builder() {
             </div>
           )}
         </div>
+
+        <DiscordActivityBadge />
 
         <div style={{ width: 1, height: 20, background: "rgba(255,255,255,0.07)" }} />
 
