@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback, useRef } from "react";
+import { useRoute, useLocation } from "wouter";
 import {
   ReactFlow,
   Background,
@@ -70,6 +71,9 @@ export function Builder() {
   const previewPayload = usePreviewStore((s) => s.payload);
 
   const { isDiscord } = useDiscord();
+  const [, builderParams] = useRoute("/builder/:id");
+  const [, navigate] = useLocation();
+  const routeProjectId = builderParams?.id ?? null;
 
   const isMobile = useIsMobile();
   const [rightTab, setRightTab] = useState<RightTab>("properties");
@@ -105,31 +109,24 @@ export function Builder() {
   }, [nodes, edges, compile]);
 
   useEffect(() => {
-    if (currentProjectId) return;
     if (projects === undefined) return;
+    if (!routeProjectId) { navigate("/"); return; }
+    if (currentProjectId === routeProjectId) return;
     const list = projects as Project[];
-    if (list.length > 0) {
-      const p = list[0];
-      setCurrentProjectId(p.id);
-      setProjectName(p.name);
-      if (p.graph?.nodes) setGraph(p.graph.nodes as never, p.graph.edges as never);
+    const found = list.find((p) => p.id === routeProjectId);
+    if (found) {
+      clearTimeout(autoSaveTimer.current);
+      setCurrentProjectId(found.id);
+      setProjectName(found.name);
+      if (found.graph?.nodes) setGraph(found.graph.nodes as never, found.graph.edges as never);
+      else clear();
+      setSaveStatus("saved");
+      setDeleteConfirm(null);
+      setHasLoaded(false);
       setTimeout(() => setHasLoaded(true), 100);
-    } else {
-      createProject.mutate(
-        { data: { name: "Untitled Project", graph: { nodes: [], edges: [] } } },
-        {
-          onSuccess: (p) => {
-            const proj = p as Project;
-            setCurrentProjectId(proj.id);
-            setProjectName(proj.name);
-            queryClient.invalidateQueries({ queryKey: getListProjectsQueryKey() });
-            setTimeout(() => setHasLoaded(true), 100);
-          },
-        }
-      );
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [projects, currentProjectId]);
+  }, [projects, currentProjectId, routeProjectId]);
 
   const doSave = useCallback(
     (manual?: boolean) => {
@@ -194,14 +191,17 @@ export function Builder() {
     createProject.mutate(
       { data: { name: "Untitled Project", graph: { nodes: [], edges: [] } } },
       {
-        onSuccess: (p) => {
+        onSuccess: (p: unknown) => {
           const proj = p as Project;
+          queryClient.invalidateQueries({ queryKey: getListProjectsQueryKey() });
+          setShowProjectList(false);
           setCurrentProjectId(proj.id);
           setProjectName(proj.name);
           clear();
           setSaveStatus("saved");
-          setShowProjectList(false);
-          queryClient.invalidateQueries({ queryKey: getListProjectsQueryKey() });
+          setHasLoaded(false);
+          setTimeout(() => setHasLoaded(true), 100);
+          navigate(`/builder/${proj.id}`);
         },
       }
     );
@@ -209,13 +209,16 @@ export function Builder() {
 
   const handleLoadProject = (p: Project) => {
     clearTimeout(autoSaveTimer.current);
+    setShowProjectList(false);
+    setDeleteConfirm(null);
     setCurrentProjectId(p.id);
     setProjectName(p.name);
     if (p.graph?.nodes) setGraph(p.graph.nodes as never, p.graph.edges as never);
     else clear();
     setSaveStatus("saved");
-    setShowProjectList(false);
-    setDeleteConfirm(null);
+    setHasLoaded(false);
+    setTimeout(() => setHasLoaded(true), 100);
+    navigate(`/builder/${p.id}`);
   };
 
   const handleDeleteProject = (id: string) => {
@@ -275,7 +278,25 @@ export function Builder() {
         scrollbarWidth: "none",
       }}
     >
-      <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0, marginRight: 16 }}>
+      <button
+        onClick={() => navigate("/")}
+        title="Home"
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 8,
+          flexShrink: 0,
+          marginRight: 16,
+          background: "transparent",
+          border: "none",
+          cursor: "pointer",
+          padding: "2px 6px 2px 0",
+          borderRadius: 6,
+          transition: "opacity 0.15s",
+        }}
+        onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.opacity = "0.72"; }}
+        onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.opacity = "1"; }}
+      >
         <img
           src="/logo.png"
           alt="OpenEmbedded"
@@ -286,7 +307,7 @@ export function Builder() {
             OpenEmbedded
           </span>
         )}
-      </div>
+      </button>
 
       <div style={{ width: 1, height: 20, background: "rgba(255,255,255,0.07)", flexShrink: 0, marginRight: 16 }} />
 
