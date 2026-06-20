@@ -947,27 +947,6 @@ export function DiscordPreview() {
         </div>
       )}
 
-      {/* Decorative message input */}
-      <div
-        style={{
-          flexShrink: 0,
-          margin: "0 16px 12px",
-          height: 44,
-          background: "#383a40",
-          borderRadius: 8,
-          display: "flex",
-          alignItems: "center",
-          padding: "0 14px",
-          color: "#7d8590",
-          fontSize: 14,
-          fontFamily: DC_FONT,
-          userSelect: "none",
-          gap: 8,
-        }}
-      >
-        <span style={{ flex: 1 }}>Message #preview</span>
-      </div>
-
       <style>{`
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-track { background: transparent; }

@@ -300,7 +300,7 @@ export function Builder() {
             onKeyDown={(e) => { if (e.key === "Enter" || e.key === "Escape") setEditingName(false); }}
             autoFocus
             style={{
-              background: "#0E1117",
+              background: "#080A0F",
               border: "1px solid rgba(88,101,242,0.6)",
               borderRadius: 6,
               color: "#e6edf3",
@@ -695,7 +695,7 @@ export function Builder() {
         onPaneClick={() => setSelectedNode(null)}
         nodeTypes={nodeTypes}
         fitView
-        style={{ background: "#0E1117" }}
+        style={{ background: "#080A0F" }}
         defaultEdgeOptions={{
           style: { stroke: "#5865F2", strokeWidth: 2, strokeDasharray: undefined },
           animated: false,
@@ -726,9 +726,11 @@ export function Builder() {
               };
               return colorMap[(node.data as { componentType?: number })?.componentType ?? -1] ?? "#5865F2";
             }}
+            bgColor="#161820"
+            maskColor="rgba(8,10,15,0.6)"
             style={{
               background: "#161820",
-              border: "1px solid rgba(255,255,255,0.07)",
+              border: "1px solid #2A2D3E",
               borderRadius: 8,
             }}
           />
@@ -834,7 +836,7 @@ export function Builder() {
           display: "flex",
           flexDirection: "column",
           height: "100dvh",
-          background: "#0E1117",
+          background: "#080A0F",
           overflow: "hidden",
         }}
       >
@@ -847,15 +849,30 @@ export function Builder() {
         {exportDrawer}
         <style>{`
           @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+          .react-flow__controls {
+            background: #161820 !important;
+            border: 1px solid #2A2D3E !important;
+            border-radius: 8px !important;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.5) !important;
+            overflow: hidden !important;
+          }
           .react-flow__controls button {
-            background: #1C1F2E !important;
-            border-color: #2A2D3E !important;
+            background: #161820 !important;
+            border: none !important;
+            border-bottom: 1px solid #2A2D3E !important;
             color: #7d8590 !important;
             fill: #7d8590 !important;
           }
-          .react-flow__controls button:hover {
-            background: #21262d !important;
+          .react-flow__controls button:last-child { border-bottom: none !important; }
+          .react-flow__controls button:hover { background: #1C1F2E !important; }
+          .react-flow__controls-button svg { fill: #7d8590 !important; }
+          .react-flow__minimap {
+            background: #161820 !important;
+            border: 1px solid #2A2D3E !important;
+            border-radius: 8px !important;
+            overflow: hidden !important;
           }
+          .react-flow__minimap-svg { background: #161820 !important; }
           .react-flow__edge-path { stroke-width: 2px; }
           ::-webkit-scrollbar { width: 5px; height: 5px; }
           ::-webkit-scrollbar-track { background: transparent; }
@@ -872,7 +889,7 @@ export function Builder() {
         display: "flex",
         flexDirection: "column",
         height: "100dvh",
-        background: "#0E1117",
+        background: "#080A0F",
         overflow: "hidden",
       }}
     >
