@@ -26,8 +26,8 @@ const TYPE_META: Record<number, { label: string; icon: ReactNode; color: string 
 
 const inputStyle: React.CSSProperties = {
   width: "100%",
-  background: "#1C1F2E",
-  border: "1px solid #2A2D3E",
+  background: "#1A1C24",
+  border: "1px solid #2A2F3A",
   borderRadius: 6,
   color: "#e6edf3",
   fontSize: 12,
@@ -98,7 +98,7 @@ export function PropertiesPanel() {
     (e.currentTarget as HTMLElement).style.borderColor = "rgba(88,101,242,0.6)";
   };
   const blurBorder = (e: React.FocusEvent) => {
-    (e.currentTarget as HTMLElement).style.borderColor = "#2A2D3E";
+    (e.currentTarget as HTMLElement).style.borderColor = "#2A2F3A";
   };
 
   const textField = (label: string, key: string, placeholder?: string) => (
@@ -166,7 +166,7 @@ export function PropertiesPanel() {
             style={{
               width: 36,
               height: 36,
-              border: "1px solid #2A2D3E",
+              border: "1px solid #2A2F3A",
               borderRadius: 6,
               cursor: "pointer",
               background: "none",
@@ -176,8 +176,8 @@ export function PropertiesPanel() {
           <div
             style={{
               flex: 1,
-              background: "#1C1F2E",
-              border: "1px solid #2A2D3E",
+              background: "#1A1C24",
+              border: "1px solid #2A2F3A",
               borderRadius: 6,
               padding: "6px 9px",
             }}
@@ -264,7 +264,7 @@ export function PropertiesPanel() {
         }}
       >
         {options.map((o) => (
-          <option key={o} value={o} style={{ background: "#161820" }}>
+          <option key={o} value={o} style={{ background: "#20232D" }}>
             {o}
           </option>
         ))}
@@ -297,8 +297,8 @@ export function PropertiesPanel() {
             <div
               key={i}
               style={{
-                background: "#1C1F2E",
-                border: "1px solid #2A2D3E",
+                background: "#1A1C24",
+                border: "1px solid #2A2F3A",
                 borderRadius: 6,
                 padding: "8px 10px",
                 display: "flex",
@@ -413,8 +413,8 @@ export function PropertiesPanel() {
             <div
               key={i}
               style={{
-                background: "#1C1F2E",
-                border: "1px solid #2A2D3E",
+                background: "#1A1C24",
+                border: "1px solid #2A2F3A",
                 borderRadius: 6,
                 padding: "8px 10px",
                 display: "flex",

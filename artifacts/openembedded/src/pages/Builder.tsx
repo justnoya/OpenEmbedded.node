@@ -282,7 +282,7 @@ export function Builder() {
         display: "flex",
         alignItems: "center",
         padding: "0 16px",
-        background: "#161820",
+        background: "#20232D",
         borderBottom: "1px solid rgba(255,255,255,0.07)",
         gap: 0,
         zIndex: 20,
@@ -333,7 +333,7 @@ export function Builder() {
             onKeyDown={(e) => { if (e.key === "Enter" || e.key === "Escape") setEditingName(false); }}
             autoFocus
             style={{
-              background: "#080A0F",
+              background: "#0F1117",
               border: "1px solid rgba(88,101,242,0.6)",
               borderRadius: 6,
               color: "#e6edf3",
@@ -460,7 +460,7 @@ export function Builder() {
                 position: "absolute",
                 top: 40,
                 right: 0,
-                background: "#161820",
+                background: "#20232D",
                 border: "1px solid rgba(255,255,255,0.1)",
                 borderRadius: 10,
                 padding: 6,
@@ -674,7 +674,7 @@ export function Builder() {
         flexShrink: 0,
         display: "flex",
         alignItems: "stretch",
-        background: "#161820",
+        background: "#20232D",
         borderTop: "1px solid rgba(255,255,255,0.07)",
         zIndex: 10,
       }}
@@ -729,7 +729,7 @@ export function Builder() {
         onPaneClick={() => setSelectedNode(null)}
         nodeTypes={nodeTypes}
         fitView
-        style={{ background: "#080A0F" }}
+        style={{ background: "#141822" }}
         defaultEdgeOptions={{
           style: { stroke: "#5865F2", strokeWidth: 2, strokeDasharray: undefined },
           animated: false,
@@ -744,7 +744,7 @@ export function Builder() {
         />
         <Controls
           style={{
-            background: "#161820",
+            background: "#20232D",
             border: "1px solid rgba(255,255,255,0.07)",
             borderRadius: 8,
             boxShadow: "0 4px 16px rgba(0,0,0,0.4)",
@@ -760,11 +760,11 @@ export function Builder() {
               };
               return colorMap[(node.data as { componentType?: number })?.componentType ?? -1] ?? "#5865F2";
             }}
-            bgColor="#161820"
-            maskColor="rgba(8,10,15,0.6)"
+            bgColor="#20232D"
+            maskColor="rgba(15,17,23,0.6)"
             style={{
-              background: "#161820",
-              border: "1px solid #2A2D3E",
+              background: "#20232D",
+              border: "1px solid #2A2F3A",
               borderRadius: 8,
             }}
           />
@@ -796,7 +796,7 @@ export function Builder() {
       style={{
         width: isMobile ? "100%" : 312,
         flexShrink: 0,
-        background: "#161820",
+        background: "#20232D",
         borderLeft: isMobile ? "none" : "1px solid rgba(255,255,255,0.07)",
         display: "flex",
         flexDirection: "column",
@@ -809,7 +809,7 @@ export function Builder() {
           display: "flex",
           padding: "6px 8px 0",
           gap: 2,
-          background: "#161820",
+          background: "#20232D",
           borderBottom: "1px solid rgba(255,255,255,0.06)",
           flexShrink: 0,
         }}
@@ -870,7 +870,7 @@ export function Builder() {
           display: "flex",
           flexDirection: "column",
           height: "100dvh",
-          background: "#080A0F",
+          background: "#0F1117",
           overflow: "hidden",
         }}
       >
@@ -884,29 +884,29 @@ export function Builder() {
         <style>{`
           @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
           .react-flow__controls {
-            background: #161820 !important;
-            border: 1px solid #2A2D3E !important;
+            background: #20232D !important;
+            border: 1px solid #2A2F3A !important;
             border-radius: 8px !important;
             box-shadow: 0 4px 16px rgba(0,0,0,0.5) !important;
             overflow: hidden !important;
           }
           .react-flow__controls button {
-            background: #161820 !important;
+            background: #20232D !important;
             border: none !important;
-            border-bottom: 1px solid #2A2D3E !important;
+            border-bottom: 1px solid #2A2F3A !important;
             color: #7d8590 !important;
             fill: #7d8590 !important;
           }
           .react-flow__controls button:last-child { border-bottom: none !important; }
-          .react-flow__controls button:hover { background: #1C1F2E !important; }
+          .react-flow__controls button:hover { background: #1A1C24 !important; }
           .react-flow__controls-button svg { fill: #7d8590 !important; }
           .react-flow__minimap {
-            background: #161820 !important;
-            border: 1px solid #2A2D3E !important;
+            background: #20232D !important;
+            border: 1px solid #2A2F3A !important;
             border-radius: 8px !important;
             overflow: hidden !important;
           }
-          .react-flow__minimap-svg { background: #161820 !important; }
+          .react-flow__minimap-svg { background: #20232D !important; }
           .react-flow__edge-path { stroke-width: 2px; }
           ::-webkit-scrollbar { width: 5px; height: 5px; }
           ::-webkit-scrollbar-track { background: transparent; }
@@ -923,7 +923,7 @@ export function Builder() {
         display: "flex",
         flexDirection: "column",
         height: "100dvh",
-        background: "#080A0F",
+        background: "#0F1117",
         overflow: "hidden",
       }}
     >
@@ -942,7 +942,7 @@ export function Builder() {
                 display: "flex",
                 padding: "6px 8px 0",
                 gap: 2,
-                background: "#161820",
+                background: "#20232D",
                 borderBottom: "1px solid rgba(255,255,255,0.06)",
                 flexShrink: 0,
               }}

@@ -36,8 +36,8 @@ function MediaGalleryNodeComponent({ id, data }: NodeProps) {
       ) : (
         <div style={{ color: "#484f58", fontSize: 11 }}>0 images</div>
       )}
-      <Handle type="target" position={Position.Left} style={{ background: "#3fb950", border: "2px solid #1c2128", width: 10, height: 10 }} />
-      <Handle type="source" position={Position.Right} style={{ background: "#ec4899", border: "2px solid #1c2128", width: 10, height: 10 }} />
+      <Handle type="target" position={Position.Left} style={{ background: "#3fb950", border: "2px solid #141822", width: 10, height: 10 }} />
+      <Handle type="source" position={Position.Right} style={{ background: "#ec4899", border: "2px solid #141822", width: 10, height: 10 }} />
     </NodeWrapper>
   );
 }

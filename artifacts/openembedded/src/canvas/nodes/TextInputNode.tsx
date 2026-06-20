@@ -32,8 +32,8 @@ function TextInputNodeComponent({ id, data }: NodeProps) {
       <div style={{ color: "#484f58", fontSize: 10, marginTop: 4 }}>
         {style} · Type 4
       </div>
-      <Handle type="target" position={Position.Left} style={{ background: "#3fb950", border: "2px solid #1C1F2E", width: 10, height: 10 }} />
-      <Handle type="source" position={Position.Right} style={{ background: "#64748b", border: "2px solid #1C1F2E", width: 10, height: 10 }} />
+      <Handle type="target" position={Position.Left} style={{ background: "#3fb950", border: "2px solid #141822", width: 10, height: 10 }} />
+      <Handle type="source" position={Position.Right} style={{ background: "#64748b", border: "2px solid #141822", width: 10, height: 10 }} />
     </NodeWrapper>
   );
 }

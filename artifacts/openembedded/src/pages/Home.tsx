@@ -96,7 +96,7 @@ export function Home() {
     <div
       style={{
         minHeight: "100vh",
-        background: "#080A0F",
+        background: "#0F1117",
         color: "#e6edf3",
         fontFamily: `"gg sans","Noto Sans","Helvetica Neue",Arial,sans-serif`,
       }}
@@ -108,8 +108,8 @@ export function Home() {
           display: "flex",
           alignItems: "center",
           padding: "0 32px",
-          background: "#161820",
-          borderBottom: "1px solid #2A2D3E",
+          background: "#20232D",
+          borderBottom: "1px solid #2A2F3A",
           position: "sticky",
           top: 0,
           zIndex: 100,
@@ -246,8 +246,8 @@ export function Home() {
                 display: "flex",
                 alignItems: "center",
                 gap: 8,
-                background: "#161820",
-                border: "1px solid #2A2D3E",
+                background: "#20232D",
+                border: "1px solid #2A2F3A",
                 borderRadius: 8,
                 padding: "8px 14px",
               }}
@@ -267,7 +267,7 @@ export function Home() {
       </div>
 
       {/* ── Divider ────────────────────────────────────────────── */}
-      <div style={{ borderTop: "1px solid #2A2D3E" }} />
+      <div style={{ borderTop: "1px solid #2A2F3A" }} />
 
       {/* ── Projects ───────────────────────────────────────────── */}
       <div
@@ -320,8 +320,8 @@ export function Home() {
                 key={i}
                 style={{
                   height: 160,
-                  background: "#161820",
-                  border: "1px solid #2A2D3E",
+                  background: "#20232D",
+                  border: "1px solid #2A2F3A",
                   borderRadius: 12,
                   animation: "pulse 1.5s ease-in-out infinite",
                 }}
@@ -348,7 +348,7 @@ export function Home() {
                 gap: 12,
                 height: 160,
                 background: "transparent",
-                border: "2px dashed #2A2D3E",
+                border: "2px dashed #2A2F3A",
                 borderRadius: 12,
                 cursor: "pointer",
                 transition: "all 0.15s",
@@ -362,7 +362,7 @@ export function Home() {
               }}
               onMouseLeave={(e) => {
                 const el = e.currentTarget as HTMLElement;
-                el.style.borderColor = "#2A2D3E";
+                el.style.borderColor = "#2A2F3A";
                 el.style.color = "#484f58";
                 el.style.background = "transparent";
               }}
@@ -392,8 +392,8 @@ export function Home() {
                   key={project.id}
                   style={{
                     position: "relative",
-                    background: "#161820",
-                    border: "1px solid #2A2D3E",
+                    background: "#20232D",
+                    border: "1px solid #2A2F3A",
                     borderRadius: 12,
                     padding: 20,
                     display: "flex",
@@ -411,7 +411,7 @@ export function Home() {
                   }}
                   onMouseLeave={(e) => {
                     const el = e.currentTarget as HTMLElement;
-                    el.style.borderColor = "#2A2D3E";
+                    el.style.borderColor = "#2A2F3A";
                     el.style.boxShadow = "none";
                   }}
                   onClick={() => !isDeletingThis && navigate(`/builder/${project.id}`)}
@@ -435,7 +435,7 @@ export function Home() {
                       style={{
                         position: "absolute",
                         inset: 0,
-                        background: "rgba(8,10,15,0.95)",
+                        background: "rgba(15,17,23,0.95)",
                         borderRadius: 12,
                         display: "flex",
                         flexDirection: "column",
@@ -606,8 +606,8 @@ export function Home() {
         >
           <div
             style={{
-              background: "#161820",
-              border: "1px solid #2A2D3E",
+              background: "#20232D",
+              border: "1px solid #2A2F3A",
               borderRadius: 14,
               padding: 28,
               width: "100%",
@@ -660,8 +660,8 @@ export function Home() {
                 placeholder="My awesome bot message"
                 style={{
                   width: "100%",
-                  background: "#1C1F2E",
-                  border: "1px solid #2A2D3E",
+                  background: "#1A1C24",
+                  border: "1px solid #2A2F3A",
                   borderRadius: 8,
                   color: "#e6edf3",
                   fontSize: 14,
@@ -670,7 +670,7 @@ export function Home() {
                   boxSizing: "border-box",
                 }}
                 onFocus={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "rgba(255,60,0,0.5)"; }}
-                onBlur={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "#2A2D3E"; }}
+                onBlur={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "#2A2F3A"; }}
               />
             </div>
 

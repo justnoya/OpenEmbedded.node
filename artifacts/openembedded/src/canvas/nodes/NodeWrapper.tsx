@@ -24,15 +24,15 @@ export function NodeWrapper({ id, children, typeName, icon, accentColor, nodeCla
       data-testid={`node-${id}`}
       onClick={() => setSelectedNode(id)}
       style={{
-        background: "#1C1F2E",
-        border: `1px solid ${isSelected ? accentColor + "99" : "#2A2D3E"}`,
+        background: "#1A1C24",
+        border: `1px solid ${isSelected ? "#ffffff" : "#2A2F3A"}`,
         borderLeft: `3px solid ${accentColor}`,
         borderRadius: 8,
         minWidth: 210,
         cursor: "pointer",
         position: "relative",
         boxShadow: isSelected
-          ? `0 0 0 3px ${accentColor}18, 0 8px 28px rgba(0,0,0,0.55)`
+          ? `0 0 0 2px #ffffff, 0 8px 28px rgba(0,0,0,0.6)`
           : "0 2px 10px rgba(0,0,0,0.35)",
         transition: "box-shadow 0.15s, border-color 0.15s",
       }}

@@ -22,8 +22,8 @@ function TextDisplayNodeComponent({ id, data }: NodeProps) {
       >
         {content || <span style={{ color: "#484f58", fontStyle: "italic" }}>Empty text…</span>}
       </div>
-      <Handle type="target" position={Position.Left} style={{ background: "#3fb950", border: "2px solid #1c2128", width: 10, height: 10 }} />
-      <Handle type="source" position={Position.Right} style={{ background: "#3b82f6", border: "2px solid #1c2128", width: 10, height: 10 }} />
+      <Handle type="target" position={Position.Left} style={{ background: "#3fb950", border: "2px solid #141822", width: 10, height: 10 }} />
+      <Handle type="source" position={Position.Right} style={{ background: "#3b82f6", border: "2px solid #141822", width: 10, height: 10 }} />
     </NodeWrapper>
   );
 }

@@ -47,8 +47,8 @@ function ButtonNodeComponent({ id, data }: NodeProps) {
       <div style={{ color: "#484f58", fontSize: 10, marginTop: 4, textTransform: "uppercase", letterSpacing: "0.05em" }}>
         {s.label}
       </div>
-      <Handle type="target" position={Position.Left} style={{ background: "#3fb950", border: "2px solid #1c2128", width: 10, height: 10 }} />
-      <Handle type="source" position={Position.Right} style={{ background: "#5865F2", border: "2px solid #1c2128", width: 10, height: 10 }} />
+      <Handle type="target" position={Position.Left} style={{ background: "#3fb950", border: "2px solid #141822", width: 10, height: 10 }} />
+      <Handle type="source" position={Position.Right} style={{ background: "#5865F2", border: "2px solid #141822", width: 10, height: 10 }} />
     </NodeWrapper>
   );
 }

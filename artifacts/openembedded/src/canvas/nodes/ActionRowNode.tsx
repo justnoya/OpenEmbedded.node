@@ -12,8 +12,8 @@ function ActionRowNodeComponent({ id }: NodeProps) {
       <div style={{ color: "#7d8590", fontSize: 11 }}>
         Buttons &amp; select menus
       </div>
-      <Handle type="target" position={Position.Left} style={{ background: "#3fb950", border: "2px solid #1c2128", width: 10, height: 10 }} />
-      <Handle type="source" position={Position.Right} style={{ background: "#14b8a6", border: "2px solid #1c2128", width: 10, height: 10 }} />
+      <Handle type="target" position={Position.Left} style={{ background: "#3fb950", border: "2px solid #141822", width: 10, height: 10 }} />
+      <Handle type="source" position={Position.Right} style={{ background: "#14b8a6", border: "2px solid #141822", width: 10, height: 10 }} />
     </NodeWrapper>
   );
 }

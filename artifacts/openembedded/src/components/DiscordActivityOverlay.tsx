@@ -25,7 +25,7 @@ export function DiscordActivityOverlay() {
         position: "fixed",
         inset: 0,
         zIndex: 9999,
-        background: "#080A0F",
+        background: "#0F1117",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",

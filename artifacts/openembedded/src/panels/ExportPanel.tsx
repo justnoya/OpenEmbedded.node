@@ -14,8 +14,8 @@ const tabDefs: { id: Tab; label: string; icon: React.ReactNode }[] = [
 ];
 
 const inputBase: React.CSSProperties = {
-  background: "#1C1F2E",
-  border: "1px solid #2A2D3E",
+  background: "#1A1C24",
+  border: "1px solid #2A2F3A",
   borderRadius: 6,
   color: "#e6edf3",
   fontSize: 12,
@@ -92,8 +92,8 @@ export function ExportPanel() {
   };
 
   const codeBlockStyle: React.CSSProperties = {
-    background: "#080A0F",
-    border: "1px solid #2A2D3E",
+    background: "#0F1117",
+    border: "1px solid #2A2F3A",
     borderRadius: 7,
     padding: 12,
     color: "#e6edf3",
@@ -110,8 +110,8 @@ export function ExportPanel() {
   return (
     <div
       style={{
-        background: "#161820",
-        borderTop: "1px solid #2A2D3E",
+        background: "#20232D",
+        borderTop: "1px solid #2A2F3A",
         height: "100%",
         display: "flex",
         flexDirection: "column",
@@ -123,7 +123,7 @@ export function ExportPanel() {
           display: "flex",
           alignItems: "center",
           padding: "6px 12px",
-          borderBottom: "1px solid #2A2D3E",
+          borderBottom: "1px solid #2A2F3A",
           gap: 2,
           flexShrink: 0,
         }}
