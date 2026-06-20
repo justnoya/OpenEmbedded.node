@@ -267,7 +267,7 @@ export function Builder() {
         display: "flex",
         alignItems: "center",
         padding: "0 16px",
-        background: "#161b22",
+        background: "#161820",
         borderBottom: "1px solid rgba(255,255,255,0.07)",
         gap: 0,
         zIndex: 20,
@@ -300,7 +300,7 @@ export function Builder() {
             onKeyDown={(e) => { if (e.key === "Enter" || e.key === "Escape") setEditingName(false); }}
             autoFocus
             style={{
-              background: "#0d1117",
+              background: "#0E1117",
               border: "1px solid rgba(88,101,242,0.6)",
               borderRadius: 6,
               color: "#e6edf3",
@@ -427,7 +427,7 @@ export function Builder() {
                 position: "absolute",
                 top: 40,
                 right: 0,
-                background: "#161b22",
+                background: "#161820",
                 border: "1px solid rgba(255,255,255,0.1)",
                 borderRadius: 10,
                 padding: 6,
@@ -641,7 +641,7 @@ export function Builder() {
         flexShrink: 0,
         display: "flex",
         alignItems: "stretch",
-        background: "#161b22",
+        background: "#161820",
         borderTop: "1px solid rgba(255,255,255,0.07)",
         zIndex: 10,
       }}
@@ -695,7 +695,7 @@ export function Builder() {
         onPaneClick={() => setSelectedNode(null)}
         nodeTypes={nodeTypes}
         fitView
-        style={{ background: "#0d1117" }}
+        style={{ background: "#0E1117" }}
         defaultEdgeOptions={{
           style: { stroke: "#5865F2", strokeWidth: 2, strokeDasharray: undefined },
           animated: false,
@@ -710,7 +710,7 @@ export function Builder() {
         />
         <Controls
           style={{
-            background: "#161b22",
+            background: "#161820",
             border: "1px solid rgba(255,255,255,0.07)",
             borderRadius: 8,
             boxShadow: "0 4px 16px rgba(0,0,0,0.4)",
@@ -727,7 +727,7 @@ export function Builder() {
               return colorMap[(node.data as { componentType?: number })?.componentType ?? -1] ?? "#5865F2";
             }}
             style={{
-              background: "#161b22",
+              background: "#161820",
               border: "1px solid rgba(255,255,255,0.07)",
               borderRadius: 8,
             }}
@@ -738,7 +738,7 @@ export function Builder() {
             style={{
               color: "#484f58",
               fontSize: 11,
-              background: "rgba(13,17,23,0.85)",
+              background: "rgba(14,17,23,0.85)",
               border: "1px solid rgba(255,255,255,0.06)",
               padding: "3px 12px",
               borderRadius: 20,
@@ -760,7 +760,7 @@ export function Builder() {
       style={{
         width: isMobile ? "100%" : 312,
         flexShrink: 0,
-        background: "#161b22",
+        background: "#161820",
         borderLeft: isMobile ? "none" : "1px solid rgba(255,255,255,0.07)",
         display: "flex",
         flexDirection: "column",
@@ -773,7 +773,7 @@ export function Builder() {
           display: "flex",
           padding: "6px 8px 0",
           gap: 2,
-          background: "#161b22",
+          background: "#161820",
           borderBottom: "1px solid rgba(255,255,255,0.06)",
           flexShrink: 0,
         }}
@@ -834,7 +834,7 @@ export function Builder() {
           display: "flex",
           flexDirection: "column",
           height: "100dvh",
-          background: "#0d1117",
+          background: "#0E1117",
           overflow: "hidden",
         }}
       >
@@ -848,8 +848,8 @@ export function Builder() {
         <style>{`
           @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
           .react-flow__controls button {
-            background: #1c2128 !important;
-            border-color: rgba(255,255,255,0.07) !important;
+            background: #1C1F2E !important;
+            border-color: #2A2D3E !important;
             color: #7d8590 !important;
             fill: #7d8590 !important;
           }
@@ -872,7 +872,7 @@ export function Builder() {
         display: "flex",
         flexDirection: "column",
         height: "100dvh",
-        background: "#0d1117",
+        background: "#0E1117",
         overflow: "hidden",
       }}
     >
@@ -891,7 +891,7 @@ export function Builder() {
                 display: "flex",
                 padding: "6px 8px 0",
                 gap: 2,
-                background: "#161b22",
+                background: "#161820",
                 borderBottom: "1px solid rgba(255,255,255,0.06)",
                 flexShrink: 0,
               }}

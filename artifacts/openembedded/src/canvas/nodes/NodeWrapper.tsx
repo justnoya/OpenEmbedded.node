@@ -19,8 +19,8 @@ export function NodeWrapper({ id, children, typeName, icon, accentColor }: NodeW
       data-testid={`node-${id}`}
       onClick={() => setSelectedNode(id)}
       style={{
-        background: "#1c2128",
-        border: `1px solid ${isSelected ? accentColor + "99" : "rgba(255,255,255,0.07)"}`,
+        background: "#1C1F2E",
+        border: `1px solid ${isSelected ? accentColor + "99" : "#2A2D3E"}`,
         borderLeft: `3px solid ${accentColor}`,
         borderRadius: 8,
         minWidth: 210,

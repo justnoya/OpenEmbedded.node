@@ -104,7 +104,7 @@
   --elevate-2: rgba(255,255,255, .09);
 
   /* OpenEmbedded Discord-brand colors */
-  --background: 210 9% 13%; /* Background deep #1E2124 */
+  --background: 220 24% 7%; /* Main canvas deep navy black #0E1117 */
   --foreground: 220 13% 95%; /* Text primary #F2F3F5 */
   
   --border: 0 0% 100% / 0.063; /* Border subtle #FFFFFF10 */
