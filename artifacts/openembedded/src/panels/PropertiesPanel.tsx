@@ -26,12 +26,12 @@ const TYPE_META: Record<number, { label: string; icon: ReactNode; color: string 
   0:  { label: "Embed (V1)",         icon: <MessageSquare size={14} />,    color: "#f59e0b" },
 };
 
-const BG = "#111827";
-const SURFACE = "#141926";
-const BORDER = "#1D2539";
-const TEXT = "#E8EDFF";
-const MUTED = "#64748B";
-const FAINT = "#374165";
+const BG = "#0D1117";
+const SURFACE = "#131720";
+const BORDER = "#1A1F2E";
+const TEXT = "#DDE3F5";
+const MUTED = "#5C6882";
+const FAINT = "#2D3652";
 
 const inputStyle: React.CSSProperties = {
   width: "100%",

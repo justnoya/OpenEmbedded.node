@@ -16,23 +16,24 @@ export function NodeWrapper({ id, children, typeName, icon, accentColor, nodeCla
   const selectedNodeId = useGraphStore((s) => s.selectedNodeId);
   const setSelectedNode = useGraphStore((s) => s.setSelectedNode);
   const isSelected = selectedNodeId === id;
-
-  // Detect when a connection wire is being dragged over this node
   const connectionToNodeId = useStore((s) => s.connection?.toNode?.id);
   const isConnectionTarget = connectionToNodeId === id;
 
   const badgeColor = NODE_CLASS_COLORS[nodeClass];
   const badgeLabel = NODE_CLASS_LABELS[nodeClass];
 
-  let borderColor = "#2A2F3A";
-  let boxShadow = "0 2px 10px rgba(0,0,0,0.35)";
+  let outline = "none";
+  let borderColor = "#1D2436";
+  let shadowVal = "0 1px 4px rgba(0,0,0,0.5)";
 
   if (isConnectionTarget) {
     borderColor = "#ffffff";
-    boxShadow = "0 0 0 2px rgba(255,255,255,0.6), 0 0 16px rgba(255,255,255,0.15), 0 8px 28px rgba(0,0,0,0.6)";
+    outline = "2px solid rgba(255,255,255,0.5)";
+    shadowVal = "0 0 0 3px rgba(255,255,255,0.1), 0 8px 24px rgba(0,0,0,0.6)";
   } else if (isSelected) {
-    borderColor = "#ffffff";
-    boxShadow = "0 0 0 2px #ffffff, 0 8px 28px rgba(0,0,0,0.6)";
+    borderColor = "#5865F2";
+    outline = "2px solid rgba(88,101,242,0.4)";
+    shadowVal = "0 0 0 3px rgba(88,101,242,0.12), 0 8px 24px rgba(0,0,0,0.6)";
   }
 
   return (
@@ -40,55 +41,44 @@ export function NodeWrapper({ id, children, typeName, icon, accentColor, nodeCla
       data-testid={`node-${id}`}
       onClick={() => setSelectedNode(id)}
       style={{
-        background: "#1A1C24",
+        background: "#0F1420",
         border: `1px solid ${borderColor}`,
         borderLeft: `3px solid ${accentColor}`,
-        borderRadius: 8,
-        minWidth: 210,
+        borderRadius: 10,
+        minWidth: 216,
         cursor: "pointer",
         position: "relative",
-        boxShadow,
-        transition: "box-shadow 0.12s, border-color 0.12s",
+        outline,
+        outlineOffset: 0,
+        boxShadow: shadowVal,
+        transition: "border-color 0.12s, box-shadow 0.12s, outline 0.12s",
       }}
     >
-      {/* Animated ring shown while a wire is hovering over this node */}
       {isConnectionTarget && (
         <div
           style={{
             position: "absolute",
-            inset: -3,
-            borderRadius: 11,
-            border: "2px solid rgba(255,255,255,0.5)",
+            inset: -4,
+            borderRadius: 14,
+            border: "2px solid rgba(255,255,255,0.35)",
             pointerEvents: "none",
-            animation: "pulseRing 0.8s ease-in-out infinite alternate",
+            animation: "pulseRing 0.7s ease-in-out infinite alternate",
           }}
         />
       )}
 
-      {/* Hide source (right) handle for sub-nodes — they cannot parent others */}
       {nodeClass === "sub" && (
-        <style>{`
-          [data-testid="node-${id}"] .react-flow__handle-right {
-            opacity: 0 !important;
-            pointer-events: none !important;
-            cursor: not-allowed !important;
-          }
-        `}</style>
+        <style>{`[data-testid="node-${id}"] .react-flow__handle-right{opacity:0!important;pointer-events:none!important}`}</style>
       )}
-      {/* Root nodes (embed) have no handles at all */}
       {nodeClass === "root" && (
-        <style>{`
-          [data-testid="node-${id}"] .react-flow__handle {
-            opacity: 0 !important;
-            pointer-events: none !important;
-          }
-        `}</style>
+        <style>{`[data-testid="node-${id}"] .react-flow__handle{opacity:0!important;pointer-events:none!important}`}</style>
       )}
 
+      {/* Header */}
       <div
         style={{
-          padding: "7px 10px 6px",
-          borderBottom: "1px solid rgba(255,255,255,0.05)",
+          padding: "8px 10px 7px",
+          borderBottom: "1px solid #1A1F30",
           display: "flex",
           alignItems: "center",
           gap: 7,
@@ -96,10 +86,10 @@ export function NodeWrapper({ id, children, typeName, icon, accentColor, nodeCla
       >
         <div
           style={{
-            width: 22,
-            height: 22,
-            borderRadius: 5,
-            background: accentColor + "22",
+            width: 24,
+            height: 24,
+            borderRadius: 6,
+            background: accentColor + "18",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -109,71 +99,59 @@ export function NodeWrapper({ id, children, typeName, icon, accentColor, nodeCla
         >
           {icon}
         </div>
+
         <span
           style={{
-            color: "#7d8590",
+            color: "#8B95B0",
             fontSize: 10,
             fontWeight: 600,
             textTransform: "uppercase",
-            letterSpacing: "0.07em",
+            letterSpacing: "0.08em",
             userSelect: "none",
+            flex: 1,
           }}
         >
           {typeName}
         </span>
 
-        {/* Class badge */}
-        <div
+        <span
           style={{
-            marginLeft: "auto",
-            display: "flex",
-            alignItems: "center",
-            gap: 4,
-            flexShrink: 0,
+            background: badgeColor + "15",
+            border: `1px solid ${badgeColor}30`,
+            color: badgeColor,
+            fontSize: 8,
+            fontWeight: 700,
+            letterSpacing: "0.07em",
+            padding: "1px 5px",
+            borderRadius: 4,
+            textTransform: "uppercase",
+            userSelect: "none",
           }}
         >
-          <span
-            title={
-              nodeClass === "main"
-                ? "Layout node — can contain child components"
-                : nodeClass === "root"
-                ? "Standalone embed — no children"
-                : "Component node — connects to a layout parent"
-            }
+          {badgeLabel}
+        </span>
+
+        {isSelected && (
+          <div
             style={{
-              background: badgeColor + "1a",
-              border: `1px solid ${badgeColor}40`,
-              color: badgeColor,
-              fontSize: 8,
-              fontWeight: 700,
-              letterSpacing: "0.08em",
-              padding: "1px 5px",
-              borderRadius: 3,
-              textTransform: "uppercase",
-              userSelect: "none",
+              width: 5,
+              height: 5,
+              borderRadius: "50%",
+              background: "#5865F2",
+              flexShrink: 0,
+              boxShadow: "0 0 4px rgba(88,101,242,0.6)",
             }}
-          >
-            {badgeLabel}
-          </span>
-          {isSelected && (
-            <div
-              style={{
-                width: 6,
-                height: 6,
-                borderRadius: "50%",
-                background: accentColor,
-                flexShrink: 0,
-              }}
-            />
-          )}
-        </div>
+          />
+        )}
       </div>
-      <div style={{ padding: "8px 12px 10px" }}>{children}</div>
+
+      {/* Body */}
+      <div style={{ padding: "9px 12px 11px" }}>{children}</div>
 
       <style>{`
         @keyframes pulseRing {
-          from { opacity: 0.5; transform: scale(1); }
-          to   { opacity: 1;   transform: scale(1.01); }
+          from { opacity: 0.4; transform: scale(1); }
+          to   { opacity: 0.9; transform: scale(1.015); }
         }
       `}</style>
     </div>

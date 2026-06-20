@@ -280,13 +280,13 @@ export function Builder() {
   const toolbar = (
     <div
       style={{
-        height: 52,
+        height: 48,
         flexShrink: 0,
         display: "flex",
         alignItems: "center",
-        padding: "0 16px",
-        background: "#20232D",
-        borderBottom: "1px solid rgba(255,255,255,0.07)",
+        padding: "0 14px",
+        background: "#0D1117",
+        borderBottom: "1px solid #1A1F2E",
         gap: 0,
         zIndex: 20,
         overflowX: "auto",
@@ -318,13 +318,13 @@ export function Builder() {
           style={{ width: 28, height: 28, borderRadius: 7, flexShrink: 0, objectFit: "cover" }}
         />
         {!isMobile && (
-          <span style={{ color: "#e6edf3", fontSize: 14, fontWeight: 700, letterSpacing: "-0.01em" }}>
+          <span style={{ color: "#DDE3F5", fontSize: 13, fontWeight: 700, letterSpacing: "-0.02em" }}>
             OpenEmbedded
           </span>
         )}
       </button>
 
-      <div style={{ width: 1, height: 20, background: "rgba(255,255,255,0.07)", flexShrink: 0, marginRight: 16 }} />
+      <div style={{ width: 1, height: 18, background: "#1A1F2E", flexShrink: 0, marginRight: 14 }} />
 
       <div style={{ position: "relative", flexShrink: 0, marginRight: 8 }}>
         {editingName ? (
@@ -396,13 +396,13 @@ export function Builder() {
               width: 30,
               height: 30,
               background: "transparent",
-              border: "1px solid rgba(255,255,255,0.07)",
+              border: "1px solid #1A1F2E",
               borderRadius: 6,
-              color: canUndo() ? "#7d8590" : "#2d333b",
+              color: canUndo() ? "#5C6882" : "#1D2436",
               cursor: canUndo() ? "pointer" : "not-allowed",
               transition: "all 0.12s",
             }}
-            onMouseEnter={(e) => { if (canUndo()) (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.05)"; }}
+            onMouseEnter={(e) => { if (canUndo()) (e.currentTarget as HTMLElement).style.background = "#131720"; }}
             onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "transparent"; }}
           >
             <Undo2 size={14} />
@@ -418,13 +418,13 @@ export function Builder() {
               width: 30,
               height: 30,
               background: "transparent",
-              border: "1px solid rgba(255,255,255,0.07)",
+              border: "1px solid #1A1F2E",
               borderRadius: 6,
-              color: canRedo() ? "#7d8590" : "#2d333b",
+              color: canRedo() ? "#5C6882" : "#1D2436",
               cursor: canRedo() ? "pointer" : "not-allowed",
               transition: "all 0.12s",
             }}
-            onMouseEnter={(e) => { if (canRedo()) (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.05)"; }}
+            onMouseEnter={(e) => { if (canRedo()) (e.currentTarget as HTMLElement).style.background = "#131720"; }}
             onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "transparent"; }}
           >
             <Redo2 size={14} />
@@ -463,8 +463,8 @@ export function Builder() {
                 position: "absolute",
                 top: 40,
                 right: 0,
-                background: "#20232D",
-                border: "1px solid rgba(255,255,255,0.1)",
+                background: "#131720",
+                border: "1px solid #1A1F2E",
                 borderRadius: 10,
                 padding: 6,
                 minWidth: 220,
@@ -613,7 +613,7 @@ export function Builder() {
 
         <DiscordActivityBadge />
 
-        <div style={{ width: 1, height: 20, background: "rgba(255,255,255,0.07)" }} />
+        <div style={{ width: 1, height: 18, background: "#1A1F2E" }} />
 
         <SaveIndicator />
 
@@ -733,7 +733,7 @@ export function Builder() {
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
         fitView
-        style={{ background: "#141822" }}
+        style={{ background: "#0B0E18" }}
         defaultEdgeOptions={{
           type: "default",
           style: { stroke: "#5865F2", strokeWidth: 2 },
@@ -749,10 +749,10 @@ export function Builder() {
         />
         <Controls
           style={{
-            background: "#20232D",
-            border: "1px solid rgba(255,255,255,0.07)",
+            background: "#0D1117",
+            border: "1px solid #1A1F2E",
             borderRadius: 8,
-            boxShadow: "0 4px 16px rgba(0,0,0,0.4)",
+            boxShadow: "0 4px 16px rgba(0,0,0,0.5)",
           }}
         />
         {!isMobile && (
@@ -765,11 +765,11 @@ export function Builder() {
               };
               return colorMap[(node.data as { componentType?: number })?.componentType ?? -1] ?? "#5865F2";
             }}
-            bgColor="#20232D"
-            maskColor="rgba(15,17,23,0.6)"
+            bgColor="#0D1117"
+            maskColor="rgba(9,12,20,0.65)"
             style={{
-              background: "#20232D",
-              border: "1px solid #2A2F3A",
+              background: "#0D1117",
+              border: "1px solid #1A1F2E",
               borderRadius: 8,
             }}
           />
@@ -777,10 +777,10 @@ export function Builder() {
         <Panel position="top-center">
           <div
             style={{
-              color: "#484f58",
+              color: "#5C6882",
               fontSize: 11,
-              background: "rgba(14,17,23,0.85)",
-              border: "1px solid rgba(255,255,255,0.06)",
+              background: "rgba(9,12,20,0.88)",
+              border: "1px solid #1A1F2E",
               padding: "3px 12px",
               borderRadius: 20,
               backdropFilter: "blur(8px)",
@@ -801,8 +801,8 @@ export function Builder() {
       style={{
         width: isMobile ? "100%" : 312,
         flexShrink: 0,
-        background: "#20232D",
-        borderLeft: isMobile ? "none" : "1px solid rgba(255,255,255,0.07)",
+        background: "#0D1117",
+        borderLeft: isMobile ? "none" : "1px solid #1A1F2E",
         display: "flex",
         flexDirection: "column",
         overflow: "hidden",
@@ -812,10 +812,10 @@ export function Builder() {
       <div
         style={{
           display: "flex",
-          padding: "6px 8px 0",
+          padding: "0 4px",
           gap: 2,
-          background: "#20232D",
-          borderBottom: "1px solid rgba(255,255,255,0.06)",
+          background: "#0D1117",
+          borderBottom: "1px solid #1A1F2E",
           flexShrink: 0,
         }}
       >
@@ -832,16 +832,16 @@ export function Builder() {
                 alignItems: "center",
                 justifyContent: "center",
                 gap: 5,
-                padding: "6px 0",
-                background: active ? "rgba(88,101,242,0.1)" : "transparent",
+                padding: "8px 0",
+                background: "transparent",
                 border: "none",
-                borderRadius: 5,
-                color: active ? "#818cf8" : "#7d8590",
+                borderBottom: active ? "2px solid #5865F2" : "2px solid transparent",
+                borderRadius: 0,
+                color: active ? "#818cf8" : "#5C6882",
                 fontSize: 12,
                 fontWeight: active ? 600 : 400,
                 cursor: "pointer",
-                transition: "all 0.12s",
-                marginBottom: 4,
+                transition: "color 0.12s, border-color 0.12s",
               }}
             >
               {meta[tab].icon}
@@ -861,7 +861,7 @@ export function Builder() {
       style={{
         height: isMobile ? 260 : 280,
         flexShrink: 0,
-        borderTop: "1px solid rgba(255,255,255,0.07)",
+        borderTop: "1px solid #1A1F2E",
       }}
     >
       <ExportPanel />
@@ -889,34 +889,30 @@ export function Builder() {
         <style>{`
           @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
           .react-flow__controls {
-            background: #111827 !important;
-            border: 1px solid #1D2539 !important;
+            background: #0D1117 !important;
+            border: 1px solid #1A1F2E !important;
             border-radius: 8px !important;
             box-shadow: 0 4px 16px rgba(0,0,0,0.6) !important;
             overflow: hidden !important;
           }
           .react-flow__controls button {
-            background: #111827 !important;
+            background: #0D1117 !important;
             border: none !important;
-            border-bottom: 1px solid #1D2539 !important;
-            color: #64748B !important;
-            fill: #64748B !important;
+            border-bottom: 1px solid #1A1F2E !important;
+            color: #5C6882 !important;
+            fill: #5C6882 !important;
           }
           .react-flow__controls button:last-child { border-bottom: none !important; }
-          .react-flow__controls button:hover { background: #141926 !important; }
-          .react-flow__controls-button svg { fill: #64748B !important; }
+          .react-flow__controls button:hover { background: #131720 !important; }
+          .react-flow__controls-button svg { fill: #5C6882 !important; }
           .react-flow__minimap {
-            background: #111827 !important;
-            border: 1px solid #1D2539 !important;
+            background: #0D1117 !important;
+            border: 1px solid #1A1F2E !important;
             border-radius: 8px !important;
             overflow: hidden !important;
           }
-          .react-flow__minimap-svg { background: #111827 !important; }
+          .react-flow__minimap-svg { background: #0D1117 !important; }
           .react-flow__edge-path { stroke-width: 2px; }
-          ::-webkit-scrollbar { width: 5px; height: 5px; }
-          ::-webkit-scrollbar-track { background: transparent; }
-          ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
-          ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.15); }
         `}</style>
       </div>
     );

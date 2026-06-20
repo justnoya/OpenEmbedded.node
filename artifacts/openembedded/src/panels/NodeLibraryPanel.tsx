@@ -8,12 +8,12 @@ import {
 } from "lucide-react";
 import { ReactNode } from "react";
 
-const BG = "#111827";
-const SURFACE = "#141926";
-const BORDER = "#1D2539";
-const TEXT = "#E8EDFF";
-const MUTED = "#64748B";
-const FAINT = "#374165";
+const PANEL = "#0D1117";
+const SURFACE = "#131720";
+const BORDER = "#1A1F2E";
+const TEXT = "#DDE3F5";
+const MUTED = "#5C6882";
+const FAINT = "#2D3652";
 
 interface NodeDef {
   type: string;
@@ -32,7 +32,7 @@ const NODE_DEFS: NodeDef[] = [
     description: "Root wrapper with accent & spoiler",
     componentType: 17,
     accentColor: "#8b5cf6",
-    icon: <Box size={15} />,
+    icon: <Box size={14} />,
     defaultData: { componentType: 17, accent_color: null, spoiler: false },
   },
   {
@@ -41,7 +41,7 @@ const NODE_DEFS: NodeDef[] = [
     description: "Text + thumbnail accessory",
     componentType: 9,
     accentColor: "#10b981",
-    icon: <Layers size={15} />,
+    icon: <Layers size={14} />,
     defaultData: { componentType: 9 },
   },
   {
@@ -50,7 +50,7 @@ const NODE_DEFS: NodeDef[] = [
     description: "Markdown content block",
     componentType: 10,
     accentColor: "#3b82f6",
-    icon: <Type size={15} />,
+    icon: <Type size={14} />,
     defaultData: { componentType: 10, content: "" },
   },
   {
@@ -59,7 +59,7 @@ const NODE_DEFS: NodeDef[] = [
     description: "Image accessory for sections",
     componentType: 11,
     accentColor: "#f59e0b",
-    icon: <Image size={15} />,
+    icon: <Image size={14} />,
     defaultData: { componentType: 11, url: "", description: "" },
   },
   {
@@ -68,7 +68,7 @@ const NODE_DEFS: NodeDef[] = [
     description: "Image grid layout",
     componentType: 12,
     accentColor: "#ec4899",
-    icon: <LayoutGrid size={15} />,
+    icon: <LayoutGrid size={14} />,
     defaultData: { componentType: 12, items: [] },
   },
   {
@@ -77,7 +77,7 @@ const NODE_DEFS: NodeDef[] = [
     description: "Spacing with optional divider",
     componentType: 14,
     accentColor: "#6b7280",
-    icon: <SeparatorHorizontal size={15} />,
+    icon: <SeparatorHorizontal size={14} />,
     defaultData: { componentType: 14, spacing: "md", divider: false },
   },
   {
@@ -86,7 +86,7 @@ const NODE_DEFS: NodeDef[] = [
     description: "Container for buttons & selects",
     componentType: 1,
     accentColor: "#14b8a6",
-    icon: <AlignJustify size={15} />,
+    icon: <AlignJustify size={14} />,
     defaultData: { componentType: 1 },
   },
   {
@@ -95,7 +95,7 @@ const NODE_DEFS: NodeDef[] = [
     description: "Clickable button (Primary/Link/…)",
     componentType: 2,
     accentColor: "#5865F2",
-    icon: <MousePointerClick size={15} />,
+    icon: <MousePointerClick size={14} />,
     defaultData: { componentType: 2, label: "Click me", style: "Primary", custom_id: "", emoji: "", disabled: false },
   },
   {
@@ -104,7 +104,7 @@ const NODE_DEFS: NodeDef[] = [
     description: "Dropdown with custom options",
     componentType: 3,
     accentColor: "#f97316",
-    icon: <ChevronDown size={15} />,
+    icon: <ChevronDown size={14} />,
     defaultData: { componentType: 3, custom_id: "", placeholder: "Make a selection…", min_values: 1, max_values: 1, options: [], disabled: false },
   },
   {
@@ -113,7 +113,7 @@ const NODE_DEFS: NodeDef[] = [
     description: "Discord user picker",
     componentType: 5,
     accentColor: "#06b6d4",
-    icon: <Users size={15} />,
+    icon: <Users size={14} />,
     defaultData: { componentType: 5, custom_id: "", placeholder: "Select a user…", min_values: 1, max_values: 1, disabled: false },
   },
   {
@@ -122,7 +122,7 @@ const NODE_DEFS: NodeDef[] = [
     description: "Discord role picker",
     componentType: 6,
     accentColor: "#a855f7",
-    icon: <Shield size={15} />,
+    icon: <Shield size={14} />,
     defaultData: { componentType: 6, custom_id: "", placeholder: "Select a role…", min_values: 1, max_values: 1, disabled: false },
   },
   {
@@ -131,7 +131,7 @@ const NODE_DEFS: NodeDef[] = [
     description: "User + role picker",
     componentType: 7,
     accentColor: "#ec4899",
-    icon: <AtSign size={15} />,
+    icon: <AtSign size={14} />,
     defaultData: { componentType: 7, custom_id: "", placeholder: "Select a user or role…", min_values: 1, max_values: 1, disabled: false },
   },
   {
@@ -140,7 +140,7 @@ const NODE_DEFS: NodeDef[] = [
     description: "Discord channel picker",
     componentType: 8,
     accentColor: "#22c55e",
-    icon: <Hash size={15} />,
+    icon: <Hash size={14} />,
     defaultData: { componentType: 8, custom_id: "", placeholder: "Select a channel…", min_values: 1, max_values: 1, disabled: false },
   },
   {
@@ -149,7 +149,7 @@ const NODE_DEFS: NodeDef[] = [
     description: "Short or paragraph input (modal)",
     componentType: 4,
     accentColor: "#64748b",
-    icon: <TextCursorInput size={15} />,
+    icon: <TextCursorInput size={14} />,
     defaultData: { componentType: 4, custom_id: "", label: "Label", style: "Short", placeholder: "", required: true, min_length: null, max_length: null, value: "" },
   },
   {
@@ -158,17 +158,17 @@ const NODE_DEFS: NodeDef[] = [
     description: "Legacy rich embed message",
     componentType: 0,
     accentColor: "#f59e0b",
-    icon: <MessageSquare size={15} />,
+    icon: <MessageSquare size={14} />,
     defaultData: { componentType: 0, title: "", description: "", color: 0x5865f2 },
   },
 ];
 
 const GROUPS = [
-  { label: "Layout", types: ["container", "section"] },
-  { label: "Content", types: ["textDisplay", "thumbnail", "mediaGallery", "separator"] },
+  { label: "Layout",      types: ["container", "section"] },
+  { label: "Content",     types: ["textDisplay", "thumbnail", "mediaGallery", "separator"] },
   { label: "Interactive", types: ["actionRow", "button", "selectMenu", "userSelect", "roleSelect", "mentionableSelect", "channelSelect"] },
-  { label: "Modals", types: ["textInput"] },
-  { label: "Legacy", types: ["embed"] },
+  { label: "Modals",      types: ["textInput"] },
+  { label: "Legacy",      types: ["embed"] },
 ];
 
 let nodeIdCounter = Date.now();
@@ -177,6 +177,7 @@ export function NodeLibraryPanel() {
   const addNode = useGraphStore((s) => s.addNode);
   const [search, setSearch] = useState("");
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
+  const [focused, setFocused] = useState(false);
 
   const handleAdd = useCallback(
     (def: NodeDef) => {
@@ -184,7 +185,7 @@ export function NodeLibraryPanel() {
       const node: AppNode = {
         id,
         type: def.type,
-        position: { x: 200 + Math.random() * 300, y: 80 + Math.random() * 300 },
+        position: { x: 260 + Math.random() * 260, y: 80 + Math.random() * 260 },
         data: { ...def.defaultData } as AppNodeData,
       };
       addNode(node);
@@ -195,9 +196,7 @@ export function NodeLibraryPanel() {
   const q = search.toLowerCase().trim();
   const filtered = q
     ? NODE_DEFS.filter(
-        (d) =>
-          d.label.toLowerCase().includes(q) ||
-          d.description.toLowerCase().includes(q)
+        (d) => d.label.toLowerCase().includes(q) || d.description.toLowerCase().includes(q)
       )
     : null;
 
@@ -213,35 +212,46 @@ export function NodeLibraryPanel() {
       style={{
         display: "flex",
         alignItems: "center",
-        gap: 10,
+        gap: 9,
         width: "100%",
-        padding: "7px 9px",
+        padding: "7px 8px",
         background: "transparent",
-        border: `1px solid rgba(255,255,255,0.04)`,
-        borderLeft: `2px solid ${def.accentColor}`,
-        borderRadius: 6,
+        border: "none",
+        borderRadius: 7,
         cursor: "pointer",
         textAlign: "left",
-        marginBottom: 3,
-        transition: "background 0.12s, border-color 0.12s",
+        marginBottom: 1,
+        transition: "background 0.1s",
+        position: "relative",
+        overflow: "hidden",
       }}
       onMouseEnter={(e) => {
-        (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.035)";
-        (e.currentTarget as HTMLElement).style.borderColor = def.accentColor + "55";
+        (e.currentTarget as HTMLElement).style.background = "#131720";
       }}
       onMouseLeave={(e) => {
         (e.currentTarget as HTMLElement).style.background = "transparent";
-        (e.currentTarget as HTMLElement).style.borderColor = "rgba(255,255,255,0.04)";
-        (e.currentTarget as HTMLElement).style.borderLeftColor = def.accentColor;
       }}
     >
+      {/* Accent pip */}
+      <div style={{
+        position: "absolute",
+        left: 0,
+        top: "50%",
+        transform: "translateY(-50%)",
+        width: 2,
+        height: 20,
+        borderRadius: 1,
+        background: def.accentColor,
+        opacity: 0,
+        transition: "opacity 0.1s",
+      }} className="accent-pip" />
+
       <div
         style={{
-          width: 28,
-          height: 28,
-          borderRadius: 6,
-          background: def.accentColor + "18",
-          border: `1px solid ${def.accentColor}22`,
+          width: 30,
+          height: 30,
+          borderRadius: 7,
+          background: def.accentColor + "15",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -251,14 +261,15 @@ export function NodeLibraryPanel() {
       >
         {def.icon}
       </div>
-      <div style={{ minWidth: 0 }}>
-        <div style={{ color: TEXT, fontSize: 12, fontWeight: 600, marginBottom: 1 }}>
+
+      <div style={{ minWidth: 0, flex: 1 }}>
+        <div style={{ color: TEXT, fontSize: 12, fontWeight: 500, marginBottom: 1, letterSpacing: "-0.01em" }}>
           {def.label}
         </div>
         <div
           style={{
             color: MUTED,
-            fontSize: 10,
+            fontSize: 10.5,
             overflow: "hidden",
             textOverflow: "ellipsis",
             whiteSpace: "nowrap",
@@ -273,44 +284,48 @@ export function NodeLibraryPanel() {
   return (
     <div
       style={{
-        width: 256,
+        width: 248,
         flexShrink: 0,
-        background: BG,
+        background: PANEL,
         borderRight: `1px solid ${BORDER}`,
         display: "flex",
         flexDirection: "column",
         overflow: "hidden",
       }}
     >
+      {/* Header */}
       <div
         style={{
-          padding: "14px 14px 10px",
+          padding: "14px 12px 10px",
           borderBottom: `1px solid ${BORDER}`,
+          flexShrink: 0,
         }}
       >
-        <div style={{ color: TEXT, fontSize: 13, fontWeight: 700, marginBottom: 2 }}>
+        <div style={{ color: TEXT, fontSize: 12, fontWeight: 600, marginBottom: 8, letterSpacing: "-0.01em" }}>
           Components
         </div>
-        <div style={{ color: MUTED, fontSize: 11, marginBottom: 10 }}>
-          Click to add to canvas
-        </div>
+
+        {/* Search */}
         <div
           style={{
             display: "flex",
             alignItems: "center",
             gap: 6,
             background: SURFACE,
-            border: `1px solid ${BORDER}`,
-            borderRadius: 6,
-            padding: "5px 8px",
+            border: `1px solid ${focused ? "rgba(88,101,242,0.5)" : BORDER}`,
+            borderRadius: 7,
+            padding: "5px 9px",
+            transition: "border-color 0.15s",
           }}
         >
-          <Search size={12} color={FAINT} />
+          <Search size={12} color={focused ? "#818cf8" : FAINT} style={{ flexShrink: 0, transition: "color 0.15s" }} />
           <input
             type="text"
-            placeholder="Search components…"
+            placeholder="Search…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
+            onFocus={() => setFocused(true)}
+            onBlur={() => setFocused(false)}
             style={{
               flex: 1,
               background: "transparent",
@@ -318,25 +333,28 @@ export function NodeLibraryPanel() {
               outline: "none",
               color: TEXT,
               fontSize: 12,
+              fontFamily: "inherit",
             }}
           />
+          {search && (
+            <button
+              onClick={() => setSearch("")}
+              style={{ background: "none", border: "none", color: MUTED, cursor: "pointer", padding: 0, display: "flex", fontSize: 14, lineHeight: 1 }}
+            >
+              ×
+            </button>
+          )}
         </div>
       </div>
 
-      <div style={{ overflowY: "auto", flex: 1, padding: "8px 10px" }}>
+      {/* List */}
+      <div style={{ overflowY: "auto", flex: 1, padding: "6px 6px" }}>
         {filtered ? (
           filtered.length > 0 ? (
             filtered.map((def) => <NodeCard key={def.type} def={def} />)
           ) : (
-            <div
-              style={{
-                color: FAINT,
-                fontSize: 12,
-                textAlign: "center",
-                padding: "20px 0",
-              }}
-            >
-              No matches
+            <div style={{ color: FAINT, fontSize: 12, textAlign: "center", padding: "24px 0" }}>
+              No results for "{search}"
             </div>
           )
         ) : (
@@ -344,36 +362,36 @@ export function NodeLibraryPanel() {
             const defs = NODE_DEFS.filter((d) => group.types.includes(d.type));
             const isCollapsed = !!collapsed[group.label];
             return (
-              <div key={group.label} style={{ marginBottom: 6 }}>
+              <div key={group.label} style={{ marginBottom: 2 }}>
                 <button
                   onClick={() => toggleGroup(group.label)}
                   style={{
                     display: "flex",
                     alignItems: "center",
-                    gap: 5,
+                    gap: 4,
                     width: "100%",
                     background: "transparent",
                     border: "none",
                     cursor: "pointer",
-                    padding: "5px 2px",
-                    marginBottom: 3,
+                    padding: "8px 8px 4px",
                   }}
                 >
-                  {isCollapsed ? (
-                    <ChevronRight size={12} color={FAINT} />
-                  ) : (
-                    <ChevronDown size={12} color={FAINT} />
-                  )}
+                  {isCollapsed
+                    ? <ChevronRight size={10} color={FAINT} />
+                    : <ChevronDown size={10} color={FAINT} />}
                   <span
                     style={{
                       color: MUTED,
                       fontSize: 10,
                       fontWeight: 700,
                       textTransform: "uppercase",
-                      letterSpacing: "0.08em",
+                      letterSpacing: "0.09em",
                     }}
                   >
                     {group.label}
+                  </span>
+                  <span style={{ color: FAINT, fontSize: 10, marginLeft: 3 }}>
+                    {defs.length}
                   </span>
                 </button>
                 {!isCollapsed && defs.map((def) => <NodeCard key={def.type} def={def} />)}

@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap');
 @import "tailwindcss";
 @import "tw-animate-css";
 @plugin "@tailwindcss/typography";
@@ -57,7 +57,7 @@
   --color-sidebar-accent-border: var(--sidebar-accent-border);
   --color-sidebar-ring: hsl(var(--sidebar-ring));
 
-  --font-sans: "gg sans", "Noto Sans", system-ui, sans-serif;
+  --font-sans: "Inter", "gg sans", "Noto Sans", system-ui, sans-serif;
   --font-serif: Georgia, serif;
   --font-mono: 'JetBrains Mono', monospace;
 
@@ -95,79 +95,76 @@
 }
 
 :root, .dark {
-  --button-outline: rgba(255,255,255, .08);
+  --button-outline: rgba(255,255,255, .07);
   --badge-outline: rgba(255,255,255, .04);
 
   --opaque-button-border-intensity: 9;
 
-  --elevate-1: rgba(255,255,255, .03);
-  --elevate-2: rgba(255,255,255, .07);
+  --elevate-1: rgba(255,255,255, .025);
+  --elevate-2: rgba(255,255,255, .05);
 
   /* ── OpenEmbedded — Deep Blue-Midnight palette ───────────────────────── */
+  --background: 228 38% 6%;
+  --foreground: 228 50% 93%;
 
-  /* Backgrounds: cool blue-midnight for a premium, intentional feel */
-  --background: 228 38% 6%;         /* #090C14 — main dark bg */
-  --foreground: 230 60% 95%;        /* #E8EDFF — text with slight blue tint */
+  --border: 224 30% 14%;
 
-  --border: 0 0% 100% / 0.055;
+  --card: 226 32% 9%;
+  --card-foreground: 228 50% 93%;
+  --card-border: 224 30% 14%;
 
-  --card: 228 28% 10%;              /* #111827 — panel / card surface */
-  --card-foreground: 230 60% 95%;
-  --card-border: 0 0% 100% / 0.055;
-
-  --sidebar: 228 38% 6%;            /* same as main bg */
-  --sidebar-foreground: 230 60% 95%;
-  --sidebar-border: 0 0% 100% / 0.055;
+  --sidebar: 228 38% 6%;
+  --sidebar-foreground: 228 50% 93%;
+  --sidebar-border: 224 30% 14%;
   --sidebar-primary: 234.9 85.6% 64.7%;
-  --sidebar-primary-foreground: 230 60% 95%;
-  --sidebar-accent: 228 28% 10%;
-  --sidebar-accent-foreground: 230 60% 95%;
+  --sidebar-primary-foreground: 228 50% 93%;
+  --sidebar-accent: 226 32% 9%;
+  --sidebar-accent-foreground: 228 50% 93%;
   --sidebar-ring: 234.9 85.6% 64.7%;
 
-  --popover: 228 32% 9%;            /* #0F1520 — dropdown surfaces */
-  --popover-foreground: 230 60% 95%;
-  --popover-border: 0 0% 100% / 0.055;
+  --popover: 226 36% 8%;
+  --popover-foreground: 228 50% 93%;
+  --popover-border: 224 30% 14%;
 
-  --primary: 234.9 85.6% 64.7%;    /* #5865F2 — Discord blurple (unchanged) */
-  --primary-foreground: 230 60% 95%;
+  --primary: 234.9 85.6% 64.7%;
+  --primary-foreground: 228 50% 93%;
 
-  --secondary: 228 28% 16%;        /* slightly elevated */
-  --secondary-foreground: 230 60% 95%;
+  --secondary: 226 28% 16%;
+  --secondary-foreground: 228 50% 93%;
 
-  --muted: 220 20% 50%;             /* #64748B — muted text */
-  --muted-foreground: 220 14% 42%; /* #60697A — faint text */
+  --muted: 221 22% 50%;
+  --muted-foreground: 221 18% 42%;
 
-  --accent: 234.7 51.4% 52.4%;     /* #4752C4 — blurple hover */
-  --accent-foreground: 230 60% 95%;
+  --accent: 234.7 51.4% 52.4%;
+  --accent-foreground: 228 50% 93%;
 
-  --destructive: 358.9 82.6% 59.4%; /* #ED4245 — danger red */
-  --destructive-foreground: 230 60% 95%;
+  --destructive: 358.9 82.6% 59.4%;
+  --destructive-foreground: 228 50% 93%;
 
   --success: 138.6 86.1% 64.5%;
   --warning: 51.5 98.8% 67.8%;
 
-  --input: 228 28% 14%;
+  --input: 226 28% 14%;
   --ring: 234.9 85.6% 64.7%;
 
   --chart-1: 234.9 85.6% 64.7%;
   --chart-2: 138.6 86.1% 64.5%;
   --chart-3: 51.5 98.8% 67.8%;
   --chart-4: 358.9 82.6% 59.4%;
-  --chart-5: 220 20% 50%;
+  --chart-5: 221 22% 50%;
 
-  --app-font-sans: "gg sans", "Noto Sans", system-ui, sans-serif;
-  --app-font-serif: Georgia, serif;
+  --app-font-sans: "Inter", "gg sans", "Noto Sans", system-ui, sans-serif;
   --app-font-mono: 'JetBrains Mono', monospace;
   --radius: .5rem;
 
-  --shadow-2xs: 0px 1px 2px rgba(0,0,0,0.4);
-  --shadow-xs:  0px 2px 4px rgba(0,0,0,0.4);
-  --shadow-sm:  0px 2px 8px rgba(0,0,0,0.5);
-  --shadow:     0px 4px 12px rgba(0,0,0,0.5);
-  --shadow-md:  0px 8px 24px rgba(0,0,0,0.5);
-  --shadow-lg:  0px 16px 40px rgba(0,0,0,0.6);
-  --shadow-xl:  0px 24px 64px rgba(0,0,0,0.6);
-  --shadow-2xl: 0px 32px 80px rgba(0,0,0,0.7);
+  --shadow-2xs: 0px 1px 2px rgba(0,0,0,0.5);
+  --shadow-xs:  0px 2px 4px rgba(0,0,0,0.5);
+  --shadow-sm:  0px 2px 8px rgba(0,0,0,0.6);
+  --shadow:     0px 4px 12px rgba(0,0,0,0.6);
+  --shadow-md:  0px 8px 24px rgba(0,0,0,0.6);
+  --shadow-lg:  0px 16px 40px rgba(0,0,0,0.7);
+  --shadow-xl:  0px 24px 64px rgba(0,0,0,0.7);
+  --shadow-2xl: 0px 32px 80px rgba(0,0,0,0.8);
 
   --sidebar-primary-border: hsl(var(--sidebar-primary));
   --sidebar-primary-border: hsl(from hsl(var(--sidebar-primary)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
@@ -188,11 +185,22 @@
 @layer base {
   * {
     @apply border-border;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    box-sizing: border-box;
   }
 
   body {
     @apply font-sans antialiased bg-background text-foreground;
+    font-feature-settings: "cv02","cv03","cv04","cv11";
   }
+
+  /* Polished slim scrollbars */
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #1E2436; border-radius: 99px; }
+  ::-webkit-scrollbar-thumb:hover { background: #2A3450; }
+  * { scrollbar-width: thin; scrollbar-color: #1E2436 transparent; }
 }
 
 @layer utilities {
