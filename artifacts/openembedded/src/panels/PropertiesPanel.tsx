@@ -19,8 +19,8 @@ const TYPE_META: Record<number, { label: string; icon: ReactNode; color: string 
 
 const inputStyle: React.CSSProperties = {
   width: "100%",
-  background: "#0d1117",
-  border: "1px solid rgba(255,255,255,0.08)",
+  background: "#1C1F2E",
+  border: "1px solid #2A2D3E",
   borderRadius: 6,
   color: "#e6edf3",
   fontSize: 12,
@@ -145,8 +145,8 @@ export function PropertiesPanel() {
           <div
             style={{
               flex: 1,
-              background: "#0d1117",
-              border: "1px solid rgba(255,255,255,0.08)",
+              background: "#1C1F2E",
+              border: "1px solid #2A2D3E",
               borderRadius: 6,
               padding: "6px 9px",
             }}
@@ -233,7 +233,7 @@ export function PropertiesPanel() {
         }}
       >
         {options.map((o) => (
-          <option key={o} value={o} style={{ background: "#161b22" }}>
+          <option key={o} value={o} style={{ background: "#161820" }}>
             {o}
           </option>
         ))}

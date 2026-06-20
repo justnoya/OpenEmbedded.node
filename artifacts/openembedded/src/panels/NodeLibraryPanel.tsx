@@ -211,8 +211,8 @@ export function NodeLibraryPanel() {
       style={{
         width: 256,
         flexShrink: 0,
-        background: "#161b22",
-        borderRight: "1px solid rgba(255,255,255,0.07)",
+        background: "#161820",
+        borderRight: "1px solid #2A2D3E",
         display: "flex",
         flexDirection: "column",
         overflow: "hidden",
@@ -221,7 +221,7 @@ export function NodeLibraryPanel() {
       <div
         style={{
           padding: "14px 14px 10px",
-          borderBottom: "1px solid rgba(255,255,255,0.07)",
+          borderBottom: "1px solid #2A2D3E",
         }}
       >
         <div style={{ color: "#e6edf3", fontSize: 13, fontWeight: 700, marginBottom: 2 }}>
@@ -235,8 +235,8 @@ export function NodeLibraryPanel() {
             display: "flex",
             alignItems: "center",
             gap: 6,
-            background: "#0d1117",
-            border: "1px solid rgba(255,255,255,0.07)",
+            background: "#1C1F2E",
+            border: "1px solid #2A2D3E",
             borderRadius: 6,
             padding: "5px 8px",
           }}
