@@ -9,7 +9,7 @@ function EmbedNodeComponent({ id, data }: NodeProps) {
   const accentHex = color != null ? `#${color.toString(16).padStart(6, "0")}` : "#5865F2";
 
   return (
-    <NodeWrapper id={id} typeName="Embed (Legacy)" icon={<MessageSquare size={13} />} accentColor={accentHex}>
+    <NodeWrapper id={id} typeName="Embed (Legacy)" icon={<MessageSquare size={13} />} accentColor={accentHex} nodeClass="root">
       <div style={{ display: "flex", alignItems: "stretch", gap: 8 }}>
         <div
           style={{

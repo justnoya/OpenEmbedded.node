@@ -7,11 +7,13 @@ import {
   Controls,
   MiniMap,
   Panel,
+  type Connection,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { useGraphStore } from "@/lib/graphStore";
 import { usePreviewStore } from "@/lib/previewStore";
 import { nodeTypes } from "@/canvas/nodeTypes";
+import { isValidNodeConnection } from "@/lib/connectionRules";
 import { NodeLibraryPanel } from "@/panels/NodeLibraryPanel";
 import { PropertiesPanel } from "@/panels/PropertiesPanel";
 import { DiscordPreview } from "@/preview/DiscordPreview";
@@ -163,6 +165,16 @@ export function Builder() {
     return () => clearTimeout(autoSaveTimer.current);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [nodes, edges, projectName]);
+
+  const isValidConnection = useCallback(
+    (connection: Connection) => {
+      const sourceNode = nodes.find((n) => n.id === connection.source);
+      const targetNode = nodes.find((n) => n.id === connection.target);
+      if (!sourceNode || !targetNode) return false;
+      return isValidNodeConnection(sourceNode.type ?? "", targetNode.type ?? "");
+    },
+    [nodes]
+  );
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -713,6 +725,7 @@ export function Builder() {
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
+        isValidConnection={isValidConnection}
         onPaneClick={() => setSelectedNode(null)}
         nodeTypes={nodeTypes}
         fitView

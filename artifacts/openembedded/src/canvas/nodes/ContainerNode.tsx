@@ -9,7 +9,7 @@ function ContainerNodeComponent({ id, data }: NodeProps) {
       ? `#${(data.accent_color as number).toString(16).padStart(6, "0")}`
       : null;
   return (
-    <NodeWrapper id={id} typeName="Container · 17" icon={<Box size={13} />} accentColor="#8b5cf6">
+    <NodeWrapper id={id} typeName="Container · 17" icon={<Box size={13} />} accentColor="#8b5cf6" nodeClass="main">
       <div style={{ color: "#e6edf3", fontSize: 13, fontWeight: 600, marginBottom: 4 }}>
         Container
       </div>

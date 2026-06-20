@@ -1,5 +1,6 @@
 import { ReactNode } from "react";
 import { useGraphStore } from "@/lib/graphStore";
+import { NodeClass, NODE_CLASS_LABELS, NODE_CLASS_COLORS } from "@/lib/connectionRules";
 
 interface NodeWrapperProps {
   id: string;
@@ -7,12 +8,16 @@ interface NodeWrapperProps {
   typeName: string;
   icon: ReactNode;
   accentColor: string;
+  nodeClass?: NodeClass;
 }
 
-export function NodeWrapper({ id, children, typeName, icon, accentColor }: NodeWrapperProps) {
+export function NodeWrapper({ id, children, typeName, icon, accentColor, nodeClass = "sub" }: NodeWrapperProps) {
   const selectedNodeId = useGraphStore((s) => s.selectedNodeId);
   const setSelectedNode = useGraphStore((s) => s.setSelectedNode);
   const isSelected = selectedNodeId === id;
+
+  const badgeColor = NODE_CLASS_COLORS[nodeClass];
+  const badgeLabel = NODE_CLASS_LABELS[nodeClass];
 
   return (
     <div
@@ -32,6 +37,26 @@ export function NodeWrapper({ id, children, typeName, icon, accentColor }: NodeW
         transition: "box-shadow 0.15s, border-color 0.15s",
       }}
     >
+      {/* Hide source (right) handle for sub-nodes — they cannot parent others */}
+      {nodeClass === "sub" && (
+        <style>{`
+          [data-testid="node-${id}"] .react-flow__handle-right {
+            opacity: 0 !important;
+            pointer-events: none !important;
+            cursor: not-allowed !important;
+          }
+        `}</style>
+      )}
+      {/* Root nodes (embed) have no handles at all */}
+      {nodeClass === "root" && (
+        <style>{`
+          [data-testid="node-${id}"] .react-flow__handle {
+            opacity: 0 !important;
+            pointer-events: none !important;
+          }
+        `}</style>
+      )}
+
       <div
         style={{
           padding: "7px 10px 6px",
@@ -68,18 +93,52 @@ export function NodeWrapper({ id, children, typeName, icon, accentColor }: NodeW
         >
           {typeName}
         </span>
-        {isSelected && (
-          <div
+
+        {/* Class badge */}
+        <div
+          style={{
+            marginLeft: "auto",
+            display: "flex",
+            alignItems: "center",
+            gap: 4,
+            flexShrink: 0,
+          }}
+        >
+          <span
+            title={
+              nodeClass === "main"
+                ? "Layout node — can contain child components"
+                : nodeClass === "root"
+                ? "Standalone embed — no children"
+                : "Component node — connects to a layout parent"
+            }
             style={{
-              marginLeft: "auto",
-              width: 6,
-              height: 6,
-              borderRadius: "50%",
-              background: accentColor,
-              flexShrink: 0,
+              background: badgeColor + "1a",
+              border: `1px solid ${badgeColor}40`,
+              color: badgeColor,
+              fontSize: 8,
+              fontWeight: 700,
+              letterSpacing: "0.08em",
+              padding: "1px 5px",
+              borderRadius: 3,
+              textTransform: "uppercase",
+              userSelect: "none",
             }}
-          />
-        )}
+          >
+            {badgeLabel}
+          </span>
+          {isSelected && (
+            <div
+              style={{
+                width: 6,
+                height: 6,
+                borderRadius: "50%",
+                background: accentColor,
+                flexShrink: 0,
+              }}
+            />
+          )}
+        </div>
       </div>
       <div style={{ padding: "8px 12px 10px" }}>{children}</div>
     </div>

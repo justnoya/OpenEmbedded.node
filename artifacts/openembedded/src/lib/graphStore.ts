@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { Node, Edge, Connection, addEdge, applyNodeChanges, applyEdgeChanges, NodeChange, EdgeChange } from '@xyflow/react';
+import { isValidNodeConnection } from './connectionRules';
 
 export type DiscordComponentType = 'container' | 'section' | 'text' | 'thumbnail' | 'media' | 'separator' | 'actionRow' | 'button' | 'embed';
 
@@ -88,6 +89,10 @@ export const useGraphStore = create<GraphState>((set, get) => ({
 
   onConnect: (connection) => {
     const { nodes, edges, past } = get();
+    const sourceNode = nodes.find((n) => n.id === connection.source);
+    const targetNode = nodes.find((n) => n.id === connection.target);
+    if (!sourceNode || !targetNode) return;
+    if (!isValidNodeConnection(sourceNode.type ?? "", targetNode.type ?? "")) return;
     set({
       past: [...past.slice(-MAX_HISTORY + 1), snap(nodes, edges)],
       future: [],

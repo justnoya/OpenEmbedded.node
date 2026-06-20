@@ -5,7 +5,7 @@ import { AlignJustify } from "lucide-react";
 
 function ActionRowNodeComponent({ id }: NodeProps) {
   return (
-    <NodeWrapper id={id} typeName="Action Row · 1" icon={<AlignJustify size={13} />} accentColor="#14b8a6">
+    <NodeWrapper id={id} typeName="Action Row · 1" icon={<AlignJustify size={13} />} accentColor="#14b8a6" nodeClass="main">
       <div style={{ color: "#e6edf3", fontSize: 13, fontWeight: 600, marginBottom: 3 }}>
         Action Row
       </div>
