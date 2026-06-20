@@ -13,6 +13,7 @@ import "@xyflow/react/dist/style.css";
 import { useGraphStore } from "@/lib/graphStore";
 import { usePreviewStore } from "@/lib/previewStore";
 import { nodeTypes } from "@/canvas/nodeTypes";
+import { CustomEdge } from "@/canvas/edges/CustomEdge";
 import { isValidNodeConnection } from "@/lib/connectionRules";
 import { NodeLibraryPanel } from "@/panels/NodeLibraryPanel";
 import { PropertiesPanel } from "@/panels/PropertiesPanel";
@@ -33,6 +34,8 @@ import {
   Undo2, Redo2, Save, Upload, Plus, FolderOpen, ChevronDown,
   Eye, Settings2, Trash2, Loader2, Check, AlertCircle, LayoutGrid,
 } from "lucide-react";
+
+const edgeTypes = { default: CustomEdge };
 
 type RightTab = "properties" | "preview";
 type MobilePanel = "library" | "canvas" | "properties" | "preview";
@@ -728,10 +731,12 @@ export function Builder() {
         isValidConnection={isValidConnection}
         onPaneClick={() => setSelectedNode(null)}
         nodeTypes={nodeTypes}
+        edgeTypes={edgeTypes}
         fitView
         style={{ background: "#141822" }}
         defaultEdgeOptions={{
-          style: { stroke: "#5865F2", strokeWidth: 2, strokeDasharray: undefined },
+          type: "default",
+          style: { stroke: "#5865F2", strokeWidth: 2 },
           animated: false,
         }}
         proOptions={{ hideAttribution: false }}

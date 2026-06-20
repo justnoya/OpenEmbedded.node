@@ -1,4 +1,5 @@
 import { ReactNode } from "react";
+import { useStore } from "@xyflow/react";
 import { useGraphStore } from "@/lib/graphStore";
 import { NodeClass, NODE_CLASS_LABELS, NODE_CLASS_COLORS } from "@/lib/connectionRules";
 
@@ -16,8 +17,23 @@ export function NodeWrapper({ id, children, typeName, icon, accentColor, nodeCla
   const setSelectedNode = useGraphStore((s) => s.setSelectedNode);
   const isSelected = selectedNodeId === id;
 
+  // Detect when a connection wire is being dragged over this node
+  const connectionToNodeId = useStore((s) => s.connection?.toNode?.id);
+  const isConnectionTarget = connectionToNodeId === id;
+
   const badgeColor = NODE_CLASS_COLORS[nodeClass];
   const badgeLabel = NODE_CLASS_LABELS[nodeClass];
+
+  let borderColor = "#2A2F3A";
+  let boxShadow = "0 2px 10px rgba(0,0,0,0.35)";
+
+  if (isConnectionTarget) {
+    borderColor = "#ffffff";
+    boxShadow = "0 0 0 2px rgba(255,255,255,0.6), 0 0 16px rgba(255,255,255,0.15), 0 8px 28px rgba(0,0,0,0.6)";
+  } else if (isSelected) {
+    borderColor = "#ffffff";
+    boxShadow = "0 0 0 2px #ffffff, 0 8px 28px rgba(0,0,0,0.6)";
+  }
 
   return (
     <div
@@ -25,18 +41,30 @@ export function NodeWrapper({ id, children, typeName, icon, accentColor, nodeCla
       onClick={() => setSelectedNode(id)}
       style={{
         background: "#1A1C24",
-        border: `1px solid ${isSelected ? "#ffffff" : "#2A2F3A"}`,
+        border: `1px solid ${borderColor}`,
         borderLeft: `3px solid ${accentColor}`,
         borderRadius: 8,
         minWidth: 210,
         cursor: "pointer",
         position: "relative",
-        boxShadow: isSelected
-          ? `0 0 0 2px #ffffff, 0 8px 28px rgba(0,0,0,0.6)`
-          : "0 2px 10px rgba(0,0,0,0.35)",
-        transition: "box-shadow 0.15s, border-color 0.15s",
+        boxShadow,
+        transition: "box-shadow 0.12s, border-color 0.12s",
       }}
     >
+      {/* Animated ring shown while a wire is hovering over this node */}
+      {isConnectionTarget && (
+        <div
+          style={{
+            position: "absolute",
+            inset: -3,
+            borderRadius: 11,
+            border: "2px solid rgba(255,255,255,0.5)",
+            pointerEvents: "none",
+            animation: "pulseRing 0.8s ease-in-out infinite alternate",
+          }}
+        />
+      )}
+
       {/* Hide source (right) handle for sub-nodes — they cannot parent others */}
       {nodeClass === "sub" && (
         <style>{`
@@ -141,6 +169,13 @@ export function NodeWrapper({ id, children, typeName, icon, accentColor, nodeCla
         </div>
       </div>
       <div style={{ padding: "8px 12px 10px" }}>{children}</div>
+
+      <style>{`
+        @keyframes pulseRing {
+          from { opacity: 0.5; transform: scale(1); }
+          to   { opacity: 1;   transform: scale(1.01); }
+        }
+      `}</style>
     </div>
   );
 }
