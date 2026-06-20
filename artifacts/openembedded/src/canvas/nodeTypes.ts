@@ -7,6 +7,9 @@ import { SeparatorNode } from "./nodes/SeparatorNode";
 import { ActionRowNode } from "./nodes/ActionRowNode";
 import { ButtonNode } from "./nodes/ButtonNode";
 import { EmbedNode } from "./nodes/EmbedNode";
+import { SelectMenuNode } from "./nodes/SelectMenuNode";
+import { AutoSelectNode } from "./nodes/AutoSelectNode";
+import { TextInputNode } from "./nodes/TextInputNode";
 
 export const nodeTypes = {
   container: ContainerNode,
@@ -18,4 +21,10 @@ export const nodeTypes = {
   actionRow: ActionRowNode,
   button: ButtonNode,
   embed: EmbedNode,
+  selectMenu: SelectMenuNode,
+  userSelect: AutoSelectNode,
+  roleSelect: AutoSelectNode,
+  mentionableSelect: AutoSelectNode,
+  channelSelect: AutoSelectNode,
+  textInput: TextInputNode,
 };

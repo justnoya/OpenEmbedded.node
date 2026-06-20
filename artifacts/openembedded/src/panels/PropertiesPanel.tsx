@@ -2,19 +2,26 @@ import { useGraphStore } from "@/lib/graphStore";
 import {
   Box, Layers, Type, Image, LayoutGrid, SeparatorHorizontal,
   AlignJustify, MousePointerClick, MessageSquare, Trash2, Hash,
+  Users, Shield, AtSign, TextCursorInput, Plus, X,
 } from "lucide-react";
 import { ReactNode } from "react";
 
 const TYPE_META: Record<number, { label: string; icon: ReactNode; color: string }> = {
-  17: { label: "Container", icon: <Box size={14} />, color: "#8b5cf6" },
-  9:  { label: "Section",   icon: <Layers size={14} />, color: "#10b981" },
-  10: { label: "Text Display", icon: <Type size={14} />, color: "#3b82f6" },
-  11: { label: "Thumbnail", icon: <Image size={14} />, color: "#f59e0b" },
-  12: { label: "Media Gallery", icon: <LayoutGrid size={14} />, color: "#ec4899" },
-  14: { label: "Separator", icon: <SeparatorHorizontal size={14} />, color: "#6b7280" },
-  1:  { label: "Action Row", icon: <AlignJustify size={14} />, color: "#14b8a6" },
-  2:  { label: "Button", icon: <MousePointerClick size={14} />, color: "#5865F2" },
-  0:  { label: "Embed", icon: <MessageSquare size={14} />, color: "#f59e0b" },
+  17: { label: "Container",          icon: <Box size={14} />,              color: "#8b5cf6" },
+  9:  { label: "Section",            icon: <Layers size={14} />,           color: "#10b981" },
+  10: { label: "Text Display",       icon: <Type size={14} />,             color: "#3b82f6" },
+  11: { label: "Thumbnail",          icon: <Image size={14} />,            color: "#f59e0b" },
+  12: { label: "Media Gallery",      icon: <LayoutGrid size={14} />,       color: "#ec4899" },
+  14: { label: "Separator",          icon: <SeparatorHorizontal size={14} />, color: "#6b7280" },
+  1:  { label: "Action Row",         icon: <AlignJustify size={14} />,     color: "#14b8a6" },
+  2:  { label: "Button",             icon: <MousePointerClick size={14} />, color: "#5865F2" },
+  3:  { label: "String Select",      icon: <Hash size={14} />,             color: "#f97316" },
+  4:  { label: "Text Input",         icon: <TextCursorInput size={14} />,  color: "#64748b" },
+  5:  { label: "User Select",        icon: <Users size={14} />,            color: "#06b6d4" },
+  6:  { label: "Role Select",        icon: <Shield size={14} />,           color: "#a855f7" },
+  7:  { label: "Mentionable Select", icon: <AtSign size={14} />,           color: "#ec4899" },
+  8:  { label: "Channel Select",     icon: <Hash size={14} />,             color: "#22c55e" },
+  0:  { label: "Embed (V1)",         icon: <MessageSquare size={14} />,    color: "#f59e0b" },
 };
 
 const inputStyle: React.CSSProperties = {
@@ -87,6 +94,13 @@ export function PropertiesPanel() {
   const d = node.data;
   const meta = TYPE_META[d.componentType as number];
 
+  const focusBorder = (e: React.FocusEvent) => {
+    (e.currentTarget as HTMLElement).style.borderColor = "rgba(88,101,242,0.6)";
+  };
+  const blurBorder = (e: React.FocusEvent) => {
+    (e.currentTarget as HTMLElement).style.borderColor = "#2A2D3E";
+  };
+
   const textField = (label: string, key: string, placeholder?: string) => (
     <div style={fieldWrap} key={key}>
       <label style={labelStyle}>{label}</label>
@@ -97,24 +111,41 @@ export function PropertiesPanel() {
         onChange={(e) => updateNodeData(node.id, { [key]: e.target.value })}
         data-testid={`prop-${key}`}
         style={inputStyle}
-        onFocus={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "rgba(88,101,242,0.6)"; }}
-        onBlur={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "rgba(255,255,255,0.08)"; }}
+        onFocus={focusBorder}
+        onBlur={blurBorder}
       />
     </div>
   );
 
-  const textareaField = (label: string, key: string, placeholder?: string) => (
+  const numberField = (label: string, key: string, min?: number, max?: number) => (
+    <div style={fieldWrap} key={key}>
+      <label style={labelStyle}>{label}</label>
+      <input
+        type="number"
+        value={(d[key] as number) ?? ""}
+        min={min}
+        max={max}
+        onChange={(e) => updateNodeData(node.id, { [key]: e.target.value === "" ? null : Number(e.target.value) })}
+        data-testid={`prop-${key}`}
+        style={inputStyle}
+        onFocus={focusBorder}
+        onBlur={blurBorder}
+      />
+    </div>
+  );
+
+  const textareaField = (label: string, key: string, placeholder?: string, rows = 4) => (
     <div style={fieldWrap} key={key}>
       <label style={labelStyle}>{label}</label>
       <textarea
         value={(d[key] as string) ?? ""}
         placeholder={placeholder}
         onChange={(e) => updateNodeData(node.id, { [key]: e.target.value })}
-        rows={4}
+        rows={rows}
         data-testid={`prop-${key}`}
         style={{ ...inputStyle, resize: "vertical", lineHeight: 1.5 }}
-        onFocus={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "rgba(88,101,242,0.6)"; }}
-        onBlur={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "rgba(255,255,255,0.08)"; }}
+        onFocus={focusBorder}
+        onBlur={blurBorder}
       />
     </div>
   );
@@ -135,7 +166,7 @@ export function PropertiesPanel() {
             style={{
               width: 36,
               height: 36,
-              border: "1px solid rgba(255,255,255,0.08)",
+              border: "1px solid #2A2D3E",
               borderRadius: 6,
               cursor: "pointer",
               background: "none",
@@ -241,6 +272,234 @@ export function PropertiesPanel() {
     </div>
   );
 
+  const selectOptionsField = () => {
+    const opts = (d.options as Array<{ label: string; value: string; description?: string; default?: boolean }>) ?? [];
+
+    const updateOption = (i: number, patch: Partial<{ label: string; value: string; description: string; default: boolean }>) => {
+      const next = opts.map((o, idx) => idx === i ? { ...o, ...patch } : o);
+      updateNodeData(node.id, { options: next });
+    };
+
+    const addOption = () => {
+      const next = [...opts, { label: `Option ${opts.length + 1}`, value: `option_${opts.length + 1}` }];
+      updateNodeData(node.id, { options: next });
+    };
+
+    const removeOption = (i: number) => {
+      updateNodeData(node.id, { options: opts.filter((_, idx) => idx !== i) });
+    };
+
+    return (
+      <div style={fieldWrap}>
+        <label style={labelStyle}>Options ({opts.length}/25)</label>
+        <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+          {opts.map((opt, i) => (
+            <div
+              key={i}
+              style={{
+                background: "#1C1F2E",
+                border: "1px solid #2A2D3E",
+                borderRadius: 6,
+                padding: "8px 10px",
+                display: "flex",
+                flexDirection: "column",
+                gap: 5,
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <input
+                    type="text"
+                    value={opt.label}
+                    placeholder="Label"
+                    onChange={(e) => updateOption(i, { label: e.target.value })}
+                    style={{ ...inputStyle, padding: "3px 6px", fontSize: 11 }}
+                    onFocus={focusBorder}
+                    onBlur={blurBorder}
+                  />
+                </div>
+                <button
+                  onClick={() => removeOption(i)}
+                  style={{
+                    background: "rgba(248,81,73,0.1)",
+                    border: "1px solid rgba(248,81,73,0.2)",
+                    borderRadius: 4,
+                    color: "#f85149",
+                    cursor: "pointer",
+                    padding: "3px 5px",
+                    display: "flex",
+                    alignItems: "center",
+                    flexShrink: 0,
+                  }}
+                >
+                  <X size={10} />
+                </button>
+              </div>
+              <input
+                type="text"
+                value={opt.value}
+                placeholder="Value (unique key)"
+                onChange={(e) => updateOption(i, { value: e.target.value })}
+                style={{ ...inputStyle, padding: "3px 6px", fontSize: 11, color: "#7d8590" }}
+                onFocus={focusBorder}
+                onBlur={blurBorder}
+              />
+              <input
+                type="text"
+                value={opt.description ?? ""}
+                placeholder="Description (optional)"
+                onChange={(e) => updateOption(i, { description: e.target.value })}
+                style={{ ...inputStyle, padding: "3px 6px", fontSize: 10, color: "#484f58" }}
+                onFocus={focusBorder}
+                onBlur={blurBorder}
+              />
+              <label style={{ display: "flex", alignItems: "center", gap: 6, cursor: "pointer" }}>
+                <input
+                  type="checkbox"
+                  checked={!!opt.default}
+                  onChange={(e) => updateOption(i, { default: e.target.checked })}
+                  style={{ accentColor: "#5865F2" }}
+                />
+                <span style={{ color: "#7d8590", fontSize: 10 }}>Default selected</span>
+              </label>
+            </div>
+          ))}
+          {opts.length < 25 && (
+            <button
+              onClick={addOption}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 5,
+                padding: "6px",
+                background: "rgba(88,101,242,0.08)",
+                border: "1px dashed rgba(88,101,242,0.3)",
+                borderRadius: 6,
+                color: "#818cf8",
+                fontSize: 11,
+                cursor: "pointer",
+              }}
+            >
+              <Plus size={11} /> Add option
+            </button>
+          )}
+        </div>
+      </div>
+    );
+  };
+
+  const embedFieldsEditor = () => {
+    const fields = (d.fields as Array<{ name: string; value: string; inline?: boolean }>) ?? [];
+
+    const updateField = (i: number, patch: Partial<{ name: string; value: string; inline: boolean }>) => {
+      const next = fields.map((f, idx) => idx === i ? { ...f, ...patch } : f);
+      updateNodeData(node.id, { fields: next });
+    };
+
+    const addField = () => {
+      updateNodeData(node.id, { fields: [...fields, { name: "Field Name", value: "Field value", inline: false }] });
+    };
+
+    const removeField = (i: number) => {
+      updateNodeData(node.id, { fields: fields.filter((_, idx) => idx !== i) });
+    };
+
+    return (
+      <div style={fieldWrap}>
+        <label style={labelStyle}>Fields ({fields.length}/25)</label>
+        <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+          {fields.map((f, i) => (
+            <div
+              key={i}
+              style={{
+                background: "#1C1F2E",
+                border: "1px solid #2A2D3E",
+                borderRadius: 6,
+                padding: "8px 10px",
+                display: "flex",
+                flexDirection: "column",
+                gap: 5,
+              }}
+            >
+              <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+                <input
+                  type="text"
+                  value={f.name}
+                  placeholder="Name"
+                  onChange={(e) => updateField(i, { name: e.target.value })}
+                  style={{ ...inputStyle, padding: "3px 6px", fontSize: 11, flex: 1 }}
+                  onFocus={focusBorder}
+                  onBlur={blurBorder}
+                />
+                <button
+                  onClick={() => removeField(i)}
+                  style={{
+                    background: "rgba(248,81,73,0.1)",
+                    border: "1px solid rgba(248,81,73,0.2)",
+                    borderRadius: 4,
+                    color: "#f85149",
+                    cursor: "pointer",
+                    padding: "3px 5px",
+                    display: "flex",
+                    alignItems: "center",
+                  }}
+                >
+                  <X size={10} />
+                </button>
+              </div>
+              <textarea
+                value={f.value}
+                placeholder="Value"
+                onChange={(e) => updateField(i, { value: e.target.value })}
+                rows={2}
+                style={{ ...inputStyle, padding: "3px 6px", fontSize: 11, resize: "vertical" }}
+                onFocus={focusBorder}
+                onBlur={blurBorder}
+              />
+              <label style={{ display: "flex", alignItems: "center", gap: 6, cursor: "pointer" }}>
+                <input
+                  type="checkbox"
+                  checked={!!f.inline}
+                  onChange={(e) => updateField(i, { inline: e.target.checked })}
+                  style={{ accentColor: "#5865F2" }}
+                />
+                <span style={{ color: "#7d8590", fontSize: 10 }}>Inline</span>
+              </label>
+            </div>
+          ))}
+          {fields.length < 25 && (
+            <button
+              onClick={addField}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 5,
+                padding: "6px",
+                background: "rgba(88,101,242,0.08)",
+                border: "1px dashed rgba(88,101,242,0.3)",
+                borderRadius: 6,
+                color: "#818cf8",
+                fontSize: 11,
+                cursor: "pointer",
+              }}
+            >
+              <Plus size={11} /> Add field
+            </button>
+          )}
+        </div>
+      </div>
+    );
+  };
+
+  const selectValuesFields = () => (
+    <>
+      {numberField("Min Values", "min_values", 0, 25)}
+      {numberField("Max Values", "max_values", 1, 25)}
+    </>
+  );
+
   const renderFields = () => {
     switch (d.componentType) {
       case 17:
@@ -277,6 +536,8 @@ export function PropertiesPanel() {
               rows={5}
               data-testid="prop-items"
               style={{ ...inputStyle, resize: "vertical", lineHeight: 1.6 }}
+              onFocus={focusBorder}
+              onBlur={blurBorder}
             />
             <div style={{ color: "#484f58", fontSize: 10, marginTop: 4 }}>
               {items.length} image{items.length !== 1 ? "s" : ""} added
@@ -295,9 +556,47 @@ export function PropertiesPanel() {
         return (
           <>
             {textField("Label", "label", "Button label…")}
-            {selectField("Style", "style", ["Primary", "Secondary", "Success", "Danger", "Link"])}
+            {textField("Emoji", "emoji", "😀 or :emoji_name:")}
+            {selectField("Style", "style", ["Primary", "Secondary", "Success", "Danger", "Link", "Premium"])}
             {textField("Custom ID", "custom_id", "my_button_id")}
             {textField("URL (Link style only)", "url", "https://example.com")}
+            {textField("SKU ID (Premium style only)", "sku_id", "1234567890")}
+            {checkboxField("Disabled", "disabled")}
+          </>
+        );
+      case 3:
+        return (
+          <>
+            {textField("Custom ID", "custom_id", "my_select_id")}
+            {textField("Placeholder", "placeholder", "Make a selection…")}
+            {selectValuesFields()}
+            {selectOptionsField()}
+            {checkboxField("Disabled", "disabled")}
+          </>
+        );
+      case 4:
+        return (
+          <>
+            {textField("Label", "label", "Input label…")}
+            {textField("Custom ID", "custom_id", "my_input_id")}
+            {selectField("Style", "style", ["Short", "Paragraph"])}
+            {textField("Placeholder", "placeholder", "Enter text…")}
+            {textField("Pre-filled Value", "value", "")}
+            {numberField("Min Length", "min_length", 0, 4000)}
+            {numberField("Max Length", "max_length", 1, 4000)}
+            {checkboxField("Required", "required")}
+          </>
+        );
+      case 5:
+      case 6:
+      case 7:
+      case 8:
+        return (
+          <>
+            {textField("Custom ID", "custom_id", "my_select_id")}
+            {textField("Placeholder", "placeholder", "Select…")}
+            {selectValuesFields()}
+            {checkboxField("Disabled", "disabled")}
           </>
         );
       case 0:
@@ -306,9 +605,13 @@ export function PropertiesPanel() {
             {textField("Title", "title", "Embed title…")}
             {textareaField("Description", "description", "Embed description…")}
             {colorField("Accent Color", "color")}
+            {textField("URL (title link)", "url", "https://example.com")}
             {textField("Author Name", "author", "Author…")}
             {textField("Footer Text", "footer", "Footer…")}
             {textField("Image URL", "imageUrl", "https://example.com/image.png")}
+            {textField("Thumbnail URL", "thumbnailUrl", "https://example.com/thumb.png")}
+            {checkboxField("Show Timestamp", "timestamp")}
+            {embedFieldsEditor()}
           </>
         );
       default:

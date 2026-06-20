@@ -3,7 +3,8 @@ import { useGraphStore, AppNode, AppNodeData } from "@/lib/graphStore";
 import {
   Box, Layers, Type, Image, LayoutGrid,
   SeparatorHorizontal, AlignJustify, MousePointerClick, MessageSquare,
-  Search, ChevronDown, ChevronRight,
+  Search, ChevronDown, ChevronRight, Users, Shield, AtSign, Hash,
+  TextCursorInput,
 } from "lucide-react";
 import { ReactNode } from "react";
 
@@ -75,7 +76,7 @@ const NODE_DEFS: NodeDef[] = [
   {
     type: "actionRow",
     label: "Action Row",
-    description: "Container for buttons",
+    description: "Container for buttons & selects",
     componentType: 1,
     accentColor: "#14b8a6",
     icon: <AlignJustify size={15} />,
@@ -84,15 +85,69 @@ const NODE_DEFS: NodeDef[] = [
   {
     type: "button",
     label: "Button",
-    description: "Clickable button component",
+    description: "Clickable button (Primary/Link/…)",
     componentType: 2,
     accentColor: "#5865F2",
     icon: <MousePointerClick size={15} />,
-    defaultData: { componentType: 2, label: "Click me", style: "Primary", custom_id: "" },
+    defaultData: { componentType: 2, label: "Click me", style: "Primary", custom_id: "", emoji: "", disabled: false },
+  },
+  {
+    type: "selectMenu",
+    label: "String Select",
+    description: "Dropdown with custom options",
+    componentType: 3,
+    accentColor: "#f97316",
+    icon: <ChevronDown size={15} />,
+    defaultData: { componentType: 3, custom_id: "", placeholder: "Make a selection…", min_values: 1, max_values: 1, options: [], disabled: false },
+  },
+  {
+    type: "userSelect",
+    label: "User Select",
+    description: "Discord user picker",
+    componentType: 5,
+    accentColor: "#06b6d4",
+    icon: <Users size={15} />,
+    defaultData: { componentType: 5, custom_id: "", placeholder: "Select a user…", min_values: 1, max_values: 1, disabled: false },
+  },
+  {
+    type: "roleSelect",
+    label: "Role Select",
+    description: "Discord role picker",
+    componentType: 6,
+    accentColor: "#a855f7",
+    icon: <Shield size={15} />,
+    defaultData: { componentType: 6, custom_id: "", placeholder: "Select a role…", min_values: 1, max_values: 1, disabled: false },
+  },
+  {
+    type: "mentionableSelect",
+    label: "Mentionable Select",
+    description: "User + role picker",
+    componentType: 7,
+    accentColor: "#ec4899",
+    icon: <AtSign size={15} />,
+    defaultData: { componentType: 7, custom_id: "", placeholder: "Select a user or role…", min_values: 1, max_values: 1, disabled: false },
+  },
+  {
+    type: "channelSelect",
+    label: "Channel Select",
+    description: "Discord channel picker",
+    componentType: 8,
+    accentColor: "#22c55e",
+    icon: <Hash size={15} />,
+    defaultData: { componentType: 8, custom_id: "", placeholder: "Select a channel…", min_values: 1, max_values: 1, disabled: false },
+  },
+  {
+    type: "textInput",
+    label: "Text Input",
+    description: "Short or paragraph input (modal)",
+    componentType: 4,
+    accentColor: "#64748b",
+    icon: <TextCursorInput size={15} />,
+    defaultData: { componentType: 4, custom_id: "", label: "Label", style: "Short", placeholder: "", required: true, min_length: null, max_length: null, value: "" },
   },
   {
     type: "embed",
-    label: "Embed",
+    label: "Embed (V1)",
     description: "Legacy rich embed message",
     componentType: 0,
     accentColor: "#f59e0b",
@@ -104,7 +159,8 @@ const NODE_DEFS: NodeDef[] = [
 const GROUPS = [
   { label: "Layout", types: ["container", "section"] },
   { label: "Content", types: ["textDisplay", "thumbnail", "mediaGallery", "separator"] },
-  { label: "Interactive", types: ["actionRow", "button"] },
+  { label: "Interactive", types: ["actionRow", "button", "selectMenu", "userSelect", "roleSelect", "mentionableSelect", "channelSelect"] },
+  { label: "Modals", types: ["textInput"] },
   { label: "Legacy", types: ["embed"] },
 ];
 

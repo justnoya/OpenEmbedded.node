@@ -1,7 +1,14 @@
 import { usePreviewStore } from "@/lib/previewStore";
-import { AlertTriangle, ExternalLink, Hash } from "lucide-react";
+import { AlertTriangle, ExternalLink, Hash, ChevronDown } from "lucide-react";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
+
+interface SelectOption {
+  label: string;
+  value: string;
+  description?: string;
+  default?: boolean;
+}
 
 interface DC {
   type: number;
@@ -19,17 +26,36 @@ interface DC {
   style?: number;
   url?: string;
   custom_id?: string;
+  disabled?: boolean;
+  emoji?: { name: string };
+  placeholder?: string;
+  min_values?: number;
+  max_values?: number;
+  options?: SelectOption[];
+  sku_id?: string;
+  // text input
+  min_length?: number;
+  max_length?: number;
+  required?: boolean;
+  value?: string;
+}
+
+interface EmbedField {
+  name: string;
+  value: string;
+  inline?: boolean;
 }
 
 interface Embed {
   title?: string;
   description?: string;
   color?: number;
+  url?: string;
   author?: { name: string; icon_url?: string };
   footer?: { text: string; icon_url?: string };
   image?: { url: string };
   thumbnail?: { url: string };
-  fields?: { name: string; value: string; inline?: boolean }[];
+  fields?: EmbedField[];
   timestamp?: string;
 }
 
@@ -42,14 +68,17 @@ const TEXT_NORMAL = "#dbdee1";
 const TEXT_MUTED = "#949ba4";
 const TEXT_LINK = "#00a8fc";
 const BORDER = "rgba(79,84,92,0.48)";
+const INPUT_BG = "#1e1f22";
+const INPUT_BORDER = "rgba(79,84,92,0.6)";
 
-// Real Discord button palette (dark theme, 2024)
+// Real Discord button palette (dark theme)
 const BTN: Record<number, { bg: string; color: string; border?: string }> = {
   1: { bg: "#5865f2", color: "#fff" },
   2: { bg: "#4e5058", color: "#fff" },
   3: { bg: "#248046", color: "#fff" },
   4: { bg: "#da3633", color: "#fff" },
   5: { bg: "transparent", color: TEXT_LINK, border: "1px solid rgba(0,168,252,0.35)" },
+  6: { bg: "#f47fff", color: "#fff" },
 };
 
 // ─── Lightweight Discord markdown ─────────────────────────────────────────────
@@ -200,44 +229,19 @@ function MediaGallery({ comp }: { comp: DC }) {
       <img
         src={it.url}
         alt={it.description ?? ""}
-        style={{
-          display: "block",
-          maxWidth: MAX,
-          maxHeight: 300,
-          width: "100%",
-          objectFit: "cover",
-          borderRadius: 4,
-        }}
-        onError={(e) => {
-          (e.currentTarget as HTMLImageElement).style.display = "none";
-        }}
+        style={{ display: "block", maxWidth: MAX, maxHeight: 300, width: "100%", objectFit: "cover", borderRadius: 4 }}
+        onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
       />
     ) : null;
   }
 
   if (items.length === 2) {
     return (
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1fr 1fr",
-          gap: 2,
-          maxWidth: MAX,
-          borderRadius: 4,
-          overflow: "hidden",
-        }}
-      >
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2, maxWidth: MAX, borderRadius: 4, overflow: "hidden" }}>
         {items.map((it, i) =>
           it.url ? (
-            <img
-              key={i}
-              src={it.url}
-              alt=""
-              style={{ width: "100%", height: 175, objectFit: "cover", display: "block" }}
-              onError={(e) => {
-                (e.currentTarget as HTMLImageElement).style.display = "none";
-              }}
-            />
+            <img key={i} src={it.url} alt="" style={{ width: "100%", height: 175, objectFit: "cover", display: "block" }}
+              onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }} />
           ) : (
             <div key={i} style={{ height: 175, background: "rgba(255,255,255,0.04)" }} />
           )
@@ -248,45 +252,15 @@ function MediaGallery({ comp }: { comp: DC }) {
 
   if (items.length === 3) {
     return (
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1fr 1fr",
-          gridTemplateRows: "1fr 1fr",
-          gap: 2,
-          maxWidth: MAX,
-          borderRadius: 4,
-          overflow: "hidden",
-        }}
-      >
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gridTemplateRows: "1fr 1fr", gap: 2, maxWidth: MAX, borderRadius: 4, overflow: "hidden" }}>
         {items[0].url && (
-          <img
-            src={items[0].url}
-            alt=""
-            style={{
-              gridRow: "1 / 3",
-              width: "100%",
-              height: "100%",
-              objectFit: "cover",
-              display: "block",
-              minHeight: 200,
-            }}
-            onError={(e) => {
-              (e.currentTarget as HTMLImageElement).style.display = "none";
-            }}
-          />
+          <img src={items[0].url} alt="" style={{ gridRow: "1 / 3", width: "100%", height: "100%", objectFit: "cover", display: "block", minHeight: 200 }}
+            onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }} />
         )}
         {items.slice(1).map((it, i) =>
           it.url ? (
-            <img
-              key={i}
-              src={it.url}
-              alt=""
-              style={{ width: "100%", height: 99, objectFit: "cover", display: "block" }}
-              onError={(e) => {
-                (e.currentTarget as HTMLImageElement).style.display = "none";
-              }}
-            />
+            <img key={i} src={it.url} alt="" style={{ width: "100%", height: 99, objectFit: "cover", display: "block" }}
+              onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }} />
           ) : (
             <div key={i} style={{ height: 99, background: "rgba(255,255,255,0.04)" }} />
           )
@@ -295,51 +269,22 @@ function MediaGallery({ comp }: { comp: DC }) {
     );
   }
 
-  // 4+ — 2×2 grid with overflow counter on last tile
   const visible = items.slice(0, 4);
   const extra = items.length - 4;
   return (
-    <div
-      style={{
-        display: "grid",
-        gridTemplateColumns: "1fr 1fr",
-        gap: 2,
-        maxWidth: MAX,
-        borderRadius: 4,
-        overflow: "hidden",
-      }}
-    >
+    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2, maxWidth: MAX, borderRadius: 4, overflow: "hidden" }}>
       {visible.map((it, i) => {
         const isLast = i === 3 && extra > 0;
         return (
           <div key={i} style={{ position: "relative" }}>
             {it.url ? (
-              <img
-                src={it.url}
-                alt=""
-                style={{ width: "100%", height: 140, objectFit: "cover", display: "block" }}
-                onError={(e) => {
-                  (e.currentTarget as HTMLImageElement).style.display = "none";
-                }}
-              />
+              <img src={it.url} alt="" style={{ width: "100%", height: 140, objectFit: "cover", display: "block" }}
+                onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }} />
             ) : (
               <div style={{ height: 140, background: "rgba(255,255,255,0.04)" }} />
             )}
             {isLast && (
-              <div
-                style={{
-                  position: "absolute",
-                  inset: 0,
-                  background: "rgba(0,0,0,0.6)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  color: "#fff",
-                  fontSize: 24,
-                  fontWeight: 700,
-                  fontFamily: DC_FONT,
-                }}
-              >
+              <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.6)", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 24, fontWeight: 700, fontFamily: DC_FONT }}>
                 +{extra}
               </div>
             )}
@@ -351,7 +296,6 @@ function MediaGallery({ comp }: { comp: DC }) {
 }
 
 function DCSeparator({ comp }: { comp: DC }) {
-  // Discord spacing: small=8px, medium=16px, large=24px
   const gap = comp.spacing === 2 ? 24 : comp.spacing === 0 ? 8 : 16;
   return (
     <div style={{ paddingTop: gap / 2, paddingBottom: gap / 2 }}>
@@ -362,6 +306,7 @@ function DCSeparator({ comp }: { comp: DC }) {
 
 function DCButton({ comp }: { comp: DC }) {
   const s = BTN[comp.style ?? 1] ?? BTN[1];
+  const isDisabled = comp.disabled;
   return (
     <div
       style={{
@@ -377,14 +322,18 @@ function DCButton({ comp }: { comp: DC }) {
         fontSize: 14,
         fontWeight: 500,
         fontFamily: DC_FONT,
-        cursor: "pointer",
+        cursor: isDisabled ? "not-allowed" : "pointer",
         userSelect: "none",
         flexShrink: 0,
         whiteSpace: "nowrap",
         maxWidth: 200,
         overflow: "hidden",
+        opacity: isDisabled ? 0.5 : 1,
       }}
     >
+      {comp.emoji && (
+        <span style={{ fontSize: 16, lineHeight: 1 }}>{comp.emoji.name}</span>
+      )}
       <span style={{ overflow: "hidden", textOverflow: "ellipsis" }}>
         {comp.label ?? "Button"}
       </span>
@@ -395,16 +344,105 @@ function DCButton({ comp }: { comp: DC }) {
   );
 }
 
+function DCStringSelect({ comp }: { comp: DC }) {
+  const opts = comp.options ?? [];
+  const defaultOpt = opts.find((o) => o.default);
+  const isDisabled = comp.disabled;
+
+  return (
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        background: INPUT_BG,
+        border: `1px solid ${INPUT_BORDER}`,
+        borderRadius: 4,
+        padding: "8px 12px",
+        cursor: isDisabled ? "not-allowed" : "pointer",
+        opacity: isDisabled ? 0.5 : 1,
+        fontFamily: DC_FONT,
+        maxWidth: "100%",
+        gap: 8,
+      }}
+    >
+      <span style={{ color: defaultOpt ? TEXT_NORMAL : TEXT_MUTED, fontSize: 14, flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+        {defaultOpt ? defaultOpt.label : (comp.placeholder || "Make a selection…")}
+      </span>
+      <ChevronDown size={16} color={TEXT_MUTED} style={{ flexShrink: 0 }} />
+    </div>
+  );
+}
+
+function DCAutoSelect({ comp, label }: { comp: DC; label: string }) {
+  const isDisabled = comp.disabled;
+  return (
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        background: INPUT_BG,
+        border: `1px solid ${INPUT_BORDER}`,
+        borderRadius: 4,
+        padding: "8px 12px",
+        cursor: isDisabled ? "not-allowed" : "pointer",
+        opacity: isDisabled ? 0.5 : 1,
+        fontFamily: DC_FONT,
+        maxWidth: "100%",
+        gap: 8,
+      }}
+    >
+      <span style={{ color: TEXT_MUTED, fontSize: 14, flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+        {comp.placeholder || `Select a ${label.toLowerCase()}…`}
+      </span>
+      <ChevronDown size={16} color={TEXT_MUTED} style={{ flexShrink: 0 }} />
+    </div>
+  );
+}
+
+function DCTextInput({ comp }: { comp: DC }) {
+  const isLong = comp.style === 2;
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 6, fontFamily: DC_FONT }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+        <span style={{ color: TEXT_NORMAL, fontSize: 13, fontWeight: 600 }}>
+          {comp.label ?? "Input"}
+        </span>
+        {comp.required && <span style={{ color: "#da3633", fontSize: 12 }}>*</span>}
+      </div>
+      <div
+        style={{
+          background: INPUT_BG,
+          border: `1px solid ${INPUT_BORDER}`,
+          borderRadius: 4,
+          padding: "10px 12px",
+          minHeight: isLong ? 80 : 40,
+          color: comp.value ? TEXT_NORMAL : TEXT_MUTED,
+          fontSize: 14,
+          wordBreak: "break-word",
+          whiteSpace: "pre-wrap",
+        }}
+      >
+        {comp.value || comp.placeholder || (isLong ? "Enter a longer response…" : "Enter text…")}
+      </div>
+      {(comp.min_length != null || comp.max_length != null) && (
+        <div style={{ color: TEXT_MUTED, fontSize: 12 }}>
+          {comp.min_length != null && `Min: ${comp.min_length}`}
+          {comp.min_length != null && comp.max_length != null && " · "}
+          {comp.max_length != null && `Max: ${comp.max_length}`}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function ActionRow({ comp }: { comp: DC }) {
   return (
-    <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-      {(comp.components ?? []).map((c, i) =>
-        c.type === 2 ? (
-          <DCButton key={i} comp={c} />
-        ) : (
-          <RenderComponent key={i} comp={c} />
-        )
-      )}
+    <div style={{ display: "flex", flexWrap: "wrap", gap: 8, flexDirection: [3, 5, 6, 7, 8].includes(comp.components?.[0]?.type ?? 0) ? "column" : "row" }}>
+      {(comp.components ?? []).map((c, i) => (
+        <RenderComponent key={i} comp={c} />
+      ))}
     </div>
   );
 }
@@ -414,15 +452,7 @@ function Section({ comp }: { comp: DC }) {
   const acc = comp.accessory;
   return (
     <div style={{ display: "flex", alignItems: "flex-start", gap: 16 }}>
-      <div
-        style={{
-          flex: 1,
-          minWidth: 0,
-          display: "flex",
-          flexDirection: "column",
-          gap: 6,
-        }}
-      >
+      <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 6 }}>
         {texts.map((c, i) => (
           <RenderComponent key={i} comp={c} />
         ))}
@@ -448,7 +478,6 @@ function Container({ comp }: { comp: DC }) {
         border: accent ? "none" : `1px solid ${BORDER}`,
       }}
     >
-      {/* Left accent stripe — same visual idiom Discord uses */}
       {accent && (
         <div
           style={{
@@ -462,8 +491,6 @@ function Container({ comp }: { comp: DC }) {
           }}
         />
       )}
-
-      {/* Spoiler veil */}
       {comp.spoiler && (
         <div
           style={{
@@ -478,20 +505,11 @@ function Container({ comp }: { comp: DC }) {
             cursor: "pointer",
           }}
         >
-          <span
-            style={{
-              color: TEXT_MUTED,
-              fontSize: 13,
-              fontFamily: DC_FONT,
-              fontWeight: 500,
-            }}
-          >
+          <span style={{ color: TEXT_MUTED, fontSize: 13, fontFamily: DC_FONT, fontWeight: 500 }}>
             🔒 Spoiler — click to reveal
           </span>
         </div>
       )}
-
-      {/* Inner content */}
       <div
         style={{
           marginLeft: accent ? 4 : 0,
@@ -519,6 +537,12 @@ function RenderComponent({ comp }: { comp: DC }): React.ReactElement | null {
     case 14: return <DCSeparator comp={comp} />;
     case 1:  return <ActionRow comp={comp} />;
     case 2:  return <DCButton comp={comp} />;
+    case 3:  return <DCStringSelect comp={comp} />;
+    case 4:  return <DCTextInput comp={comp} />;
+    case 5:  return <DCAutoSelect comp={comp} label="User" />;
+    case 6:  return <DCAutoSelect comp={comp} label="Role" />;
+    case 7:  return <DCAutoSelect comp={comp} label="User or Role" />;
+    case 8:  return <DCAutoSelect comp={comp} label="Channel" />;
     default: return null;
   }
 }
@@ -553,92 +577,39 @@ function RenderEmbed({ embed }: { embed: Embed }) {
         }}
       >
         {embed.author && (
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 6,
-              marginBottom: 2,
-            }}
-          >
+          <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 2 }}>
             {embed.author.icon_url && (
-              <img
-                src={embed.author.icon_url}
-                alt=""
-                style={{ width: 16, height: 16, borderRadius: "50%" }}
-              />
+              <img src={embed.author.icon_url} alt="" style={{ width: 16, height: 16, borderRadius: "50%" }} />
             )}
-            <span
-              style={{
-                color: TEXT_NORMAL,
-                fontSize: 13,
-                fontWeight: 600,
-                fontFamily: DC_FONT,
-              }}
-            >
+            <span style={{ color: TEXT_NORMAL, fontSize: 13, fontWeight: 600, fontFamily: DC_FONT }}>
               {embed.author.name}
             </span>
           </div>
         )}
         {embed.title && (
-          <div
-            style={{
-              color: TEXT_LINK,
-              fontSize: 15,
-              fontWeight: 700,
-              lineHeight: 1.3,
-              fontFamily: DC_FONT,
-            }}
-          >
-            {embed.title}
+          <div style={{ fontSize: 15, fontWeight: 700, lineHeight: 1.3, fontFamily: DC_FONT }}>
+            {embed.url ? (
+              <a href={embed.url} target="_blank" rel="noreferrer" style={{ color: TEXT_LINK, textDecoration: "none" }}>
+                {embed.title}
+              </a>
+            ) : (
+              <span style={{ color: TEXT_NORMAL }}>{embed.title}</span>
+            )}
           </div>
         )}
         {embed.description && (
-          <div
-            style={{
-              color: "#c4c9ce",
-              fontSize: 13,
-              lineHeight: 1.5,
-              fontFamily: DC_FONT,
-              whiteSpace: "pre-wrap",
-              wordBreak: "break-word",
-            }}
-          >
+          <div style={{ color: "#c4c9ce", fontSize: 13, lineHeight: 1.5, fontFamily: DC_FONT, whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
             {embed.description}
           </div>
         )}
         {embed.fields && embed.fields.length > 0 && (
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(3, 1fr)",
-              gap: "4px 8px",
-              marginTop: 4,
-            }}
-          >
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "4px 8px", marginTop: 4 }}>
             {embed.fields.map((f, i) => (
-              <div
-                key={i}
-                style={{ gridColumn: f.inline ? "auto" : "1 / -1" }}
-              >
-                <div
-                  style={{
-                    color: TEXT_NORMAL,
-                    fontSize: 13,
-                    fontWeight: 700,
-                    marginBottom: 1,
-                    fontFamily: DC_FONT,
-                  }}
-                >
+              <div key={i} style={{ gridColumn: f.inline ? "auto" : "1 / -1" }}>
+                <div style={{ color: TEXT_NORMAL, fontSize: 13, fontWeight: 700, marginBottom: 1, fontFamily: DC_FONT }}>
                   {f.name}
                 </div>
-                <div
-                  style={{
-                    color: "#c4c9ce",
-                    fontSize: 13,
-                    fontFamily: DC_FONT,
-                  }}
-                >
+                <div style={{ color: "#c4c9ce", fontSize: 13, fontFamily: DC_FONT, whiteSpace: "pre-wrap" }}>
                   {f.value}
                 </div>
               </div>
@@ -649,37 +620,17 @@ function RenderEmbed({ embed }: { embed: Embed }) {
           <img
             src={embed.image.url}
             alt=""
-            style={{
-              maxWidth: "100%",
-              maxHeight: 300,
-              borderRadius: 4,
-              marginTop: 6,
-              display: "block",
-            }}
+            style={{ maxWidth: "100%", maxHeight: 300, borderRadius: 4, marginTop: 6, display: "block" }}
           />
         )}
         {embed.footer && (
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 6,
-              marginTop: 4,
-            }}
-          >
+          <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 4 }}>
             {embed.footer.icon_url && (
-              <img
-                src={embed.footer.icon_url}
-                alt=""
-                style={{ width: 16, height: 16, borderRadius: "50%" }}
-              />
+              <img src={embed.footer.icon_url} alt="" style={{ width: 16, height: 16, borderRadius: "50%" }} />
             )}
-            <span
-              style={{ color: TEXT_MUTED, fontSize: 12, fontFamily: DC_FONT }}
-            >
+            <span style={{ color: TEXT_MUTED, fontSize: 12, fontFamily: DC_FONT }}>
               {embed.footer.text}
-              {embed.timestamp &&
-                ` • ${new Date(embed.timestamp).toLocaleDateString()}`}
+              {embed.timestamp && ` • ${new Date(embed.timestamp).toLocaleDateString()}`}
             </span>
           </div>
         )}
@@ -737,31 +688,11 @@ export function DiscordPreview() {
         }}
       >
         <Hash size={18} color="#7d8590" strokeWidth={2.5} />
-        <span
-          style={{
-            color: TEXT_NORMAL,
-            fontSize: 15,
-            fontWeight: 700,
-            fontFamily: DC_FONT,
-          }}
-        >
+        <span style={{ color: TEXT_NORMAL, fontSize: 15, fontWeight: 700, fontFamily: DC_FONT }}>
           preview
         </span>
-        <div
-          style={{
-            width: 1,
-            height: 18,
-            background: "rgba(255,255,255,0.08)",
-            margin: "0 2px",
-          }}
-        />
-        <span
-          style={{
-            color: TEXT_MUTED,
-            fontSize: 13,
-            fontFamily: DC_FONT,
-          }}
-        >
+        <div style={{ width: 1, height: 18, background: "rgba(255,255,255,0.08)", margin: "0 2px" }} />
+        <span style={{ color: TEXT_MUTED, fontSize: 13, fontFamily: DC_FONT }}>
           Live Discord preview
         </span>
         {!isValid && errors.length > 0 && (
@@ -791,168 +722,111 @@ export function DiscordPreview() {
           padding: "20px 0 8px",
         }}
       >
-        {/* Bot message */}
-        <div
-          style={{
-            padding: "2px 16px 2px 72px",
-            position: "relative",
-            fontFamily: DC_FONT,
-          }}
-          onMouseEnter={(e) => {
-            (e.currentTarget as HTMLDivElement).style.background = "#35373c";
-          }}
-          onMouseLeave={(e) => {
-            (e.currentTarget as HTMLDivElement).style.background = "transparent";
-          }}
-        >
-          {/* Bot avatar */}
+        {!hasContent ? (
           <div
             style={{
-              position: "absolute",
-              left: 16,
-              top: 2,
-              width: 40,
-              height: 40,
-              borderRadius: "50%",
-              background: "#5865f2",
               display: "flex",
+              flexDirection: "column",
               alignItems: "center",
               justifyContent: "center",
-              color: "#fff",
-              fontSize: 13,
-              fontWeight: 800,
-              userSelect: "none",
-              flexShrink: 0,
+              height: "100%",
+              gap: 10,
+              color: TEXT_MUTED,
+              fontFamily: DC_FONT,
             }}
           >
-            OE
+            <div style={{ fontSize: 32 }}>🤖</div>
+            <div style={{ fontSize: 14, fontWeight: 600 }}>No components yet</div>
+            <div style={{ fontSize: 13 }}>Add nodes from the left panel to preview your message</div>
           </div>
-
-          {/* Username + APP tag + timestamp */}
+        ) : (
+          /* Webhook bot message */
           <div
             style={{
               display: "flex",
-              alignItems: "baseline",
-              gap: 6,
-              marginBottom: 4,
+              alignItems: "flex-start",
+              gap: 14,
+              padding: "2px 16px 2px 14px",
             }}
           >
-            <span
+            {/* Avatar */}
+            <div
               style={{
-                color: "#f2f3f5",
-                fontSize: 15,
-                fontWeight: 600,
-                lineHeight: 1.2,
-                fontFamily: DC_FONT,
-              }}
-            >
-              OpenEmbedded Bot
-            </span>
-            <span
-              style={{
+                width: 40,
+                height: 40,
+                borderRadius: "50%",
                 background: "#5865f2",
-                color: "#fff",
-                fontSize: 10,
-                fontWeight: 700,
-                padding: "1px 4px",
-                borderRadius: 3,
-                fontFamily: DC_FONT,
-                letterSpacing: "0.01em",
-                lineHeight: 1.4,
-                alignSelf: "center",
-              }}
-            >
-              APP
-            </span>
-            <span
-              style={{
-                color: TEXT_MUTED,
-                fontSize: 12,
-                fontWeight: 400,
-                lineHeight: 1.2,
-                fontFamily: DC_FONT,
-              }}
-            >
-              Today at {timeStr}
-            </span>
-          </div>
-
-          {/* Message content */}
-          {!hasContent ? (
-            <div
-              style={{
-                color: "#484f58",
-                fontSize: 14,
-                fontStyle: "italic",
-                fontFamily: DC_FONT,
-                lineHeight: 1.5,
-                padding: "2px 0",
-              }}
-            >
-              Add nodes on the canvas and connect them to see a live preview
-            </div>
-          ) : (
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: 8,
-                maxWidth: 520,
-              }}
-            >
-              {embeds.map((embed, i) => (
-                <RenderEmbed key={i} embed={embed} />
-              ))}
-              {components.map((comp, i) => (
-                <RenderComponent key={i} comp={comp} />
-              ))}
-            </div>
-          )}
-        </div>
-
-        <div style={{ height: 24 }} />
-      </div>
-
-      {/* Validation errors bar */}
-      {!isValid && errors.length > 0 && (
-        <div
-          style={{
-            flexShrink: 0,
-            padding: "6px 12px",
-            background: "#1e1f22",
-            borderTop: "1px solid rgba(248,81,73,0.2)",
-            display: "flex",
-            flexDirection: "column",
-            gap: 3,
-            maxHeight: 80,
-            overflowY: "auto",
-          }}
-        >
-          {errors.map((e, i) => (
-            <div
-              key={i}
-              style={{
+                flexShrink: 0,
                 display: "flex",
                 alignItems: "center",
-                gap: 5,
-                color: "#f85149",
-                fontSize: 11,
-                fontFamily: DC_FONT,
+                justifyContent: "center",
+                fontSize: 18,
+                marginTop: 2,
               }}
             >
-              <AlertTriangle size={10} style={{ flexShrink: 0 }} />
-              {e.message}
+              🤖
             </div>
-          ))}
-        </div>
-      )}
 
-      <style>{`
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.18); }
-      `}</style>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              {/* Name row */}
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "baseline",
+                  gap: 8,
+                  marginBottom: 4,
+                }}
+              >
+                <span
+                  style={{
+                    color: TEXT_NORMAL,
+                    fontWeight: 700,
+                    fontSize: 15,
+                    fontFamily: DC_FONT,
+                  }}
+                >
+                  OpenEmbedded Bot
+                </span>
+                <span
+                  style={{
+                    background: "#5865f2",
+                    color: "#fff",
+                    fontSize: 10,
+                    fontWeight: 700,
+                    padding: "1px 5px",
+                    borderRadius: 3,
+                    fontFamily: DC_FONT,
+                    lineHeight: "16px",
+                  }}
+                >
+                  BOT
+                </span>
+                <span style={{ color: TEXT_MUTED, fontSize: 12, fontFamily: DC_FONT }}>
+                  {timeStr}
+                </span>
+              </div>
+
+              {/* Embeds (V1) */}
+              {embeds.length > 0 && (
+                <div style={{ display: "flex", flexDirection: "column", gap: 4, marginBottom: components.length > 0 ? 8 : 0 }}>
+                  {embeds.map((embed, i) => (
+                    <RenderEmbed key={i} embed={embed} />
+                  ))}
+                </div>
+              )}
+
+              {/* V2 Components */}
+              {components.length > 0 && (
+                <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                  {components.map((comp, i) => (
+                    <RenderComponent key={i} comp={comp} />
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
