@@ -45,6 +45,23 @@ export function ExportPanel() {
 
   const jsonText = payload ? JSON.stringify(payload, null, 2) : "{}";
 
+  // CV2-only component types (Container=17, TextDisplay=10, Section=9,
+  // Thumbnail=11, MediaGallery=12, Separator=14) are not supported by
+  // standard Discord webhooks — they require a bot application with CV2 access.
+  const CV2_TYPES = new Set([9, 10, 11, 12, 14, 17]);
+  function hasCV2Components(components: unknown): boolean {
+    if (!Array.isArray(components)) return false;
+    for (const c of components) {
+      if (c && typeof c === "object") {
+        const comp = c as Record<string, unknown>;
+        if (CV2_TYPES.has(comp.type as number)) return true;
+        if (hasCV2Components(comp.components)) return true;
+      }
+    }
+    return false;
+  }
+  const payloadHasCV2 = payload ? hasCV2Components((payload as Record<string, unknown>).components) : false;
+
   const handleCopy = (text: string) => {
     navigator.clipboard.writeText(text);
     setCopied(true);
@@ -226,6 +243,23 @@ export function ExportPanel() {
 
         {activeTab === "webhook" && (
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            {payloadHasCV2 && (
+              <div
+                style={{
+                  padding: "8px 10px",
+                  borderRadius: 6,
+                  background: "rgba(255, 166, 0, 0.08)",
+                  border: "1px solid rgba(255, 166, 0, 0.3)",
+                  color: "#e3a008",
+                  fontSize: 11,
+                  lineHeight: 1.5,
+                }}
+              >
+                <strong>⚠ Components V2 not supported via webhooks.</strong>
+                {" "}Types like Container and Text Display require a Discord bot with CV2 access.
+                Use V1 Embeds or Action Rows for standard webhooks.
+              </div>
+            )}
             <div>
               <label
                 style={{

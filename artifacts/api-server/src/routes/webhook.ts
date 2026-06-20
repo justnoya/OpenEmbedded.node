@@ -17,11 +17,21 @@ router.post("/v1/webhook/send", async (req, res) => {
     return;
   }
 
+  // Standard Discord webhooks don't support the IS_COMPONENTS_V2 flag (32768).
+  // Sending it causes a "Cannot send an empty message" error even when components
+  // are present. Strip it so V1 embeds and action-row buttons keep working.
+  const safePayload = { ...payload };
+  if (typeof safePayload.flags === "number") {
+    const stripped = safePayload.flags & ~32768;
+    if (stripped === 0) delete safePayload.flags;
+    else safePayload.flags = stripped;
+  }
+
   try {
     const response = await fetch(webhookUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
+      body: JSON.stringify(safePayload),
     });
 
     if (!response.ok) {
