@@ -1,8 +1,10 @@
 import { useGraphStore } from "@/lib/graphStore";
+import { ALLOWED_CHILDREN } from "@/lib/connectionRules";
 import {
   Box, Layers, Type, Image, LayoutGrid, SeparatorHorizontal,
   AlignJustify, MousePointerClick, MessageSquare, Trash2, Hash,
   Users, Shield, AtSign, TextCursorInput, Plus, X,
+  ChevronUp, ChevronDown,
 } from "lucide-react";
 import { ReactNode } from "react";
 
@@ -24,12 +26,19 @@ const TYPE_META: Record<number, { label: string; icon: ReactNode; color: string 
   0:  { label: "Embed (V1)",         icon: <MessageSquare size={14} />,    color: "#f59e0b" },
 };
 
+const BG = "#111827";
+const SURFACE = "#141926";
+const BORDER = "#1D2539";
+const TEXT = "#E8EDFF";
+const MUTED = "#64748B";
+const FAINT = "#374165";
+
 const inputStyle: React.CSSProperties = {
   width: "100%",
-  background: "#1A1C24",
-  border: "1px solid #2A2F3A",
+  background: SURFACE,
+  border: `1px solid ${BORDER}`,
   borderRadius: 6,
-  color: "#e6edf3",
+  color: TEXT,
   fontSize: 12,
   padding: "6px 9px",
   boxSizing: "border-box",
@@ -40,7 +49,7 @@ const inputStyle: React.CSSProperties = {
 
 const labelStyle: React.CSSProperties = {
   display: "block",
-  color: "#7d8590",
+  color: MUTED,
   fontSize: 11,
   fontWeight: 600,
   marginBottom: 5,
@@ -50,11 +59,16 @@ const labelStyle: React.CSSProperties = {
 
 const fieldWrap: React.CSSProperties = { marginBottom: 14 };
 
+/** Parent node types that have ordered children */
+const PARENT_COMPONENT_TYPES = new Set([17, 9, 1]);
+
 export function PropertiesPanel() {
   const selectedNodeId = useGraphStore((s) => s.selectedNodeId);
   const nodes = useGraphStore((s) => s.nodes);
+  const edges = useGraphStore((s) => s.edges);
   const updateNodeData = useGraphStore((s) => s.updateNodeData);
   const removeNode = useGraphStore((s) => s.removeNode);
+  const reorderChildEdges = useGraphStore((s) => s.reorderChildEdges);
 
   const node = nodes.find((n) => n.id === selectedNodeId);
 
@@ -67,25 +81,26 @@ export function PropertiesPanel() {
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
-          gap: 8,
+          gap: 10,
           padding: 24,
         }}
       >
         <div
           style={{
-            width: 40,
-            height: 40,
-            borderRadius: 10,
-            background: "rgba(255,255,255,0.04)",
+            width: 44,
+            height: 44,
+            borderRadius: 12,
+            background: "rgba(88,101,242,0.08)",
+            border: `1px solid rgba(88,101,242,0.15)`,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
           }}
         >
-          <Hash size={18} color="#484f58" />
+          <Hash size={20} color="#5865F2" strokeWidth={1.5} />
         </div>
-        <div style={{ color: "#7d8590", fontSize: 12, textAlign: "center" }}>
-          Select a node to<br />edit its properties
+        <div style={{ color: MUTED, fontSize: 12, textAlign: "center", lineHeight: 1.6 }}>
+          Select a node on the canvas<br />to edit its properties
         </div>
       </div>
     );
@@ -98,7 +113,7 @@ export function PropertiesPanel() {
     (e.currentTarget as HTMLElement).style.borderColor = "rgba(88,101,242,0.6)";
   };
   const blurBorder = (e: React.FocusEvent) => {
-    (e.currentTarget as HTMLElement).style.borderColor = "#2A2F3A";
+    (e.currentTarget as HTMLElement).style.borderColor = BORDER;
   };
 
   const textField = (label: string, key: string, placeholder?: string) => (
@@ -166,7 +181,7 @@ export function PropertiesPanel() {
             style={{
               width: 36,
               height: 36,
-              border: "1px solid #2A2F3A",
+              border: `1px solid ${BORDER}`,
               borderRadius: 6,
               cursor: "pointer",
               background: "none",
@@ -176,13 +191,13 @@ export function PropertiesPanel() {
           <div
             style={{
               flex: 1,
-              background: "#1A1C24",
-              border: "1px solid #2A2F3A",
+              background: SURFACE,
+              border: `1px solid ${BORDER}`,
               borderRadius: 6,
               padding: "6px 9px",
             }}
           >
-            <span style={{ color: "#e6edf3", fontSize: 12, fontFamily: "monospace" }}>{hex}</span>
+            <span style={{ color: TEXT, fontSize: 12, fontFamily: "monospace" }}>{hex}</span>
           </div>
           {val != null && (
             <button
@@ -237,7 +252,7 @@ export function PropertiesPanel() {
         />
       </div>
       <label
-        style={{ color: "#e6edf3", fontSize: 12, fontWeight: 500, cursor: "pointer" }}
+        style={{ color: TEXT, fontSize: 12, fontWeight: 500, cursor: "pointer" }}
         onClick={() => updateNodeData(node.id, { [key]: !d[key] })}
         data-testid={`prop-${key}`}
       >
@@ -256,7 +271,7 @@ export function PropertiesPanel() {
         style={{
           ...inputStyle,
           appearance: "none",
-          backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%237d8590' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")`,
+          backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748B' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")`,
           backgroundRepeat: "no-repeat",
           backgroundPosition: "right 8px center",
           paddingRight: 28,
@@ -264,7 +279,7 @@ export function PropertiesPanel() {
         }}
       >
         {options.map((o) => (
-          <option key={o} value={o} style={{ background: "#20232D" }}>
+          <option key={o} value={o} style={{ background: BG }}>
             {o}
           </option>
         ))}
@@ -297,8 +312,8 @@ export function PropertiesPanel() {
             <div
               key={i}
               style={{
-                background: "#1A1C24",
-                border: "1px solid #2A2F3A",
+                background: SURFACE,
+                border: `1px solid ${BORDER}`,
                 borderRadius: 6,
                 padding: "8px 10px",
                 display: "flex",
@@ -340,7 +355,7 @@ export function PropertiesPanel() {
                 value={opt.value}
                 placeholder="Value (unique key)"
                 onChange={(e) => updateOption(i, { value: e.target.value })}
-                style={{ ...inputStyle, padding: "3px 6px", fontSize: 11, color: "#7d8590" }}
+                style={{ ...inputStyle, padding: "3px 6px", fontSize: 11, color: MUTED }}
                 onFocus={focusBorder}
                 onBlur={blurBorder}
               />
@@ -349,7 +364,7 @@ export function PropertiesPanel() {
                 value={opt.description ?? ""}
                 placeholder="Description (optional)"
                 onChange={(e) => updateOption(i, { description: e.target.value })}
-                style={{ ...inputStyle, padding: "3px 6px", fontSize: 10, color: "#484f58" }}
+                style={{ ...inputStyle, padding: "3px 6px", fontSize: 10, color: FAINT }}
                 onFocus={focusBorder}
                 onBlur={blurBorder}
               />
@@ -360,7 +375,7 @@ export function PropertiesPanel() {
                   onChange={(e) => updateOption(i, { default: e.target.checked })}
                   style={{ accentColor: "#5865F2" }}
                 />
-                <span style={{ color: "#7d8590", fontSize: 10 }}>Default selected</span>
+                <span style={{ color: MUTED, fontSize: 10 }}>Default selected</span>
               </label>
             </div>
           ))}
@@ -374,7 +389,7 @@ export function PropertiesPanel() {
                 gap: 5,
                 padding: "6px",
                 background: "rgba(88,101,242,0.08)",
-                border: "1px dashed rgba(88,101,242,0.3)",
+                border: "1px dashed rgba(88,101,242,0.25)",
                 borderRadius: 6,
                 color: "#818cf8",
                 fontSize: 11,
@@ -413,8 +428,8 @@ export function PropertiesPanel() {
             <div
               key={i}
               style={{
-                background: "#1A1C24",
-                border: "1px solid #2A2F3A",
+                background: SURFACE,
+                border: `1px solid ${BORDER}`,
                 borderRadius: 6,
                 padding: "8px 10px",
                 display: "flex",
@@ -464,7 +479,7 @@ export function PropertiesPanel() {
                   onChange={(e) => updateField(i, { inline: e.target.checked })}
                   style={{ accentColor: "#5865F2" }}
                 />
-                <span style={{ color: "#7d8590", fontSize: 10 }}>Inline</span>
+                <span style={{ color: MUTED, fontSize: 10 }}>Inline</span>
               </label>
             </div>
           ))}
@@ -478,7 +493,7 @@ export function PropertiesPanel() {
                 gap: 5,
                 padding: "6px",
                 background: "rgba(88,101,242,0.08)",
-                border: "1px dashed rgba(88,101,242,0.3)",
+                border: "1px dashed rgba(88,101,242,0.25)",
                 borderRadius: 6,
                 color: "#818cf8",
                 fontSize: 11,
@@ -539,7 +554,7 @@ export function PropertiesPanel() {
               onFocus={focusBorder}
               onBlur={blurBorder}
             />
-            <div style={{ color: "#484f58", fontSize: 10, marginTop: 4 }}>
+            <div style={{ color: FAINT, fontSize: 10, marginTop: 4 }}>
               {items.length} image{items.length !== 1 ? "s" : ""} added
             </div>
           </div>
@@ -616,10 +631,130 @@ export function PropertiesPanel() {
         );
       default:
         return (
-          <div style={{ color: "#484f58", fontSize: 12 }}>No editable properties</div>
+          <div style={{ color: FAINT, fontSize: 12 }}>No editable properties</div>
         );
     }
   };
+
+  // ── Children reorder section ──────────────────────────────────────────────
+  const renderChildrenOrder = () => {
+    const ct = d.componentType as number;
+    if (!PARENT_COMPONENT_TYPES.has(ct)) return null;
+
+    // Get children in current edge order
+    const childEdges = edges.filter(e => e.source === node.id);
+    if (childEdges.length < 2) return null; // nothing to reorder if 0 or 1 child
+
+    const childIds = childEdges.map(e => e.target);
+    const childNodes = childIds.map(id => nodes.find(n => n.id === id)).filter(Boolean);
+
+    if (childNodes.length < 2) return null;
+
+    const move = (idx: number, dir: -1 | 1) => {
+      const newOrder = [...childIds];
+      const swapIdx = idx + dir;
+      if (swapIdx < 0 || swapIdx >= newOrder.length) return;
+      [newOrder[idx], newOrder[swapIdx]] = [newOrder[swapIdx], newOrder[idx]];
+      reorderChildEdges(node.id, newOrder);
+    };
+
+    return (
+      <div style={{ marginTop: 4, paddingTop: 14, borderTop: `1px solid ${BORDER}` }}>
+        <label style={labelStyle}>Children Order</label>
+        <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
+          {childNodes.map((child, idx) => {
+            if (!child) return null;
+            const cm = TYPE_META[child.data.componentType as number];
+            return (
+              <div
+                key={child.id}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 6,
+                  background: SURFACE,
+                  border: `1px solid ${BORDER}`,
+                  borderRadius: 6,
+                  padding: "5px 8px",
+                }}
+              >
+                <div
+                  style={{
+                    width: 22,
+                    height: 22,
+                    borderRadius: 5,
+                    background: (cm?.color ?? "#5865F2") + "20",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    color: cm?.color ?? "#5865F2",
+                    flexShrink: 0,
+                  }}
+                >
+                  {cm?.icon}
+                </div>
+                <span style={{ flex: 1, color: TEXT, fontSize: 11, fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                  {cm?.label ?? child.type}
+                </span>
+                <div style={{ display: "flex", gap: 2 }}>
+                  <button
+                    onClick={() => move(idx, -1)}
+                    disabled={idx === 0}
+                    title="Move up"
+                    style={{
+                      width: 22,
+                      height: 22,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      background: "transparent",
+                      border: `1px solid ${BORDER}`,
+                      borderRadius: 4,
+                      color: idx === 0 ? FAINT : MUTED,
+                      cursor: idx === 0 ? "default" : "pointer",
+                      transition: "background 0.12s",
+                    }}
+                    onMouseEnter={(e) => { if (idx !== 0) (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.06)"; }}
+                    onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "transparent"; }}
+                  >
+                    <ChevronUp size={11} />
+                  </button>
+                  <button
+                    onClick={() => move(idx, 1)}
+                    disabled={idx === childNodes.length - 1}
+                    title="Move down"
+                    style={{
+                      width: 22,
+                      height: 22,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      background: "transparent",
+                      border: `1px solid ${BORDER}`,
+                      borderRadius: 4,
+                      color: idx === childNodes.length - 1 ? FAINT : MUTED,
+                      cursor: idx === childNodes.length - 1 ? "default" : "pointer",
+                      transition: "background 0.12s",
+                    }}
+                    onMouseEnter={(e) => { if (idx !== childNodes.length - 1) (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.06)"; }}
+                    onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "transparent"; }}
+                  >
+                    <ChevronDown size={11} />
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+        <div style={{ color: FAINT, fontSize: 10, marginTop: 6, lineHeight: 1.5 }}>
+          Order determines render position in Discord.
+        </div>
+      </div>
+    );
+  };
+
+  // Suppress unused import warning
+  void ALLOWED_CHILDREN;
 
   return (
     <div
@@ -633,7 +768,7 @@ export function PropertiesPanel() {
       <div
         style={{
           padding: "12px 14px",
-          borderBottom: "1px solid rgba(255,255,255,0.06)",
+          borderBottom: `1px solid ${BORDER}`,
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
@@ -649,6 +784,7 @@ export function PropertiesPanel() {
                 height: 28,
                 borderRadius: 6,
                 background: meta.color + "20",
+                border: `1px solid ${meta.color}30`,
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -660,12 +796,12 @@ export function PropertiesPanel() {
             </div>
           )}
           <div style={{ minWidth: 0 }}>
-            <div style={{ color: "#e6edf3", fontSize: 13, fontWeight: 600 }}>
+            <div style={{ color: TEXT, fontSize: 13, fontWeight: 600 }}>
               {meta?.label ?? "Node"}
             </div>
             <div
               style={{
-                color: "#484f58",
+                color: FAINT,
                 fontSize: 10,
                 fontFamily: "monospace",
                 overflow: "hidden",
@@ -684,7 +820,7 @@ export function PropertiesPanel() {
           title="Delete node"
           style={{
             background: "rgba(248,81,73,0.08)",
-            border: "1px solid rgba(248,81,73,0.2)",
+            border: "1px solid rgba(248,81,73,0.18)",
             borderRadius: 6,
             color: "#f85149",
             display: "flex",
@@ -707,6 +843,7 @@ export function PropertiesPanel() {
 
       <div style={{ overflowY: "auto", flex: 1, padding: "14px" }}>
         {renderFields()}
+        {renderChildrenOrder()}
       </div>
     </div>
   );

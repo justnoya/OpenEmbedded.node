@@ -33,6 +33,8 @@ interface GraphState {
   redo: () => void;
   canUndo: () => boolean;
   canRedo: () => boolean;
+  /** Reorder the children of a parent node. newChildOrder is the desired child ID sequence. */
+  reorderChildEdges: (parentId: string, newChildOrder: string[]) => void;
 }
 
 const MAX_HISTORY = 50;
@@ -134,4 +136,22 @@ export const useGraphStore = create<GraphState>((set, get) => ({
 
   canUndo: () => get().past.length > 0,
   canRedo: () => get().future.length > 0,
+
+  reorderChildEdges: (parentId, newChildOrder) => {
+    const { edges, nodes, past } = get();
+    // Edges from this parent, in the new desired order
+    const parentEdges = edges.filter(e => e.source === parentId);
+    const otherEdges = edges.filter(e => e.source !== parentId);
+    const reordered = newChildOrder
+      .map(childId => parentEdges.find(e => e.target === childId))
+      .filter((e): e is Edge => e !== undefined);
+    // Append any parent edges not in newChildOrder (safety net)
+    const reorderedIds = new Set(reordered.map(e => e.id));
+    const remaining = parentEdges.filter(e => !reorderedIds.has(e.id));
+    set({
+      past: [...past.slice(-MAX_HISTORY + 1), snap(nodes, edges)],
+      future: [],
+      edges: [...otherEdges, ...reordered, ...remaining],
+    });
+  },
 }));

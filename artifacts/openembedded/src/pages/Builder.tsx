@@ -870,7 +870,7 @@ export function Builder() {
           display: "flex",
           flexDirection: "column",
           height: "100dvh",
-          background: "#0F1117",
+          background: "#090C14",
           overflow: "hidden",
         }}
       >
@@ -884,34 +884,34 @@ export function Builder() {
         <style>{`
           @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
           .react-flow__controls {
-            background: #20232D !important;
-            border: 1px solid #2A2F3A !important;
+            background: #111827 !important;
+            border: 1px solid #1D2539 !important;
             border-radius: 8px !important;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.5) !important;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.6) !important;
             overflow: hidden !important;
           }
           .react-flow__controls button {
-            background: #20232D !important;
+            background: #111827 !important;
             border: none !important;
-            border-bottom: 1px solid #2A2F3A !important;
-            color: #7d8590 !important;
-            fill: #7d8590 !important;
+            border-bottom: 1px solid #1D2539 !important;
+            color: #64748B !important;
+            fill: #64748B !important;
           }
           .react-flow__controls button:last-child { border-bottom: none !important; }
-          .react-flow__controls button:hover { background: #1A1C24 !important; }
-          .react-flow__controls-button svg { fill: #7d8590 !important; }
+          .react-flow__controls button:hover { background: #141926 !important; }
+          .react-flow__controls-button svg { fill: #64748B !important; }
           .react-flow__minimap {
-            background: #20232D !important;
-            border: 1px solid #2A2F3A !important;
+            background: #111827 !important;
+            border: 1px solid #1D2539 !important;
             border-radius: 8px !important;
             overflow: hidden !important;
           }
-          .react-flow__minimap-svg { background: #20232D !important; }
+          .react-flow__minimap-svg { background: #111827 !important; }
           .react-flow__edge-path { stroke-width: 2px; }
           ::-webkit-scrollbar { width: 5px; height: 5px; }
           ::-webkit-scrollbar-track { background: transparent; }
           ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
-          ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.18); }
+          ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.15); }
         `}</style>
       </div>
     );
@@ -923,7 +923,7 @@ export function Builder() {
         display: "flex",
         flexDirection: "column",
         height: "100dvh",
-        background: "#0F1117",
+        background: "#090C14",
         overflow: "hidden",
       }}
     >
@@ -942,7 +942,7 @@ export function Builder() {
                 display: "flex",
                 padding: "6px 8px 0",
                 gap: 2,
-                background: "#20232D",
+                background: "#111827",
                 borderBottom: "1px solid rgba(255,255,255,0.06)",
                 flexShrink: 0,
               }}
@@ -982,6 +982,23 @@ export function Builder() {
       {mobileNav}
       <style>{`
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        .react-flow__controls {
+          background: #111827 !important;
+          border: 1px solid #1D2539 !important;
+          border-radius: 8px !important;
+          box-shadow: 0 4px 16px rgba(0,0,0,0.6) !important;
+          overflow: hidden !important;
+        }
+        .react-flow__controls button {
+          background: #111827 !important;
+          border: none !important;
+          border-bottom: 1px solid #1D2539 !important;
+          color: #64748B !important;
+          fill: #64748B !important;
+        }
+        .react-flow__controls button:last-child { border-bottom: none !important; }
+        .react-flow__controls button:hover { background: #141926 !important; }
+        .react-flow__controls-button svg { fill: #64748B !important; }
         ::-webkit-scrollbar { width: 5px; } ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
       `}</style>

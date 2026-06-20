@@ -44,9 +44,25 @@ export function compileGraph(nodes: AppNode[], edges: Edge[]): CompileResult {
     switch (d.componentType) {
       case 17: {
         hasV2 = true;
+        // Separate direct thumbnail children — auto-wrap each into an anonymous section
+        // so the output JSON stays valid (Container → Section → Thumbnail is the Discord spec).
+        const builtComponents: Record<string, unknown>[] = [];
+        for (const kid of kids) {
+          const kidNode = nodeMap.get(kid);
+          if (kidNode?.data?.componentType === 11) {
+            // thumbnail wired directly to container → auto-wrap in a section
+            const thumbBuilt = buildComponent(kid);
+            if (thumbBuilt) {
+              builtComponents.push({ type: 9, components: [], accessory: thumbBuilt });
+            }
+          } else {
+            const built = buildComponent(kid);
+            if (built) builtComponents.push(built);
+          }
+        }
         const comp: Record<string, unknown> = {
           type: 17,
-          components: kids.map(buildComponent).filter(Boolean),
+          components: builtComponents,
         };
         if (d.accent_color != null) comp.accent_color = d.accent_color;
         if (d.spoiler) comp.spoiler = true;

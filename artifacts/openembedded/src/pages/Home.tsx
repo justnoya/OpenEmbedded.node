@@ -7,7 +7,16 @@ import {
   useDeleteProject,
   getListProjectsQueryKey,
 } from "@workspace/api-client-react";
-import { Search, MoreVertical, Lock, Plus, User, X, ChevronRight, Trash2 } from "lucide-react";
+import { Plus, MoreVertical, Trash2, ExternalLink, FolderOpen, Zap, Layers, MousePointerClick, X } from "lucide-react";
+
+const BG = "#090C14";
+const PANEL = "#111827";
+const SURFACE = "#141926";
+const BORDER = "#1D2539";
+const TEXT = "#E8EDFF";
+const MUTED = "#64748B";
+const FAINT = "#374165";
+const ACCENT = "#5865F2";
 
 type Project = {
   id: string;
@@ -28,270 +37,100 @@ function timeAgo(iso: string): string {
   return `${d}d ago`;
 }
 
-const ProjectsTabIcon = () => (
-  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <rect x="2" y="7" width="20" height="14" rx="2" />
-    <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2" />
-    <line x1="12" y1="12" x2="12" y2="16" />
-    <line x1="10" y1="14" x2="14" y2="14" />
-  </svg>
-);
-
-const CreateTabIcon = () => (
-  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <rect x="3" y="3" width="18" height="18" rx="3" />
-    <line x1="12" y1="8" x2="12" y2="16" />
-    <line x1="8" y1="12" x2="16" y2="12" />
-  </svg>
-);
-
 const MiniCanvasPreview = ({ nodeCount }: { nodeCount: number }) => (
   <div style={{
     width: "100%",
     height: "100%",
-    background: "#141822",
+    background: "#0C0F1A",
     position: "relative",
     overflow: "hidden",
   }}>
     <div style={{
       position: "absolute",
       inset: 0,
-      backgroundImage: "radial-gradient(circle, rgba(255,255,255,0.045) 1px, transparent 1px)",
-      backgroundSize: "18px 18px",
+      backgroundImage: "radial-gradient(circle, rgba(255,255,255,0.04) 1px, transparent 1px)",
+      backgroundSize: "20px 20px",
     }} />
-
     <div style={{
       position: "absolute",
-      left: 0,
-      top: 0,
-      bottom: 0,
-      width: 68,
-      background: "#20232D",
-      borderRight: "1px solid #2A2F3A",
+      left: 0, top: 0, bottom: 0,
+      width: 66,
+      background: PANEL,
+      borderRight: `1px solid ${BORDER}`,
       padding: "8px 6px",
       display: "flex",
       flexDirection: "column",
-      gap: 5,
+      gap: 4,
     }}>
       {[
-        { color: "#8b5cf6", label: "Container" },
-        { color: "#10b981", label: "Section" },
-        { color: "#3b82f6", label: "TextDisp" },
-        { color: "#f59e0b", label: "Thumbnail" },
-        { color: "#ec4899", label: "Gallery" },
-        { color: "#14b8a6", label: "ActionRow" },
-        { color: "#5865F2", label: "Button" },
-      ].map((item) => (
-        <div key={item.label} style={{
-          height: 16,
+        { color: "#8b5cf6" }, { color: "#10b981" }, { color: "#3b82f6" },
+        { color: "#f59e0b" }, { color: "#ec4899" }, { color: "#14b8a6" }, { color: "#5865F2" },
+      ].map((item, i) => (
+        <div key={i} style={{
+          height: 14,
           borderRadius: 3,
-          background: item.color + "22",
+          background: item.color + "18",
           borderLeft: `2px solid ${item.color}`,
-          paddingLeft: 3,
-          display: "flex",
-          alignItems: "center",
-          overflow: "hidden",
-        }}>
-          <span style={{ color: item.color, fontSize: 7, fontWeight: 600, whiteSpace: "nowrap" }}>
-            {item.label}
-          </span>
-        </div>
+        }} />
       ))}
     </div>
-
     <div style={{
       position: "absolute",
-      left: 68,
-      top: 0,
-      bottom: 0,
-      right: 0,
+      left: 66, top: 0, bottom: 0, right: 0,
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
     }}>
       {nodeCount > 0 ? (
-        <div style={{ display: "flex", flexDirection: "column", gap: 8, alignItems: "center" }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 7, alignItems: "center" }}>
           {[
-            { color: "#8b5cf6", w: 120, label: "Container" },
-            { color: "#10b981", w: 100, label: "Section" },
-            { color: "#3b82f6", w: 90, label: "Text Display" },
-          ].slice(0, Math.min(nodeCount, 3)).map((n) => (
-            <div key={n.label} style={{
+            { color: "#8b5cf6", w: 110 },
+            { color: "#10b981", w: 90 },
+            { color: "#3b82f6", w: 80 },
+          ].slice(0, Math.min(nodeCount, 3)).map((n, i) => (
+            <div key={i} style={{
               width: n.w,
-              height: 28,
+              height: 26,
               borderRadius: 5,
-              background: "#1A1C24",
-              border: `1px solid ${n.color}33`,
+              background: SURFACE,
+              border: `1px solid ${n.color}28`,
               borderLeft: `3px solid ${n.color}`,
               display: "flex",
               alignItems: "center",
-              paddingLeft: 6,
+              paddingLeft: 7,
               gap: 4,
             }}>
-              <div style={{ width: 6, height: 6, borderRadius: "50%", background: n.color }} />
-              <span style={{ color: "#7d8590", fontSize: 8, fontWeight: 500 }}>{n.label}</span>
+              <div style={{ width: 5, height: 5, borderRadius: "50%", background: n.color }} />
+              <div style={{
+                flex: 1,
+                height: 4,
+                borderRadius: 2,
+                background: n.color + "30",
+              }} />
             </div>
           ))}
           {nodeCount > 3 && (
-            <span style={{ color: "#484f58", fontSize: 9 }}>+{nodeCount - 3} more</span>
+            <span style={{ color: FAINT, fontSize: 9, letterSpacing: "0.05em" }}>+{nodeCount - 3} more nodes</span>
           )}
         </div>
       ) : (
-        <div style={{ textAlign: "center" }}>
+        <div style={{ textAlign: "center", opacity: 0.7 }}>
           <div style={{
-            width: 36,
-            height: 36,
-            borderRadius: 10,
-            background: "#20232D",
+            width: 32,
+            height: 32,
+            borderRadius: 8,
+            border: `1px dashed ${BORDER}`,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
             margin: "0 auto 6px",
           }}>
-            <Plus size={18} color="#484f58" />
+            <Plus size={16} color={FAINT} />
           </div>
-          <span style={{ color: "#484f58", fontSize: 11 }}>Empty canvas</span>
+          <span style={{ color: FAINT, fontSize: 10 }}>Empty canvas</span>
         </div>
       )}
     </div>
-  </div>
-);
-
-interface ProjectCardProps {
-  project: Project;
-  nodeCount: number;
-  isHighlighted: boolean;
-  onOpen: () => void;
-  showMenu: boolean;
-  onMenuToggle: () => void;
-  onDelete: () => void;
-}
-
-const ProjectCard = ({
-  project, nodeCount, isHighlighted, onOpen, showMenu, onMenuToggle, onDelete,
-}: ProjectCardProps) => (
-  <div
-    style={{
-      borderRadius: 16,
-      border: isHighlighted ? "2px solid #5865F2" : "1px solid #2A2F3A",
-      overflow: "hidden",
-      background: "#1A1C24",
-      position: "relative",
-      cursor: "pointer",
-      transition: "border-color 0.15s",
-    }}
-    onClick={onOpen}
-  >
-    <div style={{ height: 210, position: "relative" }}>
-      <MiniCanvasPreview nodeCount={nodeCount} />
-    </div>
-
-    <div style={{
-      padding: "14px 16px 16px",
-      borderTop: "1px solid #2A2F3A",
-    }}>
-      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 6 }}>
-        <div style={{ fontSize: 19, fontWeight: 700, color: "#ffffff", lineHeight: 1.2, flex: 1, paddingRight: 8 }}>
-          {project.name}
-        </div>
-        <button
-          onClick={(e) => { e.stopPropagation(); onMenuToggle(); }}
-          style={{ background: "none", border: "none", cursor: "pointer", color: "#7d8590", padding: "2px 4px", flexShrink: 0, borderRadius: 4 }}
-        >
-          <MoreVertical size={18} />
-        </button>
-      </div>
-
-      <div style={{ color: "#7d8590", fontSize: 13, marginBottom: 14 }}>
-        {timeAgo(project.updatedAt)}
-      </div>
-
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 5, color: "#7d8590", fontSize: 13 }}>
-          <Lock size={13} />
-          <span>Private</span>
-        </div>
-        <button
-          onClick={(e) => { e.stopPropagation(); onOpen(); }}
-          style={{
-            background: isHighlighted ? "#5865F2" : "rgba(255,255,255,0.07)",
-            border: "none",
-            borderRadius: 20,
-            color: "#fff",
-            fontSize: 13,
-            fontWeight: 600,
-            padding: "6px 18px",
-            cursor: "pointer",
-            transition: "background 0.15s",
-          }}
-        >
-          Open →
-        </button>
-      </div>
-    </div>
-
-    {showMenu && (
-      <div
-        style={{
-          position: "absolute",
-          top: 218,
-          right: 12,
-          background: "#20232D",
-          border: "1px solid #2A2F3A",
-          borderRadius: 10,
-          overflow: "hidden",
-          zIndex: 50,
-          boxShadow: "0 8px 32px rgba(0,0,0,0.5)",
-          minWidth: 160,
-        }}
-        onClick={(e) => e.stopPropagation()}
-      >
-        <button
-          onClick={(e) => { e.stopPropagation(); onOpen(); }}
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 8,
-            width: "100%",
-            background: "none",
-            border: "none",
-            padding: "10px 14px",
-            cursor: "pointer",
-            color: "#e6edf3",
-            fontSize: 13,
-            fontWeight: 500,
-            textAlign: "left",
-          }}
-          onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.05)"; }}
-          onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "none"; }}
-        >
-          Open in Builder
-        </button>
-        <div style={{ height: 1, background: "#2A2F3A" }} />
-        <button
-          onClick={(e) => { e.stopPropagation(); onDelete(); }}
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 8,
-            width: "100%",
-            background: "none",
-            border: "none",
-            padding: "10px 14px",
-            cursor: "pointer",
-            color: "#f85149",
-            fontSize: 13,
-            fontWeight: 500,
-            textAlign: "left",
-          }}
-          onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "rgba(248,81,73,0.08)"; }}
-          onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "none"; }}
-        >
-          <Trash2 size={14} />
-          Delete
-        </button>
-      </div>
-    )}
   </div>
 );
 
@@ -344,256 +183,503 @@ export function Home() {
     <div
       style={{
         minHeight: "100dvh",
-        background: "#0F1117",
-        color: "#e6edf3",
+        background: BG,
+        color: TEXT,
         fontFamily: `"gg sans","Noto Sans","Helvetica Neue",Arial,sans-serif`,
         display: "flex",
         flexDirection: "column",
-        maxWidth: 520,
-        margin: "0 auto",
-        position: "relative",
       }}
-      onClick={() => { setOpenMenuId(null); }}
+      onClick={() => setOpenMenuId(null)}
     >
-      {/* ── Header ─────────────────────────────────────────────── */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          padding: "20px 20px 10px",
-          position: "sticky",
-          top: 0,
-          background: "#0F1117",
-          zIndex: 100,
-        }}
-      >
-        <h1 style={{ fontSize: 30, fontWeight: 900, color: "#ffffff", margin: 0, letterSpacing: "-0.02em" }}>
-          Projects
-        </h1>
-        <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-          <button
-            style={{ background: "none", border: "none", cursor: "pointer", color: "#7d8590", padding: 4, display: "flex" }}
-            title="Search"
-          >
-            <Search size={22} color="#b1bac4" />
-          </button>
-          <div
-            style={{
-              width: 36,
-              height: 36,
-              borderRadius: "50%",
-              background: "#5865F2",
+      {/* ── Top Header ─────────────────────────────────────────────────── */}
+      <header style={{
+        position: "sticky",
+        top: 0,
+        zIndex: 100,
+        background: BG,
+        borderBottom: `1px solid ${BORDER}`,
+        display: "flex",
+        alignItems: "center",
+        padding: "0 24px",
+        height: 56,
+        gap: 16,
+      }}>
+        {/* Brand */}
+        <div style={{ display: "flex", alignItems: "center", gap: 10, flexShrink: 0 }}>
+          <div style={{
+            width: 30,
+            height: 30,
+            borderRadius: 8,
+            background: `linear-gradient(135deg, #5865F2, #8b5cf6)`,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            boxShadow: "0 0 16px rgba(88,101,242,0.35)",
+          }}>
+            <Layers size={15} color="#fff" />
+          </div>
+          <span style={{ fontSize: 15, fontWeight: 700, color: TEXT, letterSpacing: "-0.02em" }}>
+            OpenEmbedded
+          </span>
+        </div>
+
+        <div style={{ flex: 1 }} />
+
+        {/* Node count badge */}
+        {sorted.length > 0 && (
+          <div style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 6,
+            background: SURFACE,
+            border: `1px solid ${BORDER}`,
+            borderRadius: 20,
+            padding: "4px 12px",
+          }}>
+            <FolderOpen size={12} color={MUTED} />
+            <span style={{ fontSize: 12, color: MUTED, fontWeight: 500 }}>
+              {sorted.length} project{sorted.length !== 1 ? "s" : ""}
+            </span>
+          </div>
+        )}
+
+        {/* New Project CTA */}
+        <button
+          onClick={openCreate}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 6,
+            background: ACCENT,
+            border: "none",
+            borderRadius: 8,
+            color: "#fff",
+            fontSize: 13,
+            fontWeight: 600,
+            padding: "7px 14px",
+            cursor: "pointer",
+            boxShadow: "0 2px 12px rgba(88,101,242,0.35)",
+            transition: "all 0.15s",
+            flexShrink: 0,
+          }}
+          onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "#4752C4"; }}
+          onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = ACCENT; }}
+        >
+          <Plus size={14} />
+          New Project
+        </button>
+      </header>
+
+      {/* ── Main content ───────────────────────────────────────────────── */}
+      <main style={{ flex: 1, padding: "32px 24px 48px", maxWidth: 1400, margin: "0 auto", width: "100%" }}>
+
+        {isLoading ? (
+          /* Loading skeleton */
+          <div style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
+            gap: 18,
+          }}>
+            {[1, 2, 3].map((i) => (
+              <div key={i} style={{
+                height: 280,
+                background: PANEL,
+                border: `1px solid ${BORDER}`,
+                borderRadius: 16,
+                opacity: 0.5,
+              }} />
+            ))}
+          </div>
+
+        ) : sorted.length === 0 ? (
+          /* Empty state */
+          <div style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            minHeight: "60vh",
+            gap: 48,
+          }}>
+            <div style={{ textAlign: "center", maxWidth: 480 }}>
+              <div style={{
+                width: 64,
+                height: 64,
+                borderRadius: 18,
+                background: `linear-gradient(135deg, rgba(88,101,242,0.2), rgba(139,92,246,0.2))`,
+                border: `1px solid rgba(88,101,242,0.25)`,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                margin: "0 auto 20px",
+              }}>
+                <Layers size={28} color={ACCENT} strokeWidth={1.5} />
+              </div>
+              <h1 style={{ fontSize: 28, fontWeight: 800, color: TEXT, margin: "0 0 10px", letterSpacing: "-0.03em" }}>
+                Build Discord messages visually
+              </h1>
+              <p style={{ color: MUTED, fontSize: 15, lineHeight: 1.7, margin: "0 0 28px" }}>
+                Design Components V2 embeds with a drag-and-drop node editor.
+                Export ready-to-use discord.js code or send via webhook.
+              </p>
+              <button
+                onClick={openCreate}
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 8,
+                  background: ACCENT,
+                  border: "none",
+                  borderRadius: 10,
+                  color: "#fff",
+                  fontSize: 15,
+                  fontWeight: 700,
+                  padding: "12px 28px",
+                  cursor: "pointer",
+                  boxShadow: "0 4px 20px rgba(88,101,242,0.4)",
+                  transition: "all 0.15s",
+                }}
+                onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "#4752C4"; }}
+                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = ACCENT; }}
+              >
+                <Plus size={17} />
+                Create your first project
+              </button>
+            </div>
+
+            {/* Feature highlights */}
+            <div style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+              gap: 14,
+              width: "100%",
+              maxWidth: 680,
+            }}>
+              {[
+                { icon: <Layers size={18} />, color: "#8b5cf6", title: "Visual Node Graph", desc: "Drag & drop Discord components on an infinite canvas" },
+                { icon: <MousePointerClick size={18} />, color: "#5865F2", title: "All CV2 Types", desc: "Containers, Sections, Buttons, Selects and more" },
+                { icon: <Zap size={18} />, color: "#10b981", title: "Instant Export", desc: "Get JSON, discord.js code, or send directly via webhook" },
+              ].map((f) => (
+                <div key={f.title} style={{
+                  padding: "16px 18px",
+                  background: PANEL,
+                  border: `1px solid ${BORDER}`,
+                  borderRadius: 12,
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 8,
+                }}>
+                  <div style={{
+                    width: 36,
+                    height: 36,
+                    borderRadius: 9,
+                    background: f.color + "18",
+                    border: `1px solid ${f.color}25`,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    color: f.color,
+                  }}>
+                    {f.icon}
+                  </div>
+                  <div style={{ color: TEXT, fontSize: 13, fontWeight: 600 }}>{f.title}</div>
+                  <div style={{ color: MUTED, fontSize: 12, lineHeight: 1.5 }}>{f.desc}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+        ) : (
+          /* Project grid */
+          <>
+            <div style={{
               display: "flex",
               alignItems: "center",
-              justifyContent: "center",
-              fontSize: 15,
-              fontWeight: 700,
-              color: "#fff",
-              flexShrink: 0,
-            }}
-          >
-            N
-          </div>
-        </div>
-      </div>
+              justifyContent: "space-between",
+              marginBottom: 20,
+            }}>
+              <h2 style={{ fontSize: 20, fontWeight: 700, color: TEXT, margin: 0, letterSpacing: "-0.02em" }}>
+                Recent Projects
+              </h2>
+            </div>
 
-      {/* ── Scrollable content ─────────────────────────────────── */}
-      <div style={{ flex: 1, overflowY: "auto", paddingBottom: 90 }}>
-
-        {/* ── Your Recent Projects ───────────────────────────── */}
-        <section style={{ padding: "10px 20px 28px" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 4, marginBottom: 16 }}>
-            <span style={{ fontSize: 17, fontWeight: 700, color: "#e6edf3" }}>Your Recent Projects</span>
-            <ChevronRight size={18} color="#484f58" />
-          </div>
-
-          {isLoading ? (
             <div style={{
-              height: 300,
-              background: "#1A1C24",
-              border: "1px solid #2A2F3A",
-              borderRadius: 16,
-              animation: "pulse 1.5s ease-in-out infinite",
-            }} />
-          ) : sorted.length === 0 ? (
-            <button
-              onClick={openCreate}
-              style={{
-                width: "100%",
-                height: 200,
-                border: "2px dashed #2A2F3A",
-                borderRadius: 16,
-                background: "transparent",
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: 12,
-                color: "#484f58",
-                cursor: "pointer",
-                transition: "all 0.15s",
-              }}
-              onMouseEnter={(e) => {
-                const el = e.currentTarget as HTMLElement;
-                el.style.borderColor = "#5865F2";
-                el.style.color = "#5865F2";
-                el.style.background = "rgba(88,101,242,0.04)";
-              }}
-              onMouseLeave={(e) => {
-                const el = e.currentTarget as HTMLElement;
-                el.style.borderColor = "#2A2F3A";
-                el.style.color = "#484f58";
-                el.style.background = "transparent";
-              }}
-            >
-              <div style={{
-                width: 48,
-                height: 48,
-                borderRadius: 12,
-                border: "2px dashed currentColor",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}>
-                <Plus size={22} />
-              </div>
-              <span style={{ fontSize: 14, fontWeight: 600 }}>Create your first project</span>
-            </button>
-          ) : (
-            <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
-              {sorted.map((project, idx) => {
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fill, minmax(290px, 1fr))",
+              gap: 16,
+            }}>
+              {/* New project card */}
+              <button
+                onClick={openCreate}
+                style={{
+                  height: 292,
+                  border: `2px dashed ${BORDER}`,
+                  borderRadius: 16,
+                  background: "transparent",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 12,
+                  color: FAINT,
+                  cursor: "pointer",
+                  transition: "all 0.15s",
+                }}
+                onMouseEnter={(e) => {
+                  const el = e.currentTarget as HTMLElement;
+                  el.style.borderColor = ACCENT;
+                  el.style.color = ACCENT;
+                  el.style.background = "rgba(88,101,242,0.04)";
+                }}
+                onMouseLeave={(e) => {
+                  const el = e.currentTarget as HTMLElement;
+                  el.style.borderColor = BORDER;
+                  el.style.color = FAINT;
+                  el.style.background = "transparent";
+                }}
+              >
+                <div style={{
+                  width: 44,
+                  height: 44,
+                  borderRadius: 11,
+                  border: "2px dashed currentColor",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}>
+                  <Plus size={20} />
+                </div>
+                <span style={{ fontSize: 13, fontWeight: 600 }}>New Project</span>
+              </button>
+
+              {/* Existing project cards */}
+              {sorted.map((project) => {
                 const nodeCount = project.graph?.nodes?.length ?? 0;
+                const isMenuOpen = openMenuId === project.id;
                 return (
-                  <ProjectCard
+                  <div
                     key={project.id}
-                    project={project}
-                    nodeCount={nodeCount}
-                    isHighlighted={idx === 0}
-                    onOpen={() => navigate(`/builder/${project.id}`)}
-                    showMenu={openMenuId === project.id}
-                    onMenuToggle={() => setOpenMenuId(openMenuId === project.id ? null : project.id)}
-                    onDelete={() => setConfirmDeleteId(project.id)}
-                  />
+                    style={{
+                      borderRadius: 16,
+                      border: `1px solid ${BORDER}`,
+                      overflow: "hidden",
+                      background: PANEL,
+                      position: "relative",
+                      cursor: "pointer",
+                      transition: "border-color 0.15s, transform 0.15s",
+                    }}
+                    onClick={() => navigate(`/builder/${project.id}`)}
+                    onMouseEnter={(e) => {
+                      const el = e.currentTarget as HTMLElement;
+                      el.style.borderColor = "rgba(88,101,242,0.4)";
+                    }}
+                    onMouseLeave={(e) => {
+                      const el = e.currentTarget as HTMLElement;
+                      el.style.borderColor = BORDER;
+                    }}
+                  >
+                    {/* Canvas preview */}
+                    <div style={{ height: 180, position: "relative" }}>
+                      <MiniCanvasPreview nodeCount={nodeCount} />
+                    </div>
+
+                    {/* Card footer */}
+                    <div style={{
+                      padding: "12px 14px 14px",
+                      borderTop: `1px solid ${BORDER}`,
+                    }}>
+                      <div style={{
+                        display: "flex",
+                        alignItems: "flex-start",
+                        justifyContent: "space-between",
+                        marginBottom: 4,
+                      }}>
+                        <div style={{
+                          fontSize: 14,
+                          fontWeight: 700,
+                          color: TEXT,
+                          lineHeight: 1.3,
+                          flex: 1,
+                          paddingRight: 8,
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          whiteSpace: "nowrap",
+                        }}>
+                          {project.name}
+                        </div>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setOpenMenuId(isMenuOpen ? null : project.id);
+                          }}
+                          style={{
+                            background: "none",
+                            border: "none",
+                            cursor: "pointer",
+                            color: MUTED,
+                            padding: "1px 3px",
+                            flexShrink: 0,
+                            borderRadius: 4,
+                            display: "flex",
+                          }}
+                        >
+                          <MoreVertical size={15} />
+                        </button>
+                      </div>
+
+                      <div style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                      }}>
+                        <div style={{ color: MUTED, fontSize: 11 }}>
+                          {timeAgo(project.updatedAt)}
+                        </div>
+                        <div style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 4,
+                          background: SURFACE,
+                          border: `1px solid ${BORDER}`,
+                          borderRadius: 20,
+                          padding: "2px 8px",
+                        }}>
+                          <span style={{ color: FAINT, fontSize: 10, fontWeight: 600 }}>
+                            {nodeCount} node{nodeCount !== 1 ? "s" : ""}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Context menu */}
+                    {isMenuOpen && (
+                      <div
+                        style={{
+                          position: "absolute",
+                          top: 184,
+                          right: 10,
+                          background: PANEL,
+                          border: `1px solid ${BORDER}`,
+                          borderRadius: 10,
+                          overflow: "hidden",
+                          zIndex: 50,
+                          boxShadow: "0 8px 32px rgba(0,0,0,0.6)",
+                          minWidth: 160,
+                        }}
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <button
+                          onClick={(e) => { e.stopPropagation(); navigate(`/builder/${project.id}`); }}
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 8,
+                            width: "100%",
+                            background: "none",
+                            border: "none",
+                            padding: "9px 13px",
+                            cursor: "pointer",
+                            color: TEXT,
+                            fontSize: 13,
+                            fontWeight: 500,
+                            textAlign: "left",
+                          }}
+                          onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.04)"; }}
+                          onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "none"; }}
+                        >
+                          <ExternalLink size={13} />
+                          Open in Builder
+                        </button>
+                        <div style={{ height: 1, background: BORDER }} />
+                        <button
+                          onClick={(e) => { e.stopPropagation(); setConfirmDeleteId(project.id); setOpenMenuId(null); }}
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 8,
+                            width: "100%",
+                            background: "none",
+                            border: "none",
+                            padding: "9px 13px",
+                            cursor: "pointer",
+                            color: "#f85149",
+                            fontSize: 13,
+                            fontWeight: 500,
+                            textAlign: "left",
+                          }}
+                          onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "rgba(248,81,73,0.06)"; }}
+                          onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "none"; }}
+                        >
+                          <Trash2 size={13} />
+                          Delete
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 );
               })}
             </div>
-          )}
-        </section>
+          </>
+        )}
+      </main>
 
-        <div style={{ height: 1, background: "#20232D", margin: "0 20px 24px" }} />
-
-        {/* ── Your Published Projects ────────────────────────── */}
-        <section style={{ padding: "0 20px" }}>
-          <h2 style={{ fontSize: 17, fontWeight: 700, color: "#e6edf3", marginBottom: 8, letterSpacing: "-0.01em" }}>
-            Your Published Projects
-          </h2>
-          <p style={{ fontSize: 14, color: "#7d8590", lineHeight: 1.6, margin: 0 }}>
-            When you publish a Project, it will show up here.
-          </p>
-        </section>
-      </div>
-
-      {/* ── Bottom Tab Bar ─────────────────────────────────────── */}
-      <div
-        style={{
-          position: "fixed",
-          bottom: 0,
-          left: "50%",
-          transform: "translateX(-50%)",
-          width: "100%",
-          maxWidth: 520,
-          background: "#0F1117",
-          borderTop: "1px solid #20232D",
-          display: "flex",
-          zIndex: 200,
-        }}
-      >
-        {([
-          { id: "projects", label: "Projects", icon: <ProjectsTabIcon /> },
-          { id: "create", label: "Create", icon: <CreateTabIcon /> },
-          { id: "account", label: "Account", icon: <User size={26} /> },
-        ] as const).map((tab) => {
-          const isActive = tab.id === "projects";
-          return (
-            <button
-              key={tab.id}
-              onClick={() => {
-                if (tab.id === "create") openCreate();
-              }}
-              style={{
-                flex: 1,
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: 4,
-                padding: "10px 0 14px",
-                background: "none",
-                border: "none",
-                borderTop: isActive ? "2px solid #ffffff" : "2px solid transparent",
-                cursor: "pointer",
-                color: isActive ? "#ffffff" : "#484f58",
-                fontSize: 11,
-                fontWeight: isActive ? 700 : 400,
-                transition: "color 0.15s",
-                marginTop: -1,
-              }}
-            >
-              {tab.icon}
-              {tab.label}
-            </button>
-          );
-        })}
-      </div>
-
-      {/* ── Delete Confirmation Modal ───────────────────────────── */}
+      {/* ── Delete Confirmation Modal ──────────────────────────────────── */}
       {confirmDeleteId && (
         <div
           style={{
             position: "fixed",
             inset: 0,
-            background: "rgba(0,0,0,0.65)",
+            background: "rgba(0,0,0,0.7)",
             display: "flex",
-            alignItems: "flex-end",
+            alignItems: "center",
             justifyContent: "center",
             zIndex: 999,
-            padding: "0 0 20px",
+            padding: "0 20px",
           }}
           onClick={() => setConfirmDeleteId(null)}
         >
           <div
             style={{
-              background: "#20232D",
-              border: "1px solid #2A2F3A",
+              background: PANEL,
+              border: `1px solid ${BORDER}`,
               borderRadius: 20,
-              padding: "24px 20px",
+              padding: "28px 24px",
               width: "100%",
-              maxWidth: 520,
+              maxWidth: 440,
               display: "flex",
               flexDirection: "column",
-              gap: 14,
+              gap: 16,
+              boxShadow: "0 24px 64px rgba(0,0,0,0.7)",
             }}
             onClick={(e) => e.stopPropagation()}
           >
-            <h3 style={{ fontSize: 16, fontWeight: 800, color: "#e6edf3", margin: 0 }}>
-              Delete "{projects.find((p) => p.id === confirmDeleteId)?.name}"?
-            </h3>
-            <p style={{ color: "#7d8590", fontSize: 13, margin: 0, lineHeight: 1.5 }}>
-              This will permanently delete the project and all its nodes. This cannot be undone.
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <h3 style={{ fontSize: 17, fontWeight: 800, color: TEXT, margin: 0 }}>
+                Delete Project?
+              </h3>
+              <button
+                onClick={() => setConfirmDeleteId(null)}
+                style={{ background: "none", border: "none", color: MUTED, cursor: "pointer", padding: 4, display: "flex" }}
+              >
+                <X size={18} />
+              </button>
+            </div>
+            <p style={{ color: MUTED, fontSize: 13, margin: 0, lineHeight: 1.6 }}>
+              <strong style={{ color: TEXT }}>&ldquo;{projects.find((p) => p.id === confirmDeleteId)?.name}&rdquo;</strong>{" "}
+              and all its nodes will be permanently deleted. This cannot be undone.
             </p>
             <div style={{ display: "flex", gap: 10 }}>
               <button
                 onClick={() => setConfirmDeleteId(null)}
                 style={{
                   flex: 1,
-                  background: "rgba(255,255,255,0.06)",
-                  border: "1px solid rgba(255,255,255,0.1)",
-                  borderRadius: 12,
-                  color: "#e6edf3",
-                  fontSize: 14,
+                  background: "rgba(255,255,255,0.05)",
+                  border: `1px solid rgba(255,255,255,0.08)`,
+                  borderRadius: 10,
+                  color: TEXT,
+                  fontSize: 13,
                   fontWeight: 600,
-                  padding: "12px",
+                  padding: "10px",
                   cursor: "pointer",
                 }}
               >
@@ -603,13 +689,13 @@ export function Home() {
                 onClick={() => handleDelete(confirmDeleteId)}
                 style={{
                   flex: 1,
-                  background: "rgba(248,81,73,0.15)",
-                  border: "1px solid rgba(248,81,73,0.3)",
-                  borderRadius: 12,
+                  background: "rgba(248,81,73,0.12)",
+                  border: "1px solid rgba(248,81,73,0.25)",
+                  borderRadius: 10,
                   color: "#f85149",
-                  fontSize: 14,
+                  fontSize: 13,
                   fontWeight: 700,
-                  padding: "12px",
+                  padding: "10px",
                   cursor: "pointer",
                 }}
               >
@@ -620,129 +706,115 @@ export function Home() {
         </div>
       )}
 
-      {/* ── Create Project Modal ────────────────────────────────── */}
+      {/* ── Create Project Modal ───────────────────────────────────────── */}
       {showCreateModal && (
         <div
           style={{
             position: "fixed",
             inset: 0,
-            background: "rgba(0,0,0,0.65)",
+            background: "rgba(0,0,0,0.7)",
             display: "flex",
-            alignItems: "flex-end",
+            alignItems: "center",
             justifyContent: "center",
             zIndex: 999,
-            padding: "0 0 20px",
+            padding: "0 20px",
           }}
           onClick={() => setShowCreateModal(false)}
         >
           <div
             style={{
-              background: "#20232D",
-              border: "1px solid #2A2F3A",
+              background: PANEL,
+              border: `1px solid ${BORDER}`,
               borderRadius: 20,
-              padding: "24px 20px",
+              padding: "28px 24px",
               width: "100%",
-              maxWidth: 520,
+              maxWidth: 440,
               display: "flex",
               flexDirection: "column",
-              gap: 16,
+              gap: 18,
+              boxShadow: "0 24px 64px rgba(0,0,0,0.7)",
             }}
             onClick={(e) => e.stopPropagation()}
           >
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-              <h3 style={{ fontSize: 18, fontWeight: 800, color: "#ffffff", margin: 0 }}>
+              <h3 style={{ fontSize: 18, fontWeight: 800, color: TEXT, margin: 0 }}>
                 New Project
               </h3>
               <button
                 onClick={() => setShowCreateModal(false)}
-                style={{ background: "none", border: "none", color: "#7d8590", cursor: "pointer", padding: 4, display: "flex" }}
+                style={{ background: "none", border: "none", color: MUTED, cursor: "pointer", padding: 4, display: "flex" }}
               >
-                <X size={20} />
+                <X size={18} />
               </button>
             </div>
 
             <div>
-              <label
-                style={{
-                  display: "block",
-                  color: "#7d8590",
-                  fontSize: 11,
-                  fontWeight: 700,
-                  textTransform: "uppercase",
-                  letterSpacing: "0.08em",
-                  marginBottom: 8,
-                }}
-              >
-                Project Name
+              <label style={{
+                display: "block",
+                color: MUTED,
+                fontSize: 11,
+                fontWeight: 600,
+                textTransform: "uppercase",
+                letterSpacing: "0.06em",
+                marginBottom: 6,
+              }}>
+                Project name
               </label>
               <input
-                autoFocus
                 type="text"
+                autoFocus
                 value={newName}
                 onChange={(e) => setNewName(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && !createProject.isPending) {
-                    handleCreate(newName);
-                    setShowCreateModal(false);
-                    setNewName("");
-                  }
-                  if (e.key === "Escape") setShowCreateModal(false);
-                }}
-                placeholder="My awesome bot message"
+                placeholder="My Discord Message"
+                onKeyDown={(e) => { if (e.key === "Enter" && newName.trim()) handleCreate(newName); }}
                 style={{
                   width: "100%",
-                  background: "#1A1C24",
-                  border: "1px solid #2A2F3A",
-                  borderRadius: 12,
-                  color: "#e6edf3",
-                  fontSize: 15,
-                  padding: "13px 14px",
+                  background: SURFACE,
+                  border: `1px solid ${BORDER}`,
+                  borderRadius: 9,
+                  color: TEXT,
+                  fontSize: 14,
+                  padding: "10px 13px",
                   outline: "none",
                   boxSizing: "border-box",
                   fontFamily: "inherit",
                   transition: "border-color 0.15s",
                 }}
                 onFocus={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "rgba(88,101,242,0.6)"; }}
-                onBlur={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "#2A2F3A"; }}
+                onBlur={(e) => { (e.currentTarget as HTMLElement).style.borderColor = BORDER; }}
               />
             </div>
 
             <button
-              onClick={() => {
-                if (!createProject.isPending) {
-                  handleCreate(newName);
-                  setShowCreateModal(false);
-                  setNewName("");
-                }
-              }}
+              onClick={() => handleCreate(newName)}
               disabled={createProject.isPending}
               style={{
-                background: "#5865F2",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 7,
+                background: ACCENT,
                 border: "none",
-                borderRadius: 12,
+                borderRadius: 10,
                 color: "#fff",
-                fontSize: 15,
+                fontSize: 14,
                 fontWeight: 700,
-                padding: "14px",
-                cursor: createProject.isPending ? "not-allowed" : "pointer",
-                width: "100%",
+                padding: "12px",
+                cursor: createProject.isPending ? "wait" : "pointer",
                 opacity: createProject.isPending ? 0.7 : 1,
-                transition: "opacity 0.15s",
+                boxShadow: "0 4px 16px rgba(88,101,242,0.35)",
+                transition: "all 0.15s",
               }}
-              onMouseEnter={(e) => { if (!createProject.isPending) (e.currentTarget as HTMLElement).style.opacity = "0.88"; }}
-              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.opacity = "1"; }}
             >
-              {createProject.isPending ? "Creating…" : "Create Project"}
+              <Plus size={16} />
+              Create Project
             </button>
           </div>
         </div>
       )}
 
       <style>{`
-        @keyframes pulse {
-          0%, 100% { opacity: 1; }
-          50% { opacity: 0.4; }
-        }
+        @keyframes pulse { 0%, 100% { opacity: 0.4; } 50% { opacity: 0.7; } }
       `}</style>
     </div>
   );

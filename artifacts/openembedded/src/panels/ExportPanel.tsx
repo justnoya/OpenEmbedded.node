@@ -7,6 +7,13 @@ import { Copy, Check, Code2, Webhook, FileJson, Send, Loader2 } from "lucide-rea
 
 type Tab = "json" | "code" | "webhook";
 
+const BG = "#111827";
+const SURFACE = "#141926";
+const BORDER = "#1D2539";
+const TEXT = "#E8EDFF";
+const MUTED = "#64748B";
+const FAINT = "#374165";
+
 const tabDefs: { id: Tab; label: string; icon: React.ReactNode }[] = [
   { id: "json", label: "JSON", icon: <FileJson size={13} /> },
   { id: "code", label: "discord.js", icon: <Code2 size={13} /> },
@@ -14,10 +21,10 @@ const tabDefs: { id: Tab; label: string; icon: React.ReactNode }[] = [
 ];
 
 const inputBase: React.CSSProperties = {
-  background: "#1A1C24",
-  border: "1px solid #2A2F3A",
+  background: SURFACE,
+  border: `1px solid ${BORDER}`,
   borderRadius: 6,
-  color: "#e6edf3",
+  color: TEXT,
   fontSize: 12,
   padding: "7px 10px",
   outline: "none",
@@ -45,9 +52,6 @@ export function ExportPanel() {
 
   const jsonText = payload ? JSON.stringify(payload, null, 2) : "{}";
 
-  // CV2-only component types (Container=17, TextDisplay=10, Section=9,
-  // Thumbnail=11, MediaGallery=12, Separator=14) are not supported by
-  // standard Discord webhooks — they require a bot application with CV2 access.
   const CV2_TYPES = new Set([9, 10, 11, 12, 14, 17]);
   function hasCV2Components(components: unknown): boolean {
     if (!Array.isArray(components)) return false;
@@ -109,11 +113,11 @@ export function ExportPanel() {
   };
 
   const codeBlockStyle: React.CSSProperties = {
-    background: "#0F1117",
-    border: "1px solid #2A2F3A",
+    background: "#090C14",
+    border: `1px solid ${BORDER}`,
     borderRadius: 7,
     padding: 12,
-    color: "#e6edf3",
+    color: TEXT,
     fontSize: 12,
     fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
     overflowX: "auto",
@@ -127,8 +131,8 @@ export function ExportPanel() {
   return (
     <div
       style={{
-        background: "#20232D",
-        borderTop: "1px solid #2A2F3A",
+        background: BG,
+        borderTop: `1px solid ${BORDER}`,
         height: "100%",
         display: "flex",
         flexDirection: "column",
@@ -140,7 +144,7 @@ export function ExportPanel() {
           display: "flex",
           alignItems: "center",
           padding: "6px 12px",
-          borderBottom: "1px solid #2A2F3A",
+          borderBottom: `1px solid ${BORDER}`,
           gap: 2,
           flexShrink: 0,
         }}
@@ -154,10 +158,10 @@ export function ExportPanel() {
               alignItems: "center",
               gap: 5,
               padding: "5px 11px",
-              background: activeTab === t.id ? "rgba(88,101,242,0.15)" : "transparent",
+              background: activeTab === t.id ? "rgba(88,101,242,0.12)" : "transparent",
               border: "none",
               borderRadius: 5,
-              color: activeTab === t.id ? "#818cf8" : "#7d8590",
+              color: activeTab === t.id ? "#818cf8" : MUTED,
               fontSize: 12,
               fontWeight: activeTab === t.id ? 600 : 400,
               cursor: "pointer",
@@ -179,10 +183,10 @@ export function ExportPanel() {
               display: "flex",
               alignItems: "center",
               gap: 5,
-              background: copied ? "rgba(63,185,80,0.12)" : "rgba(255,255,255,0.05)",
-              border: "1px solid rgba(255,255,255,0.08)",
+              background: copied ? "rgba(63,185,80,0.12)" : "rgba(255,255,255,0.04)",
+              border: `1px solid rgba(255,255,255,0.07)`,
               borderRadius: 5,
-              color: copied ? "#3fb950" : "#7d8590",
+              color: copied ? "#3fb950" : MUTED,
               fontSize: 11,
               fontWeight: 600,
               padding: "4px 10px",
@@ -207,7 +211,7 @@ export function ExportPanel() {
               <pre style={codeBlockStyle}>{code}</pre>
             ) : (
               <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 10, padding: "16px 0" }}>
-                <div style={{ color: "#7d8590", fontSize: 12, textAlign: "center" }}>
+                <div style={{ color: MUTED, fontSize: 12, textAlign: "center" }}>
                   Generate ready-to-use discord.js v14 builder code
                 </div>
                 <button
@@ -248,8 +252,8 @@ export function ExportPanel() {
                 style={{
                   padding: "8px 10px",
                   borderRadius: 6,
-                  background: "rgba(255, 166, 0, 0.08)",
-                  border: "1px solid rgba(255, 166, 0, 0.3)",
+                  background: "rgba(255, 166, 0, 0.06)",
+                  border: "1px solid rgba(255, 166, 0, 0.25)",
                   color: "#e3a008",
                   fontSize: 11,
                   lineHeight: 1.5,
@@ -264,7 +268,7 @@ export function ExportPanel() {
               <label
                 style={{
                   display: "block",
-                  color: "#7d8590",
+                  color: MUTED,
                   fontSize: 11,
                   fontWeight: 600,
                   textTransform: "uppercase",
@@ -282,7 +286,7 @@ export function ExportPanel() {
                 data-testid="webhook-url"
                 style={inputBase}
               />
-              <div style={{ color: "#484f58", fontSize: 10, marginTop: 4 }}>
+              <div style={{ color: FAINT, fontSize: 10, marginTop: 4 }}>
                 URL is saved locally in your browser
               </div>
             </div>
@@ -304,7 +308,7 @@ export function ExportPanel() {
                 fontWeight: 700,
                 padding: "8px 0",
                 cursor: (!webhookUrl || !payload) ? "not-allowed" : "pointer",
-                opacity: (!webhookUrl || !payload) ? 0.45 : 1,
+                opacity: (!webhookUrl || !payload) ? 0.4 : 1,
                 transition: "all 0.15s",
               }}
             >
@@ -331,8 +335,8 @@ export function ExportPanel() {
                       : "rgba(248,81,73,0.1)",
                   border:
                     webhookStatus === "success"
-                      ? "1px solid rgba(63,185,80,0.25)"
-                      : "1px solid rgba(248,81,73,0.25)",
+                      ? "1px solid rgba(63,185,80,0.2)"
+                      : "1px solid rgba(248,81,73,0.2)",
                   color: webhookStatus === "success" ? "#3fb950" : "#f85149",
                   fontSize: 12,
                 }}

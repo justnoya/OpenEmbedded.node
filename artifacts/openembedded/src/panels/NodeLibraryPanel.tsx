@@ -8,6 +8,13 @@ import {
 } from "lucide-react";
 import { ReactNode } from "react";
 
+const BG = "#111827";
+const SURFACE = "#141926";
+const BORDER = "#1D2539";
+const TEXT = "#E8EDFF";
+const MUTED = "#64748B";
+const FAINT = "#374165";
+
 interface NodeDef {
   type: string;
   label: string;
@@ -208,9 +215,9 @@ export function NodeLibraryPanel() {
         alignItems: "center",
         gap: 10,
         width: "100%",
-        padding: "8px 10px",
+        padding: "7px 9px",
         background: "transparent",
-        border: "1px solid rgba(255,255,255,0.05)",
+        border: `1px solid rgba(255,255,255,0.04)`,
         borderLeft: `2px solid ${def.accentColor}`,
         borderRadius: 6,
         cursor: "pointer",
@@ -219,21 +226,22 @@ export function NodeLibraryPanel() {
         transition: "background 0.12s, border-color 0.12s",
       }}
       onMouseEnter={(e) => {
-        (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.04)";
-        (e.currentTarget as HTMLElement).style.borderColor = def.accentColor + "66";
+        (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.035)";
+        (e.currentTarget as HTMLElement).style.borderColor = def.accentColor + "55";
       }}
       onMouseLeave={(e) => {
         (e.currentTarget as HTMLElement).style.background = "transparent";
-        (e.currentTarget as HTMLElement).style.borderColor = "rgba(255,255,255,0.05)";
+        (e.currentTarget as HTMLElement).style.borderColor = "rgba(255,255,255,0.04)";
         (e.currentTarget as HTMLElement).style.borderLeftColor = def.accentColor;
       }}
     >
       <div
         style={{
-          width: 30,
-          height: 30,
+          width: 28,
+          height: 28,
           borderRadius: 6,
           background: def.accentColor + "18",
+          border: `1px solid ${def.accentColor}22`,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -244,12 +252,12 @@ export function NodeLibraryPanel() {
         {def.icon}
       </div>
       <div style={{ minWidth: 0 }}>
-        <div style={{ color: "#e6edf3", fontSize: 12, fontWeight: 600, marginBottom: 1 }}>
+        <div style={{ color: TEXT, fontSize: 12, fontWeight: 600, marginBottom: 1 }}>
           {def.label}
         </div>
         <div
           style={{
-            color: "#7d8590",
+            color: MUTED,
             fontSize: 10,
             overflow: "hidden",
             textOverflow: "ellipsis",
@@ -267,8 +275,8 @@ export function NodeLibraryPanel() {
       style={{
         width: 256,
         flexShrink: 0,
-        background: "#20232D",
-        borderRight: "1px solid #2A2F3A",
+        background: BG,
+        borderRight: `1px solid ${BORDER}`,
         display: "flex",
         flexDirection: "column",
         overflow: "hidden",
@@ -277,13 +285,13 @@ export function NodeLibraryPanel() {
       <div
         style={{
           padding: "14px 14px 10px",
-          borderBottom: "1px solid #2A2F3A",
+          borderBottom: `1px solid ${BORDER}`,
         }}
       >
-        <div style={{ color: "#e6edf3", fontSize: 13, fontWeight: 700, marginBottom: 2 }}>
+        <div style={{ color: TEXT, fontSize: 13, fontWeight: 700, marginBottom: 2 }}>
           Components
         </div>
-        <div style={{ color: "#7d8590", fontSize: 11, marginBottom: 10 }}>
+        <div style={{ color: MUTED, fontSize: 11, marginBottom: 10 }}>
           Click to add to canvas
         </div>
         <div
@@ -291,13 +299,13 @@ export function NodeLibraryPanel() {
             display: "flex",
             alignItems: "center",
             gap: 6,
-            background: "#1A1C24",
-            border: "1px solid #2A2F3A",
+            background: SURFACE,
+            border: `1px solid ${BORDER}`,
             borderRadius: 6,
             padding: "5px 8px",
           }}
         >
-          <Search size={12} color="#484f58" />
+          <Search size={12} color={FAINT} />
           <input
             type="text"
             placeholder="Search components…"
@@ -308,7 +316,7 @@ export function NodeLibraryPanel() {
               background: "transparent",
               border: "none",
               outline: "none",
-              color: "#e6edf3",
+              color: TEXT,
               fontSize: 12,
             }}
           />
@@ -322,7 +330,7 @@ export function NodeLibraryPanel() {
           ) : (
             <div
               style={{
-                color: "#484f58",
+                color: FAINT,
                 fontSize: 12,
                 textAlign: "center",
                 padding: "20px 0",
@@ -352,13 +360,13 @@ export function NodeLibraryPanel() {
                   }}
                 >
                   {isCollapsed ? (
-                    <ChevronRight size={12} color="#484f58" />
+                    <ChevronRight size={12} color={FAINT} />
                   ) : (
-                    <ChevronDown size={12} color="#484f58" />
+                    <ChevronDown size={12} color={FAINT} />
                   )}
                   <span
                     style={{
-                      color: "#7d8590",
+                      color: MUTED,
                       fontSize: 10,
                       fontWeight: 700,
                       textTransform: "uppercase",

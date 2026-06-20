@@ -29,11 +29,15 @@ export const NODE_CLASSES: Record<string, NodeClass> = {
 /**
  * Allowed child node types for each parent node type.
  * Keys are parent nodeType strings; values are arrays of valid child nodeType strings.
+ *
+ * NOTE: thumbnail is allowed directly on container as a convenience shortcut.
+ * The compiler auto-wraps it in an anonymous section so the Discord JSON is valid.
  */
 export const ALLOWED_CHILDREN: Record<string, string[]> = {
   container: [
     "section",
     "textDisplay",
+    "thumbnail",
     "mediaGallery",
     "separator",
     "actionRow",

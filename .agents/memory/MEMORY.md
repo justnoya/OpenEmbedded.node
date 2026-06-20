@@ -1,3 +1,5 @@
 - [Replit artifact port routing](artifact-port-routing.md) — new react-vite artifacts may get path-based IDs that break proxy routing; serve frontend from Express API server instead.
 - [OpenEmbedded workflow setup](openembedded-workflows.md) — API Server needs PORT=8080 explicitly in workflow command; both workflows must be configured via configureWorkflow().
 - [Discord Activity SDK types](discord-sdk-types.md) — DiscordSDKMock needs 4 args; use sdk.channelId/guildId properties not getSelectedVoiceChannel; useRef needs explicit undefined initial in React 19.
+- [OpenEmbedded vite proxy](openembedded-vite-proxy.md) — Vite proxy must be "/api" not "/v1"; generated API client uses /api/v1/... prefix because Express mounts router at app.use("/api", router).
+- [OpenEmbedded color palette](openembedded-colors.md) — canonical dark palette: bg #090C14, panel #111827, surface #141926, border #1D2539, muted #64748B, faint #374165, text #E8EDFF, accent #5865F2.
