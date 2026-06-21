@@ -4,6 +4,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Home } from "@/pages/Home";
 import { Builder } from "@/pages/Builder";
+import { Docs } from "@/pages/Docs";
 import NotFound from "@/pages/not-found";
 import { DiscordProvider } from "@/lib/discordContext";
 import { DiscordActivityOverlay } from "@/components/DiscordActivityOverlay";
@@ -19,6 +20,7 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={Home} />
+      <Route path="/docs" component={Docs} />
       <Route path="/support" component={Support} />
       <Route path="/builder/:id" component={Builder} />
       <Route component={NotFound} />
