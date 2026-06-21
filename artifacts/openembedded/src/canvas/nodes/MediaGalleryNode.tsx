@@ -9,7 +9,7 @@ function MediaGalleryNodeComponent({ id, data }: NodeProps) {
 
   return (
     <NodeWrapper id={id} typeName="Media Gallery · 12" icon={<LayoutGrid size={13} />} accentColor="#ec4899">
-      <div style={{ color: "#DDE3F5", fontSize: 13, fontWeight: 600, marginBottom: 6 }}>
+      <div style={{ color: "#e8e8e8", fontSize: 13, fontWeight: 600, marginBottom: 6 }}>
         Media Gallery
       </div>
       {preview.length > 0 ? (
@@ -20,7 +20,7 @@ function MediaGalleryNodeComponent({ id, data }: NodeProps) {
                 key={i}
                 src={item.url}
                 alt=""
-                style={{ width: 28, height: 28, objectFit: "cover", borderRadius: 4, border: "1px solid #1D2436" }}
+                style={{ width: 28, height: 28, objectFit: "cover", borderRadius: 4, border: "1px solid #333333" }}
                 onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
               />
             ) : (
@@ -34,10 +34,10 @@ function MediaGalleryNodeComponent({ id, data }: NodeProps) {
           )}
         </div>
       ) : (
-        <div style={{ color: "#2D3652", fontSize: 11 }}>0 images</div>
+        <div style={{ color: "#555555", fontSize: 11 }}>0 images</div>
       )}
-      <Handle type="target" position={Position.Left} style={{ background: "#3fb950", border: "2px solid #0F1420", width: 10, height: 10 }} />
-      <Handle type="source" position={Position.Right} style={{ background: "#ec4899", border: "2px solid #0F1420", width: 10, height: 10 }} />
+      <Handle type="target" position={Position.Left} style={{ background: "#3fb950", border: "2px solid #242424", width: 10, height: 10 }} />
+      <Handle type="source" position={Position.Right} style={{ background: "#ec4899", border: "2px solid #242424", width: 10, height: 10 }} />
     </NodeWrapper>
   );
 }

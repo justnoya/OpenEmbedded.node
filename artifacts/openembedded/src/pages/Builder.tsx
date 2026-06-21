@@ -260,7 +260,7 @@ export function Builder() {
     const configs = {
       saved:   { color: "#3fb950", icon: <Check size={11} />,    text: "Saved" },
       saving:  { color: "#d29922", icon: <Loader2 size={11} style={{ animation: "spin 1s linear infinite" }} />, text: "Saving…" },
-      unsaved: { color: "#7d8590", icon: null,                   text: "Unsaved" },
+      unsaved: { color: "#888888", icon: null,                   text: "Unsaved" },
       error:   { color: "#f85149", icon: <AlertCircle size={11} />, text: "Error" },
     };
     const cfg = configs[saveStatus];
@@ -285,8 +285,8 @@ export function Builder() {
         display: "flex",
         alignItems: "center",
         padding: "0 14px",
-        background: "#0D1117",
-        borderBottom: "1px solid #1A1F2E",
+        background: "#222222",
+        borderBottom: "1px solid #333333",
         gap: 0,
         zIndex: 20,
         overflowX: "auto",
@@ -318,13 +318,13 @@ export function Builder() {
           style={{ width: 28, height: 28, borderRadius: 7, flexShrink: 0, objectFit: "cover" }}
         />
         {!isMobile && (
-          <span style={{ color: "#DDE3F5", fontSize: 13, fontWeight: 700, letterSpacing: "-0.02em" }}>
+          <span style={{ color: "#e8e8e8", fontSize: 13, fontWeight: 700, letterSpacing: "-0.02em" }}>
             OpenEmbedded
           </span>
         )}
       </button>
 
-      <div style={{ width: 1, height: 18, background: "#1A1F2E", flexShrink: 0, marginRight: 14 }} />
+      <div style={{ width: 1, height: 18, background: "#333333", flexShrink: 0, marginRight: 14 }} />
 
       <div style={{ position: "relative", flexShrink: 0, marginRight: 8 }}>
         {editingName ? (
@@ -336,10 +336,10 @@ export function Builder() {
             onKeyDown={(e) => { if (e.key === "Enter" || e.key === "Escape") setEditingName(false); }}
             autoFocus
             style={{
-              background: "#0F1117",
+              background: "#2a2a2a",
               border: "1px solid rgba(88,101,242,0.6)",
               borderRadius: 6,
-              color: "#e6edf3",
+              color: "#e8e8e8",
               fontSize: 13,
               fontWeight: 600,
               padding: "4px 9px",
@@ -356,7 +356,7 @@ export function Builder() {
               background: "transparent",
               border: "1px solid transparent",
               borderRadius: 6,
-              color: "#e6edf3",
+              color: "#e8e8e8",
               fontSize: 13,
               fontWeight: 600,
               padding: "4px 9px",
@@ -396,13 +396,13 @@ export function Builder() {
               width: 30,
               height: 30,
               background: "transparent",
-              border: "1px solid #1A1F2E",
+              border: "1px solid #333333",
               borderRadius: 6,
-              color: canUndo() ? "#5C6882" : "#1D2436",
+              color: canUndo() ? "#888888" : "#444444",
               cursor: canUndo() ? "pointer" : "not-allowed",
               transition: "all 0.12s",
             }}
-            onMouseEnter={(e) => { if (canUndo()) (e.currentTarget as HTMLElement).style.background = "#131720"; }}
+            onMouseEnter={(e) => { if (canUndo()) (e.currentTarget as HTMLElement).style.background = "#2a2a2a"; }}
             onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "transparent"; }}
           >
             <Undo2 size={14} />
@@ -418,13 +418,13 @@ export function Builder() {
               width: 30,
               height: 30,
               background: "transparent",
-              border: "1px solid #1A1F2E",
+              border: "1px solid #333333",
               borderRadius: 6,
-              color: canRedo() ? "#5C6882" : "#1D2436",
+              color: canRedo() ? "#888888" : "#444444",
               cursor: canRedo() ? "pointer" : "not-allowed",
               transition: "all 0.12s",
             }}
-            onMouseEnter={(e) => { if (canRedo()) (e.currentTarget as HTMLElement).style.background = "#131720"; }}
+            onMouseEnter={(e) => { if (canRedo()) (e.currentTarget as HTMLElement).style.background = "#2a2a2a"; }}
             onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "transparent"; }}
           >
             <Redo2 size={14} />
@@ -443,7 +443,7 @@ export function Builder() {
               background: showProjectList ? "rgba(255,255,255,0.07)" : "transparent",
               border: "1px solid rgba(255,255,255,0.07)",
               borderRadius: 6,
-              color: "#7d8590",
+              color: "#888888",
               fontSize: 12,
               fontWeight: 500,
               padding: "5px 10px",
@@ -463,8 +463,8 @@ export function Builder() {
                 position: "absolute",
                 top: 40,
                 right: 0,
-                background: "#131720",
-                border: "1px solid #1A1F2E",
+                background: "#2a2a2a",
+                border: "1px solid #333333",
                 borderRadius: 10,
                 padding: 6,
                 minWidth: 220,
@@ -475,7 +475,7 @@ export function Builder() {
               <div
                 style={{
                   padding: "4px 8px 6px",
-                  color: "#484f58",
+                  color: "#555555",
                   fontSize: 10,
                   fontWeight: 700,
                   textTransform: "uppercase",
@@ -485,7 +485,7 @@ export function Builder() {
                 Your Projects
               </div>
               {projectList.length === 0 ? (
-                <div style={{ color: "#484f58", fontSize: 12, padding: "8px 10px" }}>No projects yet</div>
+                <div style={{ color: "#555555", fontSize: 12, padding: "8px 10px" }}>No projects yet</div>
               ) : (
                 projectList.map((p) => {
                   const isActive = p.id === currentProjectId;
@@ -511,7 +511,7 @@ export function Builder() {
                           gap: 7,
                           background: "transparent",
                           border: "none",
-                          color: isActive ? "#818cf8" : "#b1bac4",
+                          color: isActive ? "#818cf8" : "#cccccc",
                           fontSize: 12,
                           fontWeight: isActive ? 600 : 400,
                           padding: "7px 10px",
@@ -549,7 +549,7 @@ export function Builder() {
                               background: "rgba(255,255,255,0.05)",
                               border: "1px solid rgba(255,255,255,0.08)",
                               borderRadius: 4,
-                              color: "#7d8590",
+                              color: "#888888",
                               fontSize: 10,
                               padding: "2px 7px",
                               cursor: "pointer",
@@ -565,7 +565,7 @@ export function Builder() {
                           style={{
                             background: "transparent",
                             border: "none",
-                            color: "#484f58",
+                            color: "#555555",
                             padding: "7px 8px",
                             cursor: "pointer",
                             display: "flex",
@@ -574,7 +574,7 @@ export function Builder() {
                             transition: "color 0.12s",
                           }}
                           onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "#f85149"; }}
-                          onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "#484f58"; }}
+                          onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "#555555"; }}
                         >
                           <Trash2 size={12} />
                         </button>
@@ -613,7 +613,7 @@ export function Builder() {
 
         <DiscordActivityBadge />
 
-        <div style={{ width: 1, height: 18, background: "#1A1F2E" }} />
+        <div style={{ width: 1, height: 18, background: "#333333" }} />
 
         <SaveIndicator />
 
@@ -654,7 +654,7 @@ export function Builder() {
             background: exportOpen ? "rgba(88,101,242,0.15)" : "rgba(255,255,255,0.05)",
             border: `1px solid ${exportOpen ? "rgba(88,101,242,0.4)" : "rgba(255,255,255,0.07)"}`,
             borderRadius: 6,
-            color: exportOpen ? "#818cf8" : "#7d8590",
+            color: exportOpen ? "#818cf8" : "#888888",
             fontSize: 12,
             fontWeight: 600,
             padding: "6px 12px",
@@ -677,8 +677,8 @@ export function Builder() {
         flexShrink: 0,
         display: "flex",
         alignItems: "stretch",
-        background: "#0D1117",
-        borderTop: "1px solid #1A1F2E",
+        background: "#222222",
+        borderTop: "1px solid #333333",
         zIndex: 10,
       }}
     >
@@ -704,7 +704,7 @@ export function Builder() {
               background: "transparent",
               border: "none",
               borderTop: active ? "2px solid #5865F2" : "2px solid transparent",
-              color: active ? "#818cf8" : "#484f58",
+              color: active ? "#818cf8" : "#555555",
               cursor: "pointer",
               fontSize: 10,
               fontWeight: active ? 600 : 400,
@@ -733,7 +733,7 @@ export function Builder() {
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
         fitView
-        style={{ background: "#0B0E18" }}
+        style={{ background: "#1a1a1a" }}
         defaultEdgeOptions={{
           type: "default",
           style: { stroke: "#5865F2", strokeWidth: 2 },
@@ -749,8 +749,8 @@ export function Builder() {
         />
         <Controls
           style={{
-            background: "#0D1117",
-            border: "1px solid #1A1F2E",
+            background: "#222222",
+            border: "1px solid #333333",
             borderRadius: 8,
             boxShadow: "0 4px 16px rgba(0,0,0,0.5)",
           }}
@@ -765,11 +765,11 @@ export function Builder() {
               };
               return colorMap[(node.data as { componentType?: number })?.componentType ?? -1] ?? "#5865F2";
             }}
-            bgColor="#0D1117"
-            maskColor="rgba(9,12,20,0.65)"
+            bgColor="#222222"
+            maskColor="rgba(26,26,26,0.65)"
             style={{
-              background: "#0D1117",
-              border: "1px solid #1A1F2E",
+              background: "#222222",
+              border: "1px solid #333333",
               borderRadius: 8,
             }}
           />
@@ -777,10 +777,10 @@ export function Builder() {
         <Panel position="top-center">
           <div
             style={{
-              color: "#5C6882",
+              color: "#888888",
               fontSize: 11,
-              background: "rgba(9,12,20,0.88)",
-              border: "1px solid #1A1F2E",
+              background: "rgba(26,26,26,0.88)",
+              border: "1px solid #333333",
               padding: "3px 12px",
               borderRadius: 20,
               backdropFilter: "blur(8px)",
@@ -801,8 +801,8 @@ export function Builder() {
       style={{
         width: isMobile ? "100%" : 312,
         flexShrink: 0,
-        background: "#0D1117",
-        borderLeft: isMobile ? "none" : "1px solid #1A1F2E",
+        background: "#222222",
+        borderLeft: isMobile ? "none" : "1px solid #333333",
         display: "flex",
         flexDirection: "column",
         overflow: "hidden",
@@ -814,8 +814,8 @@ export function Builder() {
           display: "flex",
           padding: "0 4px",
           gap: 2,
-          background: "#0D1117",
-          borderBottom: "1px solid #1A1F2E",
+          background: "#222222",
+          borderBottom: "1px solid #333333",
           flexShrink: 0,
         }}
       >
@@ -837,7 +837,7 @@ export function Builder() {
                 border: "none",
                 borderBottom: active ? "2px solid #5865F2" : "2px solid transparent",
                 borderRadius: 0,
-                color: active ? "#818cf8" : "#5C6882",
+                color: active ? "#818cf8" : "#888888",
                 fontSize: 12,
                 fontWeight: active ? 600 : 400,
                 cursor: "pointer",
@@ -861,7 +861,7 @@ export function Builder() {
       style={{
         height: isMobile ? 260 : 280,
         flexShrink: 0,
-        borderTop: "1px solid #1A1F2E",
+        borderTop: "1px solid #333333",
       }}
     >
       <ExportPanel />
@@ -875,7 +875,7 @@ export function Builder() {
           display: "flex",
           flexDirection: "column",
           height: "100dvh",
-          background: "#090C14",
+          background: "#1a1a1a",
           overflow: "hidden",
         }}
       >
@@ -889,29 +889,29 @@ export function Builder() {
         <style>{`
           @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
           .react-flow__controls {
-            background: #0D1117 !important;
-            border: 1px solid #1A1F2E !important;
+            background: #222222 !important;
+            border: 1px solid #333333 !important;
             border-radius: 8px !important;
             box-shadow: 0 4px 16px rgba(0,0,0,0.6) !important;
             overflow: hidden !important;
           }
           .react-flow__controls button {
-            background: #0D1117 !important;
+            background: #222222 !important;
             border: none !important;
-            border-bottom: 1px solid #1A1F2E !important;
-            color: #5C6882 !important;
-            fill: #5C6882 !important;
+            border-bottom: 1px solid #333333 !important;
+            color: #888888 !important;
+            fill: #888888 !important;
           }
           .react-flow__controls button:last-child { border-bottom: none !important; }
-          .react-flow__controls button:hover { background: #131720 !important; }
-          .react-flow__controls-button svg { fill: #5C6882 !important; }
+          .react-flow__controls button:hover { background: #2a2a2a !important; }
+          .react-flow__controls-button svg { fill: #888888 !important; }
           .react-flow__minimap {
-            background: #0D1117 !important;
-            border: 1px solid #1A1F2E !important;
+            background: #222222 !important;
+            border: 1px solid #333333 !important;
             border-radius: 8px !important;
             overflow: hidden !important;
           }
-          .react-flow__minimap-svg { background: #0D1117 !important; }
+          .react-flow__minimap-svg { background: #222222 !important; }
           .react-flow__edge-path { stroke-width: 2px; }
         `}</style>
       </div>
@@ -924,7 +924,7 @@ export function Builder() {
         display: "flex",
         flexDirection: "column",
         height: "100dvh",
-        background: "#090C14",
+        background: "#1a1a1a",
         overflow: "hidden",
       }}
     >
@@ -943,8 +943,8 @@ export function Builder() {
                 display: "flex",
                 padding: "0 4px",
                 gap: 2,
-                background: "#0D1117",
-                borderBottom: "1px solid #1A1F2E",
+                background: "#222222",
+                borderBottom: "1px solid #333333",
                 flexShrink: 0,
               }}
             >
@@ -962,7 +962,7 @@ export function Builder() {
                       border: "none",
                       borderBottom: active ? "2px solid #5865F2" : "2px solid transparent",
                       borderRadius: 0,
-                      color: active ? "#818cf8" : "#5C6882",
+                      color: active ? "#818cf8" : "#888888",
                       fontSize: 12,
                       fontWeight: active ? 600 : 400,
                       cursor: "pointer",
@@ -984,22 +984,22 @@ export function Builder() {
       <style>{`
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         .react-flow__controls {
-          background: #0D1117 !important;
-          border: 1px solid #1A1F2E !important;
+          background: #222222 !important;
+          border: 1px solid #333333 !important;
           border-radius: 8px !important;
           box-shadow: 0 4px 16px rgba(0,0,0,0.6) !important;
           overflow: hidden !important;
         }
         .react-flow__controls button {
-          background: #0D1117 !important;
+          background: #222222 !important;
           border: none !important;
-          border-bottom: 1px solid #1A1F2E !important;
-          color: #5C6882 !important;
-          fill: #5C6882 !important;
+          border-bottom: 1px solid #333333 !important;
+          color: #888888 !important;
+          fill: #888888 !important;
         }
         .react-flow__controls button:last-child { border-bottom: none !important; }
-        .react-flow__controls button:hover { background: #131720 !important; }
-        .react-flow__controls-button svg { fill: #5C6882 !important; }
+        .react-flow__controls button:hover { background: #2a2a2a !important; }
+        .react-flow__controls-button svg { fill: #888888 !important; }
         .react-flow__edge-path { stroke-width: 2px; }
       `}</style>
     </div>

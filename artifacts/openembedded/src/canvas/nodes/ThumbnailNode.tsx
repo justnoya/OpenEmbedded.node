@@ -42,12 +42,12 @@ function ThumbnailNodeComponent({ id, data }: NodeProps) {
           </div>
         )}
         <div>
-          <div style={{ color: "#DDE3F5", fontSize: 12, fontWeight: 500, marginBottom: 1 }}>
+          <div style={{ color: "#e8e8e8", fontSize: 12, fontWeight: 500, marginBottom: 1 }}>
             Thumbnail
           </div>
           <div
             style={{
-              color: "#5C6882",
+              color: "#888888",
               fontSize: 10,
               maxWidth: 140,
               overflow: "hidden",
@@ -59,8 +59,8 @@ function ThumbnailNodeComponent({ id, data }: NodeProps) {
           </div>
         </div>
       </div>
-      <Handle type="target" position={Position.Left} style={{ background: "#3fb950", border: "2px solid #0F1420", width: 10, height: 10 }} />
-      <Handle type="source" position={Position.Right} style={{ background: "#f59e0b", border: "2px solid #0F1420", width: 10, height: 10 }} />
+      <Handle type="target" position={Position.Left} style={{ background: "#3fb950", border: "2px solid #242424", width: 10, height: 10 }} />
+      <Handle type="source" position={Position.Right} style={{ background: "#f59e0b", border: "2px solid #242424", width: 10, height: 10 }} />
     </NodeWrapper>
   );
 }

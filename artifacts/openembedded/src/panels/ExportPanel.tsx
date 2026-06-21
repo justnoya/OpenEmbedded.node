@@ -7,12 +7,12 @@ import { Copy, Check, Code2, Webhook, FileJson, Send, Loader2 } from "lucide-rea
 
 type Tab = "json" | "code" | "webhook";
 
-const BG = "#0D1117";
-const SURFACE = "#131720";
-const BORDER = "#1A1F2E";
-const TEXT = "#DDE3F5";
-const MUTED = "#5C6882";
-const FAINT = "#2D3652";
+const BG = "#222222";
+const SURFACE = "#2a2a2a";
+const BORDER = "#333333";
+const TEXT = "#e8e8e8";
+const MUTED = "#888888";
+const FAINT = "#555555";
 
 const tabDefs: { id: Tab; label: string; icon: React.ReactNode }[] = [
   { id: "json", label: "JSON", icon: <FileJson size={13} /> },
@@ -113,7 +113,7 @@ export function ExportPanel() {
   };
 
   const codeBlockStyle: React.CSSProperties = {
-    background: "#090C14",
+    background: "#1a1a1a",
     border: `1px solid ${BORDER}`,
     borderRadius: 7,
     padding: 12,

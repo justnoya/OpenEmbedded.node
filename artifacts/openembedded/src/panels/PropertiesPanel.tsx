@@ -26,12 +26,12 @@ const TYPE_META: Record<number, { label: string; icon: ReactNode; color: string 
   0:  { label: "Embed (V1)",         icon: <MessageSquare size={14} />,    color: "#f59e0b" },
 };
 
-const BG = "#0D1117";
-const SURFACE = "#131720";
-const BORDER = "#1A1F2E";
-const TEXT = "#DDE3F5";
-const MUTED = "#5C6882";
-const FAINT = "#2D3652";
+const BG = "#222222";
+const SURFACE = "#2a2a2a";
+const BORDER = "#333333";
+const TEXT = "#e8e8e8";
+const MUTED = "#888888";
+const FAINT = "#555555";
 
 const inputStyle: React.CSSProperties = {
   width: "100%",
@@ -641,9 +641,8 @@ export function PropertiesPanel() {
     const ct = d.componentType as number;
     if (!PARENT_COMPONENT_TYPES.has(ct)) return null;
 
-    // Get children in current edge order
     const childEdges = edges.filter(e => e.source === node.id);
-    if (childEdges.length < 2) return null; // nothing to reorder if 0 or 1 child
+    if (childEdges.length < 2) return null;
 
     const childIds = childEdges.map(e => e.target);
     const childNodes = childIds.map(id => nodes.find(n => n.id === id)).filter(Boolean);
@@ -753,7 +752,6 @@ export function PropertiesPanel() {
     );
   };
 
-  // Suppress unused import warning
   void ALLOWED_CHILDREN;
 
   return (

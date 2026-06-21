@@ -9,13 +9,13 @@ import {
 } from "@workspace/api-client-react";
 import { Plus, MoreVertical, Trash2, ExternalLink, FolderOpen, Zap, Layers, MousePointerClick, X } from "lucide-react";
 
-const BG = "#090C14";
-const PANEL = "#0E1117";
-const SURFACE = "#131720";
-const BORDER = "#1A1F2E";
-const TEXT = "#DDE3F5";
-const MUTED = "#5C6882";
-const FAINT = "#2D3652";
+const BG = "#1a1a1a";
+const PANEL = "#222222";
+const SURFACE = "#2a2a2a";
+const BORDER = "#333333";
+const TEXT = "#e8e8e8";
+const MUTED = "#888888";
+const FAINT = "#555555";
 const ACCENT = "#5865F2";
 
 type Project = {
@@ -41,7 +41,7 @@ const MiniCanvasPreview = ({ nodeCount }: { nodeCount: number }) => (
   <div style={{
     width: "100%",
     height: "100%",
-    background: "#0B0E18",
+    background: "#1a1a1a",
     position: "relative",
     overflow: "hidden",
   }}>
@@ -731,13 +731,13 @@ export function Home() {
               maxWidth: 440,
               display: "flex",
               flexDirection: "column",
-              gap: 18,
+              gap: 16,
               boxShadow: "0 24px 64px rgba(0,0,0,0.7)",
             }}
             onClick={(e) => e.stopPropagation()}
           >
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-              <h3 style={{ fontSize: 18, fontWeight: 800, color: TEXT, margin: 0 }}>
+              <h3 style={{ fontSize: 17, fontWeight: 800, color: TEXT, margin: 0 }}>
                 New Project
               </h3>
               <button
@@ -747,75 +747,75 @@ export function Home() {
                 <X size={18} />
               </button>
             </div>
-
             <div>
-              <label style={{
-                display: "block",
-                color: MUTED,
-                fontSize: 11,
-                fontWeight: 600,
-                textTransform: "uppercase",
-                letterSpacing: "0.06em",
-                marginBottom: 6,
-              }}>
-                Project name
+              <label style={{ display: "block", color: MUTED, fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 6 }}>
+                Project Name
               </label>
               <input
-                type="text"
                 autoFocus
+                type="text"
                 value={newName}
                 onChange={(e) => setNewName(e.target.value)}
-                placeholder="My Discord Message"
-                onKeyDown={(e) => { if (e.key === "Enter" && newName.trim()) handleCreate(newName); }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") { handleCreate(newName); setShowCreateModal(false); }
+                  if (e.key === "Escape") setShowCreateModal(false);
+                }}
+                placeholder="Untitled Project"
                 style={{
                   width: "100%",
                   background: SURFACE,
                   border: `1px solid ${BORDER}`,
-                  borderRadius: 9,
+                  borderRadius: 10,
                   color: TEXT,
                   fontSize: 14,
-                  padding: "10px 13px",
+                  padding: "10px 14px",
                   outline: "none",
-                  boxSizing: "border-box",
                   fontFamily: "inherit",
+                  boxSizing: "border-box",
                   transition: "border-color 0.15s",
                 }}
                 onFocus={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "rgba(88,101,242,0.6)"; }}
                 onBlur={(e) => { (e.currentTarget as HTMLElement).style.borderColor = BORDER; }}
               />
             </div>
-
-            <button
-              onClick={() => handleCreate(newName)}
-              disabled={createProject.isPending}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: 7,
-                background: ACCENT,
-                border: "none",
-                borderRadius: 10,
-                color: "#fff",
-                fontSize: 14,
-                fontWeight: 700,
-                padding: "12px",
-                cursor: createProject.isPending ? "wait" : "pointer",
-                opacity: createProject.isPending ? 0.7 : 1,
-                boxShadow: "0 4px 16px rgba(88,101,242,0.35)",
-                transition: "all 0.15s",
-              }}
-            >
-              <Plus size={16} />
-              Create Project
-            </button>
+            <div style={{ display: "flex", gap: 10 }}>
+              <button
+                onClick={() => setShowCreateModal(false)}
+                style={{
+                  flex: 1,
+                  background: "rgba(255,255,255,0.05)",
+                  border: `1px solid rgba(255,255,255,0.08)`,
+                  borderRadius: 10,
+                  color: TEXT,
+                  fontSize: 13,
+                  fontWeight: 600,
+                  padding: "10px",
+                  cursor: "pointer",
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => { handleCreate(newName); setShowCreateModal(false); }}
+                style={{
+                  flex: 1,
+                  background: ACCENT,
+                  border: "none",
+                  borderRadius: 10,
+                  color: "#fff",
+                  fontSize: 13,
+                  fontWeight: 700,
+                  padding: "10px",
+                  cursor: "pointer",
+                  boxShadow: "0 2px 12px rgba(88,101,242,0.3)",
+                }}
+              >
+                Create
+              </button>
+            </div>
           </div>
         </div>
       )}
-
-      <style>{`
-        @keyframes pulse { 0%, 100% { opacity: 0.4; } 50% { opacity: 0.7; } }
-      `}</style>
     </div>
   );
 }

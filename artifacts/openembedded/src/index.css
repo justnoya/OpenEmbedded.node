@@ -103,55 +103,55 @@
   --elevate-1: rgba(255,255,255, .025);
   --elevate-2: rgba(255,255,255, .05);
 
-  /* ── OpenEmbedded — Deep Blue-Midnight palette ───────────────────────── */
-  --background: 228 38% 6%;
-  --foreground: 228 50% 93%;
+  /* ── OpenEmbedded — Charcoal Dark palette (#1a1a1a base) ─────────────── */
+  --background: 0 0% 10%;
+  --foreground: 0 0% 91%;
 
-  --border: 224 30% 14%;
+  --border: 0 0% 20%;
 
-  --card: 226 32% 9%;
-  --card-foreground: 228 50% 93%;
-  --card-border: 224 30% 14%;
+  --card: 0 0% 13%;
+  --card-foreground: 0 0% 91%;
+  --card-border: 0 0% 20%;
 
-  --sidebar: 228 38% 6%;
-  --sidebar-foreground: 228 50% 93%;
-  --sidebar-border: 224 30% 14%;
+  --sidebar: 0 0% 10%;
+  --sidebar-foreground: 0 0% 91%;
+  --sidebar-border: 0 0% 20%;
   --sidebar-primary: 234.9 85.6% 64.7%;
-  --sidebar-primary-foreground: 228 50% 93%;
-  --sidebar-accent: 226 32% 9%;
-  --sidebar-accent-foreground: 228 50% 93%;
+  --sidebar-primary-foreground: 0 0% 91%;
+  --sidebar-accent: 0 0% 13%;
+  --sidebar-accent-foreground: 0 0% 91%;
   --sidebar-ring: 234.9 85.6% 64.7%;
 
-  --popover: 226 36% 8%;
-  --popover-foreground: 228 50% 93%;
-  --popover-border: 224 30% 14%;
+  --popover: 0 0% 12%;
+  --popover-foreground: 0 0% 91%;
+  --popover-border: 0 0% 20%;
 
   --primary: 234.9 85.6% 64.7%;
-  --primary-foreground: 228 50% 93%;
+  --primary-foreground: 0 0% 91%;
 
-  --secondary: 226 28% 16%;
-  --secondary-foreground: 228 50% 93%;
+  --secondary: 0 0% 20%;
+  --secondary-foreground: 0 0% 91%;
 
-  --muted: 221 22% 50%;
-  --muted-foreground: 221 18% 42%;
+  --muted: 0 0% 53%;
+  --muted-foreground: 0 0% 42%;
 
   --accent: 234.7 51.4% 52.4%;
-  --accent-foreground: 228 50% 93%;
+  --accent-foreground: 0 0% 91%;
 
   --destructive: 358.9 82.6% 59.4%;
-  --destructive-foreground: 228 50% 93%;
+  --destructive-foreground: 0 0% 91%;
 
   --success: 138.6 86.1% 64.5%;
   --warning: 51.5 98.8% 67.8%;
 
-  --input: 226 28% 14%;
+  --input: 0 0% 17%;
   --ring: 234.9 85.6% 64.7%;
 
   --chart-1: 234.9 85.6% 64.7%;
   --chart-2: 138.6 86.1% 64.5%;
   --chart-3: 51.5 98.8% 67.8%;
   --chart-4: 358.9 82.6% 59.4%;
-  --chart-5: 221 22% 50%;
+  --chart-5: 0 0% 53%;
 
   --app-font-sans: "Inter", "gg sans", "Noto Sans", system-ui, sans-serif;
   --app-font-mono: 'JetBrains Mono', monospace;
@@ -198,9 +198,9 @@
   /* Polished slim scrollbars */
   ::-webkit-scrollbar { width: 4px; height: 4px; }
   ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: #1E2436; border-radius: 99px; }
-  ::-webkit-scrollbar-thumb:hover { background: #2A3450; }
-  * { scrollbar-width: thin; scrollbar-color: #1E2436 transparent; }
+  ::-webkit-scrollbar-thumb { background: #2d2d2d; border-radius: 99px; }
+  ::-webkit-scrollbar-thumb:hover { background: #444444; }
+  * { scrollbar-width: thin; scrollbar-color: #2d2d2d transparent; }
 
   /* Accessible focus rings — Replit-quality polish */
   *:focus { outline: none; }

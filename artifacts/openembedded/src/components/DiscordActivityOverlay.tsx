@@ -25,7 +25,7 @@ export function DiscordActivityOverlay() {
         position: "fixed",
         inset: 0,
         zIndex: 9999,
-        background: "#0F1117",
+        background: "#222222",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
@@ -67,14 +67,14 @@ export function DiscordActivityOverlay() {
       )}
 
       <div style={{ textAlign: "center" }}>
-        <div style={{ color: "#e6edf3", fontSize: 16, fontWeight: 600, marginBottom: 6 }}>
+        <div style={{ color: "#e8e8e8", fontSize: 16, fontWeight: 600, marginBottom: 6 }}>
           OpenEmbedded
         </div>
-        <div style={{ color: "#7d8590", fontSize: 13 }}>
+        <div style={{ color: "#888888", fontSize: 13 }}>
           {STAGE_TEXT[sdkState] ?? "Loading…"}
         </div>
         {isError && (
-          <div style={{ color: "#484f58", fontSize: 11, marginTop: 10, maxWidth: 280 }}>
+          <div style={{ color: "#555555", fontSize: 11, marginTop: 10, maxWidth: 280 }}>
             Make sure DISCORD_CLIENT_ID and DISCORD_CLIENT_SECRET are set in your environment.
           </div>
         )}

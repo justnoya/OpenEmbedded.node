@@ -3,7 +3,7 @@
  * Shows SDK state, authenticated user, and a "Rich Presence active" pill.
  */
 import { useDiscord } from "@/lib/discordContext";
-import { Loader2, Wifi, WifiOff, User } from "lucide-react";
+import { Loader2, Wifi, WifiOff } from "lucide-react";
 
 function avatarUrl(userId: string, avatarHash: string | null) {
   if (!avatarHash) return `https://cdn.discordapp.com/embed/avatars/${Number(userId) % 6}.png`;
@@ -64,7 +64,7 @@ export function DiscordActivityBadge() {
             alt={user.username}
             style={{ width: 16, height: 16, borderRadius: "50%", flexShrink: 0 }}
           />
-          <span style={{ fontSize: 11, color: "#b1bac4", fontWeight: 500 }}>
+          <span style={{ fontSize: 11, color: "#cccccc", fontWeight: 500 }}>
             {user.global_name ?? user.username}
           </span>
         </>

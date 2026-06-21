@@ -23,7 +23,7 @@ export function NodeWrapper({ id, children, typeName, icon, accentColor, nodeCla
   const badgeLabel = NODE_CLASS_LABELS[nodeClass];
 
   let outline = "none";
-  let borderColor = "#1D2436";
+  let borderColor = "#333333";
   let shadowVal = "0 1px 4px rgba(0,0,0,0.5)";
 
   if (isConnectionTarget) {
@@ -41,7 +41,7 @@ export function NodeWrapper({ id, children, typeName, icon, accentColor, nodeCla
       data-testid={`node-${id}`}
       onClick={() => setSelectedNode(id)}
       style={{
-        background: "#0F1420",
+        background: "#242424",
         border: `1px solid ${borderColor}`,
         borderLeft: `3px solid ${accentColor}`,
         borderRadius: 10,
@@ -78,7 +78,7 @@ export function NodeWrapper({ id, children, typeName, icon, accentColor, nodeCla
       <div
         style={{
           padding: "8px 10px 7px",
-          borderBottom: "1px solid #1A1F30",
+          borderBottom: "1px solid #333333",
           display: "flex",
           alignItems: "center",
           gap: 7,
@@ -102,7 +102,7 @@ export function NodeWrapper({ id, children, typeName, icon, accentColor, nodeCla
 
         <span
           style={{
-            color: "#8B95B0",
+            color: "#999999",
             fontSize: 10,
             fontWeight: 600,
             textTransform: "uppercase",

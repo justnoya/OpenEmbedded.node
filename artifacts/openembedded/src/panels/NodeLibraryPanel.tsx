@@ -8,12 +8,12 @@ import {
 } from "lucide-react";
 import { ReactNode } from "react";
 
-const PANEL = "#0D1117";
-const SURFACE = "#131720";
-const BORDER = "#1A1F2E";
-const TEXT = "#DDE3F5";
-const MUTED = "#5C6882";
-const FAINT = "#2D3652";
+const PANEL = "#222222";
+const SURFACE = "#2a2a2a";
+const BORDER = "#333333";
+const TEXT = "#e8e8e8";
+const MUTED = "#888888";
+const FAINT = "#555555";
 
 interface NodeDef {
   type: string;
@@ -226,13 +226,12 @@ export function NodeLibraryPanel() {
         overflow: "hidden",
       }}
       onMouseEnter={(e) => {
-        (e.currentTarget as HTMLElement).style.background = "#131720";
+        (e.currentTarget as HTMLElement).style.background = "#2a2a2a";
       }}
       onMouseLeave={(e) => {
         (e.currentTarget as HTMLElement).style.background = "transparent";
       }}
     >
-      {/* Accent pip */}
       <div style={{
         position: "absolute",
         left: 0,

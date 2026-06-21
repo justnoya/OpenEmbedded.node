@@ -10,7 +10,7 @@ function ContainerNodeComponent({ id, data }: NodeProps) {
       : null;
   return (
     <NodeWrapper id={id} typeName="Container · 17" icon={<Box size={13} />} accentColor="#8b5cf6" nodeClass="main">
-      <div style={{ color: "#DDE3F5", fontSize: 13, fontWeight: 600, marginBottom: 4 }}>
+      <div style={{ color: "#e8e8e8", fontSize: 13, fontWeight: 600, marginBottom: 4 }}>
         Container
       </div>
       <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
@@ -26,7 +26,7 @@ function ContainerNodeComponent({ id, data }: NodeProps) {
                 flexShrink: 0,
               }}
             />
-            <span style={{ color: "#5C6882", fontSize: 11, fontFamily: "monospace" }}>{accentHex}</span>
+            <span style={{ color: "#888888", fontSize: 11, fontFamily: "monospace" }}>{accentHex}</span>
           </div>
         )}
         {!!data.spoiler && (
@@ -45,11 +45,11 @@ function ContainerNodeComponent({ id, data }: NodeProps) {
           </span>
         )}
         {!accentHex && !data.spoiler && (
-          <span style={{ color: "#2D3652", fontSize: 11 }}>Root wrapper</span>
+          <span style={{ color: "#555555", fontSize: 11 }}>Root wrapper</span>
         )}
       </div>
-      <Handle type="target" position={Position.Left} style={{ background: "#3fb950", border: "2px solid #0F1420", width: 10, height: 10 }} />
-      <Handle type="source" position={Position.Right} style={{ background: "#8b5cf6", border: "2px solid #0F1420", width: 10, height: 10 }} />
+      <Handle type="target" position={Position.Left} style={{ background: "#3fb950", border: "2px solid #242424", width: 10, height: 10 }} />
+      <Handle type="source" position={Position.Right} style={{ background: "#8b5cf6", border: "2px solid #242424", width: 10, height: 10 }} />
     </NodeWrapper>
   );
 }

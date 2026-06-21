@@ -44,11 +44,11 @@ function ButtonNodeComponent({ id, data }: NodeProps) {
           {label}
         </span>
       </div>
-      <div style={{ color: "#5C6882", fontSize: 10, marginTop: 4, textTransform: "uppercase", letterSpacing: "0.05em" }}>
+      <div style={{ color: "#888888", fontSize: 10, marginTop: 4, textTransform: "uppercase", letterSpacing: "0.05em" }}>
         {s.label}
       </div>
-      <Handle type="target" position={Position.Left} style={{ background: "#3fb950", border: "2px solid #0F1420", width: 10, height: 10 }} />
-      <Handle type="source" position={Position.Right} style={{ background: "#5865F2", border: "2px solid #0F1420", width: 10, height: 10 }} />
+      <Handle type="target" position={Position.Left} style={{ background: "#3fb950", border: "2px solid #242424", width: 10, height: 10 }} />
+      <Handle type="source" position={Position.Right} style={{ background: "#5865F2", border: "2px solid #242424", width: 10, height: 10 }} />
     </NodeWrapper>
   );
 }

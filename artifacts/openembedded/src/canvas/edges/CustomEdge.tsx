@@ -78,7 +78,7 @@ export function CustomEdge({
                 width: 22,
                 height: 22,
                 borderRadius: "50%",
-                background: "#1D2539",
+                background: "#2a2a2a",
                 border: "2px solid #a5b4fc",
                 color: "#a5b4fc",
                 cursor: "pointer",
@@ -94,7 +94,7 @@ export function CustomEdge({
               }}
               onMouseLeave={(e) => {
                 const el = e.currentTarget as HTMLElement;
-                el.style.background = "#1D2539";
+                el.style.background = "#2a2a2a";
                 el.style.borderColor = "#a5b4fc";
                 el.style.color = "#a5b4fc";
               }}
