@@ -31,19 +31,16 @@ export function CustomEdge({
     setEdges((eds) => eds.filter((edge) => edge.id !== id));
   };
 
-  const strokeColor = selected ? "#a5b4fc" : "#5865F2";
-  const strokeWidth = selected ? 3 : 2;
+  const strokeColor = selected ? "#818cf8" : "#5865F2";
+  const strokeWidth = selected ? 2.5 : 1.5;
+  const glowFilter = selected
+    ? "drop-shadow(0 0 6px rgba(129,140,248,0.5))"
+    : "drop-shadow(0 0 3px rgba(88,101,242,0.25))";
 
   return (
     <>
-      {/* Wider invisible hit-area for easier clicking */}
-      <path
-        d={edgePath}
-        fill="none"
-        stroke="transparent"
-        strokeWidth={16}
-        style={{ cursor: "pointer" }}
-      />
+      {/* Wide invisible hit-area */}
+      <path d={edgePath} fill="none" stroke="transparent" strokeWidth={18} style={{ cursor: "pointer" }} />
 
       <BaseEdge
         id={id}
@@ -52,7 +49,7 @@ export function CustomEdge({
         style={{
           stroke: strokeColor,
           strokeWidth,
-          filter: selected ? "drop-shadow(0 0 4px rgba(165,180,252,0.6))" : undefined,
+          filter: glowFilter,
           transition: "stroke 0.12s, stroke-width 0.12s",
         }}
       />
@@ -65,6 +62,7 @@ export function CustomEdge({
               transform: `translate(-50%, -50%) translate(${labelX}px, ${labelY}px)`,
               pointerEvents: "all",
               zIndex: 10,
+              animation: "scaleIn 0.1s cubic-bezier(0.4,0,0.2,1)",
             }}
             className="nodrag nopan"
           >
@@ -78,13 +76,13 @@ export function CustomEdge({
                 width: 22,
                 height: 22,
                 borderRadius: "50%",
-                background: "#2a2a2a",
-                border: "2px solid #a5b4fc",
-                color: "#a5b4fc",
+                background: "#1e1e1e",
+                border: "1.5px solid #818cf8",
+                color: "#818cf8",
                 cursor: "pointer",
                 padding: 0,
-                boxShadow: "0 2px 8px rgba(0,0,0,0.6)",
-                transition: "background 0.12s, color 0.12s",
+                boxShadow: "0 2px 12px rgba(0,0,0,0.7), 0 0 8px rgba(129,140,248,0.2)",
+                transition: "all 0.12s",
               }}
               onMouseEnter={(e) => {
                 const el = e.currentTarget as HTMLElement;
@@ -94,12 +92,12 @@ export function CustomEdge({
               }}
               onMouseLeave={(e) => {
                 const el = e.currentTarget as HTMLElement;
-                el.style.background = "#2a2a2a";
-                el.style.borderColor = "#a5b4fc";
-                el.style.color = "#a5b4fc";
+                el.style.background = "#1e1e1e";
+                el.style.borderColor = "#818cf8";
+                el.style.color = "#818cf8";
               }}
             >
-              <X size={11} strokeWidth={3} />
+              <X size={10} strokeWidth={2.5} />
             </button>
           </div>
         </EdgeLabelRenderer>

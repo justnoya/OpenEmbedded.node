@@ -26,35 +26,35 @@ const TYPE_META: Record<number, { label: string; icon: ReactNode; color: string 
   0:  { label: "Embed (V1)",         icon: <MessageSquare size={14} />,    color: "#f59e0b" },
 };
 
-const BG = "#222222";
-const SURFACE = "#2a2a2a";
-const BORDER = "#333333";
+const BG = "#161616";
+const SURFACE = "rgba(255,255,255,0.04)";
+const BORDER = "rgba(255,255,255,0.09)";
 const TEXT = "#e8e8e8";
-const MUTED = "#888888";
-const FAINT = "#555555";
+const MUTED = "#606060";
+const FAINT = "#3a3a3a";
 
 const inputStyle: React.CSSProperties = {
   width: "100%",
-  background: SURFACE,
-  border: `1px solid ${BORDER}`,
-  borderRadius: 6,
+  background: "rgba(255,255,255,0.04)",
+  border: "1px solid rgba(255,255,255,0.09)",
+  borderRadius: 8,
   color: TEXT,
   fontSize: 12,
-  padding: "6px 9px",
+  padding: "7px 10px",
   boxSizing: "border-box",
   outline: "none",
   fontFamily: "inherit",
-  transition: "border-color 0.15s",
+  transition: "border-color 0.15s, box-shadow 0.15s",
 };
 
 const labelStyle: React.CSSProperties = {
   display: "block",
-  color: MUTED,
-  fontSize: 11,
-  fontWeight: 600,
+  color: "#505050",
+  fontSize: 10,
+  fontWeight: 700,
   marginBottom: 5,
   textTransform: "uppercase",
-  letterSpacing: "0.06em",
+  letterSpacing: "0.08em",
 };
 
 const fieldWrap: React.CSSProperties = { marginBottom: 14 };

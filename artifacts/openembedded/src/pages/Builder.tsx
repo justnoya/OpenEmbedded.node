@@ -285,8 +285,10 @@ export function Builder() {
         display: "flex",
         alignItems: "center",
         padding: "0 14px",
-        background: "#222222",
-        borderBottom: "1px solid #333333",
+        background: "rgba(15,15,15,0.92)",
+        backdropFilter: "blur(24px) saturate(180%)",
+        WebkitBackdropFilter: "blur(24px) saturate(180%)",
+        borderBottom: "1px solid rgba(255,255,255,0.06)",
         gap: 0,
         zIndex: 20,
         overflowX: "auto",
@@ -324,7 +326,7 @@ export function Builder() {
         )}
       </button>
 
-      <div style={{ width: 1, height: 18, background: "#333333", flexShrink: 0, marginRight: 14 }} />
+      <div style={{ width: 1, height: 18, background: "rgba(255,255,255,0.07)", flexShrink: 0, marginRight: 14 }} />
 
       <div style={{ position: "relative", flexShrink: 0, marginRight: 8 }}>
         {editingName ? (
@@ -396,13 +398,13 @@ export function Builder() {
               width: 30,
               height: 30,
               background: "transparent",
-              border: "1px solid #333333",
-              borderRadius: 6,
-              color: canUndo() ? "#888888" : "#444444",
+              border: "1px solid rgba(255,255,255,0.08)",
+              borderRadius: 7,
+              color: canUndo() ? "#888888" : "#333333",
               cursor: canUndo() ? "pointer" : "not-allowed",
               transition: "all 0.12s",
             }}
-            onMouseEnter={(e) => { if (canUndo()) (e.currentTarget as HTMLElement).style.background = "#2a2a2a"; }}
+            onMouseEnter={(e) => { if (canUndo()) (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.06)"; }}
             onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "transparent"; }}
           >
             <Undo2 size={14} />
@@ -418,13 +420,13 @@ export function Builder() {
               width: 30,
               height: 30,
               background: "transparent",
-              border: "1px solid #333333",
-              borderRadius: 6,
-              color: canRedo() ? "#888888" : "#444444",
+              border: "1px solid rgba(255,255,255,0.08)",
+              borderRadius: 7,
+              color: canRedo() ? "#888888" : "#333333",
               cursor: canRedo() ? "pointer" : "not-allowed",
               transition: "all 0.12s",
             }}
-            onMouseEnter={(e) => { if (canRedo()) (e.currentTarget as HTMLElement).style.background = "#2a2a2a"; }}
+            onMouseEnter={(e) => { if (canRedo()) (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.06)"; }}
             onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "transparent"; }}
           >
             <Redo2 size={14} />
@@ -463,13 +465,15 @@ export function Builder() {
                 position: "absolute",
                 top: 40,
                 right: 0,
-                background: "#2a2a2a",
-                border: "1px solid #333333",
-                borderRadius: 10,
+                background: "rgba(22,22,22,0.96)",
+                backdropFilter: "blur(24px)",
+                WebkitBackdropFilter: "blur(24px)",
+                border: "1px solid rgba(255,255,255,0.08)",
+                borderRadius: 12,
                 padding: 6,
                 minWidth: 220,
                 zIndex: 200,
-                boxShadow: "0 16px 48px rgba(0,0,0,0.7)",
+                boxShadow: "0 16px 48px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.05)",
               }}
             >
               <div
@@ -613,7 +617,7 @@ export function Builder() {
 
         <DiscordActivityBadge />
 
-        <div style={{ width: 1, height: 18, background: "#333333" }} />
+        <div style={{ width: 1, height: 18, background: "rgba(255,255,255,0.07)" }} />
 
         <SaveIndicator />
 
@@ -625,20 +629,21 @@ export function Builder() {
             display: "flex",
             alignItems: "center",
             gap: 5,
-            background: "#5865F2",
+            background: "linear-gradient(135deg, #5865F2, #7c3aed)",
             border: "none",
-            borderRadius: 6,
+            borderRadius: 7,
             color: "#fff",
             fontSize: 12,
             fontWeight: 600,
-            padding: "6px 12px",
+            padding: "6px 14px",
             cursor: "pointer",
             opacity: updateProject.isPending ? 0.7 : 1,
-            transition: "all 0.15s",
+            transition: "opacity 0.15s",
             flexShrink: 0,
+            boxShadow: "0 2px 12px rgba(88,101,242,0.3)",
           }}
-          onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "#4752c4"; }}
-          onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "#5865F2"; }}
+          onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.opacity = "0.88"; }}
+          onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.opacity = "1"; }}
         >
           <Save size={13} />
           {!isMobile && "Save"}
@@ -677,8 +682,10 @@ export function Builder() {
         flexShrink: 0,
         display: "flex",
         alignItems: "stretch",
-        background: "#222222",
-        borderTop: "1px solid #333333",
+        background: "rgba(15,15,15,0.92)",
+        backdropFilter: "blur(20px)",
+        WebkitBackdropFilter: "blur(20px)",
+        borderTop: "1px solid rgba(255,255,255,0.06)",
         zIndex: 10,
       }}
     >
@@ -733,7 +740,7 @@ export function Builder() {
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
         fitView
-        style={{ background: "#1a1a1a" }}
+        style={{ background: "#0f0f0f" }}
         defaultEdgeOptions={{
           type: "default",
           style: { stroke: "#5865F2", strokeWidth: 2 },
@@ -749,10 +756,10 @@ export function Builder() {
         />
         <Controls
           style={{
-            background: "#222222",
-            border: "1px solid #333333",
-            borderRadius: 8,
-            boxShadow: "0 4px 16px rgba(0,0,0,0.5)",
+            background: "#161616",
+            border: "1px solid rgba(255,255,255,0.08)",
+            borderRadius: 10,
+            boxShadow: "0 4px 20px rgba(0,0,0,0.6)",
           }}
         />
         {!isMobile && (
@@ -765,12 +772,12 @@ export function Builder() {
               };
               return colorMap[(node.data as { componentType?: number })?.componentType ?? -1] ?? "#5865F2";
             }}
-            bgColor="#222222"
-            maskColor="rgba(26,26,26,0.65)"
+            bgColor="#161616"
+            maskColor="rgba(15,15,15,0.7)"
             style={{
-              background: "#222222",
-              border: "1px solid #333333",
-              borderRadius: 8,
+              background: "#161616",
+              border: "1px solid rgba(255,255,255,0.07)",
+              borderRadius: 10,
             }}
           />
         )}
@@ -779,12 +786,13 @@ export function Builder() {
             style={{
               color: "#888888",
               fontSize: 11,
-              background: "rgba(26,26,26,0.88)",
-              border: "1px solid #333333",
-              padding: "3px 12px",
+              background: "rgba(15,15,15,0.88)",
+              border: "1px solid rgba(255,255,255,0.07)",
+              padding: "3px 14px",
               borderRadius: 20,
-              backdropFilter: "blur(8px)",
+              backdropFilter: "blur(12px)",
               fontWeight: 500,
+              letterSpacing: "-0.01em",
             }}
           >
             {nodes.length === 0
@@ -801,8 +809,8 @@ export function Builder() {
       style={{
         width: isMobile ? "100%" : 312,
         flexShrink: 0,
-        background: "#222222",
-        borderLeft: isMobile ? "none" : "1px solid #333333",
+        background: "#161616",
+        borderLeft: isMobile ? "none" : "1px solid rgba(255,255,255,0.06)",
         display: "flex",
         flexDirection: "column",
         overflow: "hidden",
@@ -814,8 +822,8 @@ export function Builder() {
           display: "flex",
           padding: "0 4px",
           gap: 2,
-          background: "#222222",
-          borderBottom: "1px solid #333333",
+          background: "#161616",
+          borderBottom: "1px solid rgba(255,255,255,0.05)",
           flexShrink: 0,
         }}
       >
@@ -861,7 +869,7 @@ export function Builder() {
       style={{
         height: isMobile ? 260 : 280,
         flexShrink: 0,
-        borderTop: "1px solid #333333",
+        borderTop: "1px solid rgba(255,255,255,0.06)",
       }}
     >
       <ExportPanel />
@@ -875,7 +883,7 @@ export function Builder() {
           display: "flex",
           flexDirection: "column",
           height: "100dvh",
-          background: "#1a1a1a",
+          background: "#0f0f0f",
           overflow: "hidden",
         }}
       >
@@ -888,30 +896,33 @@ export function Builder() {
         {exportDrawer}
         <style>{`
           @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+          @keyframes fadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+          @keyframes scaleIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+          @keyframes pulseRing { from { opacity: 0.5; transform: scale(1); } to { opacity: 1; transform: scale(1.02); } }
           .react-flow__controls {
-            background: #222222 !important;
-            border: 1px solid #333333 !important;
-            border-radius: 8px !important;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.6) !important;
+            background: #161616 !important;
+            border: 1px solid rgba(255,255,255,0.08) !important;
+            border-radius: 10px !important;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.6) !important;
             overflow: hidden !important;
           }
           .react-flow__controls button {
-            background: #222222 !important;
+            background: #161616 !important;
             border: none !important;
-            border-bottom: 1px solid #333333 !important;
+            border-bottom: 1px solid rgba(255,255,255,0.05) !important;
             color: #888888 !important;
             fill: #888888 !important;
           }
           .react-flow__controls button:last-child { border-bottom: none !important; }
-          .react-flow__controls button:hover { background: #2a2a2a !important; }
+          .react-flow__controls button:hover { background: rgba(255,255,255,0.05) !important; }
           .react-flow__controls-button svg { fill: #888888 !important; }
           .react-flow__minimap {
-            background: #222222 !important;
-            border: 1px solid #333333 !important;
-            border-radius: 8px !important;
+            background: #161616 !important;
+            border: 1px solid rgba(255,255,255,0.07) !important;
+            border-radius: 10px !important;
             overflow: hidden !important;
           }
-          .react-flow__minimap-svg { background: #222222 !important; }
+          .react-flow__minimap-svg { background: #161616 !important; }
           .react-flow__edge-path { stroke-width: 2px; }
         `}</style>
       </div>
@@ -924,7 +935,7 @@ export function Builder() {
         display: "flex",
         flexDirection: "column",
         height: "100dvh",
-        background: "#1a1a1a",
+        background: "#0f0f0f",
         overflow: "hidden",
       }}
     >
@@ -943,8 +954,8 @@ export function Builder() {
                 display: "flex",
                 padding: "0 4px",
                 gap: 2,
-                background: "#222222",
-                borderBottom: "1px solid #333333",
+                background: "#161616",
+                borderBottom: "1px solid rgba(255,255,255,0.05)",
                 flexShrink: 0,
               }}
             >
@@ -983,22 +994,23 @@ export function Builder() {
       {mobileNav}
       <style>{`
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        @keyframes pulseRing { from { opacity: 0.5; transform: scale(1); } to { opacity: 1; transform: scale(1.02); } }
         .react-flow__controls {
-          background: #222222 !important;
-          border: 1px solid #333333 !important;
-          border-radius: 8px !important;
-          box-shadow: 0 4px 16px rgba(0,0,0,0.6) !important;
+          background: #161616 !important;
+          border: 1px solid rgba(255,255,255,0.08) !important;
+          border-radius: 10px !important;
+          box-shadow: 0 4px 20px rgba(0,0,0,0.6) !important;
           overflow: hidden !important;
         }
         .react-flow__controls button {
-          background: #222222 !important;
+          background: #161616 !important;
           border: none !important;
-          border-bottom: 1px solid #333333 !important;
+          border-bottom: 1px solid rgba(255,255,255,0.05) !important;
           color: #888888 !important;
           fill: #888888 !important;
         }
         .react-flow__controls button:last-child { border-bottom: none !important; }
-        .react-flow__controls button:hover { background: #2a2a2a !important; }
+        .react-flow__controls button:hover { background: rgba(255,255,255,0.05) !important; }
         .react-flow__controls-button svg { fill: #888888 !important; }
         .react-flow__edge-path { stroke-width: 2px; }
       `}</style>

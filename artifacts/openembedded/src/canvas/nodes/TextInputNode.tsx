@@ -18,7 +18,7 @@ function TextInputNodeComponent({ id, data }: NodeProps) {
       <div
         style={{
           background: "rgba(255,255,255,0.04)",
-          border: "1px solid #333333",
+          border: "1px solid rgba(255,255,255,0.07)",
           borderRadius: 4,
           padding: "4px 8px",
           minHeight: style === "Paragraph" ? 40 : 22,
@@ -32,8 +32,8 @@ function TextInputNodeComponent({ id, data }: NodeProps) {
       <div style={{ color: "#555555", fontSize: 10, marginTop: 4 }}>
         {style} · Type 4
       </div>
-      <Handle type="target" position={Position.Left} style={{ background: "#3fb950", border: "2px solid #242424", width: 10, height: 10 }} />
-      <Handle type="source" position={Position.Right} style={{ background: "#64748b", border: "2px solid #242424", width: 10, height: 10 }} />
+      <Handle type="target" position={Position.Left} style={{ background: "#3fb950", border: "2px solid #1b1b1b", width: 10, height: 10 }} />
+      <Handle type="source" position={Position.Right} style={{ background: "#64748b", border: "2px solid #1b1b1b", width: 10, height: 10 }} />
     </NodeWrapper>
   );
 }

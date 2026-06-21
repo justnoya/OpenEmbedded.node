@@ -59,8 +59,8 @@ function ThumbnailNodeComponent({ id, data }: NodeProps) {
           </div>
         </div>
       </div>
-      <Handle type="target" position={Position.Left} style={{ background: "#3fb950", border: "2px solid #242424", width: 10, height: 10 }} />
-      <Handle type="source" position={Position.Right} style={{ background: "#f59e0b", border: "2px solid #242424", width: 10, height: 10 }} />
+      <Handle type="target" position={Position.Left} style={{ background: "#3fb950", border: "2px solid #1b1b1b", width: 10, height: 10 }} />
+      <Handle type="source" position={Position.Right} style={{ background: "#f59e0b", border: "2px solid #1b1b1b", width: 10, height: 10 }} />
     </NodeWrapper>
   );
 }

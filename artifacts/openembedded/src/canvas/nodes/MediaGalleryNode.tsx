@@ -20,7 +20,7 @@ function MediaGalleryNodeComponent({ id, data }: NodeProps) {
                 key={i}
                 src={item.url}
                 alt=""
-                style={{ width: 28, height: 28, objectFit: "cover", borderRadius: 4, border: "1px solid #333333" }}
+                style={{ width: 28, height: 28, objectFit: "cover", borderRadius: 4, border: "1px solid rgba(255,255,255,0.07)" }}
                 onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
               />
             ) : (
@@ -36,8 +36,8 @@ function MediaGalleryNodeComponent({ id, data }: NodeProps) {
       ) : (
         <div style={{ color: "#555555", fontSize: 11 }}>0 images</div>
       )}
-      <Handle type="target" position={Position.Left} style={{ background: "#3fb950", border: "2px solid #242424", width: 10, height: 10 }} />
-      <Handle type="source" position={Position.Right} style={{ background: "#ec4899", border: "2px solid #242424", width: 10, height: 10 }} />
+      <Handle type="target" position={Position.Left} style={{ background: "#3fb950", border: "2px solid #1b1b1b", width: 10, height: 10 }} />
+      <Handle type="source" position={Position.Right} style={{ background: "#ec4899", border: "2px solid #1b1b1b", width: 10, height: 10 }} />
     </NodeWrapper>
   );
 }

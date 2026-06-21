@@ -48,8 +48,8 @@ function ContainerNodeComponent({ id, data }: NodeProps) {
           <span style={{ color: "#555555", fontSize: 11 }}>Root wrapper</span>
         )}
       </div>
-      <Handle type="target" position={Position.Left} style={{ background: "#3fb950", border: "2px solid #242424", width: 10, height: 10 }} />
-      <Handle type="source" position={Position.Right} style={{ background: "#8b5cf6", border: "2px solid #242424", width: 10, height: 10 }} />
+      <Handle type="target" position={Position.Left} style={{ background: "#3fb950", border: "2px solid #1b1b1b", width: 10, height: 10 }} />
+      <Handle type="source" position={Position.Right} style={{ background: "#8b5cf6", border: "2px solid #1b1b1b", width: 10, height: 10 }} />
     </NodeWrapper>
   );
 }

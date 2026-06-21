@@ -2,5 +2,5 @@
 - [OpenEmbedded workflow setup](openembedded-workflows.md) — API Server needs PORT=8080 explicitly in workflow command; both workflows must be configured via configureWorkflow().
 - [Discord Activity SDK types](discord-sdk-types.md) — DiscordSDKMock needs 4 args; use sdk.channelId/guildId properties not getSelectedVoiceChannel; useRef needs explicit undefined initial in React 19.
 - [OpenEmbedded vite proxy](openembedded-vite-proxy.md) — Vite proxy must be "/api" not "/v1"; generated API client uses /api/v1/... prefix because Express mounts router at app.use("/api", router).
-- [OpenEmbedded color palette](openembedded-colors.md) — canonical dark palette: BG #090C14, Panel #0D1117, Surface #131720, Border #1A1F2E, Text #DDE3F5, Muted #5C6882, Faint #2D3652, Accent #5865F2; node card bg #0F1420; handle border #0F1420.
+- [OpenEmbedded color palette](openembedded-colors.md) — canonical premium dark: canvas #0f0f0f, panel #161616, node #1b1b1b; borders rgba(255,255,255,0.07); glass toolbar with backdrop-filter blur.
 - [OpenEmbedded UI conventions](openembedded-ui.md) — tab bars use underline indicator (2px solid #5865F2 on active, transparent inactive); DiscordPreview keeps Discord's own color palette (CHAT_BG #313338 etc); focus ring via *:focus-visible CSS in index.css.

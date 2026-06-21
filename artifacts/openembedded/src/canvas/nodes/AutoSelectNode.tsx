@@ -39,8 +39,8 @@ function AutoSelectNodeComponent({ id, data }: NodeProps) {
       <div style={{ color: "#555555", fontSize: 10, marginTop: 4 }}>
         {meta.label}
       </div>
-      <Handle type="target" position={Position.Left} style={{ background: "#3fb950", border: "2px solid #242424", width: 10, height: 10 }} />
-      <Handle type="source" position={Position.Right} style={{ background: meta.color, border: "2px solid #242424", width: 10, height: 10 }} />
+      <Handle type="target" position={Position.Left} style={{ background: "#3fb950", border: "2px solid #1b1b1b", width: 10, height: 10 }} />
+      <Handle type="source" position={Position.Right} style={{ background: meta.color, border: "2px solid #1b1b1b", width: 10, height: 10 }} />
     </NodeWrapper>
   );
 }

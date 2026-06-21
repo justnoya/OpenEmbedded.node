@@ -22,18 +22,22 @@ export function NodeWrapper({ id, children, typeName, icon, accentColor, nodeCla
   const badgeColor = NODE_CLASS_COLORS[nodeClass];
   const badgeLabel = NODE_CLASS_LABELS[nodeClass];
 
-  let outline = "none";
-  let borderColor = "#333333";
-  let shadowVal = "0 1px 4px rgba(0,0,0,0.5)";
+  let borderColor: string;
+  let shadowVal: string;
+  let bgGradient: string;
 
   if (isConnectionTarget) {
-    borderColor = "#ffffff";
-    outline = "2px solid rgba(255,255,255,0.5)";
-    shadowVal = "0 0 0 3px rgba(255,255,255,0.1), 0 8px 24px rgba(0,0,0,0.6)";
+    borderColor = "rgba(255,255,255,0.4)";
+    shadowVal = "0 0 0 2px rgba(255,255,255,0.15), 0 0 32px rgba(255,255,255,0.05), 0 8px 24px rgba(0,0,0,0.6)";
+    bgGradient = `linear-gradient(180deg, rgba(255,255,255,0.04) 0%, transparent 50%), #1b1b1b`;
   } else if (isSelected) {
-    borderColor = "#5865F2";
-    outline = "2px solid rgba(88,101,242,0.4)";
-    shadowVal = "0 0 0 3px rgba(88,101,242,0.12), 0 8px 24px rgba(0,0,0,0.6)";
+    borderColor = "rgba(88,101,242,0.55)";
+    shadowVal = "0 0 0 3px rgba(88,101,242,0.15), 0 0 24px rgba(88,101,242,0.08), 0 8px 32px rgba(0,0,0,0.6)";
+    bgGradient = `linear-gradient(180deg, ${accentColor}08 0%, transparent 60%), #1b1b1b`;
+  } else {
+    borderColor = "rgba(255,255,255,0.07)";
+    shadowVal = "0 2px 8px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.04)";
+    bgGradient = `linear-gradient(180deg, rgba(255,255,255,0.025) 0%, transparent 60%), #1b1b1b`;
   }
 
   return (
@@ -41,32 +45,45 @@ export function NodeWrapper({ id, children, typeName, icon, accentColor, nodeCla
       data-testid={`node-${id}`}
       onClick={() => setSelectedNode(id)}
       style={{
-        background: "#242424",
+        background: bgGradient,
         border: `1px solid ${borderColor}`,
-        borderLeft: `3px solid ${accentColor}`,
-        borderRadius: 10,
-        minWidth: 216,
+        borderRadius: 12,
+        minWidth: 220,
         cursor: "pointer",
         position: "relative",
-        outline,
-        outlineOffset: 0,
         boxShadow: shadowVal,
-        transition: "border-color 0.12s, box-shadow 0.12s, outline 0.12s",
+        transition: "border-color 0.15s cubic-bezier(0.4,0,0.2,1), box-shadow 0.15s cubic-bezier(0.4,0,0.2,1)",
+        overflow: "hidden",
       }}
     >
+      {/* Accent gradient top bar */}
+      <div
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          height: 2,
+          background: `linear-gradient(90deg, ${accentColor}, ${accentColor}60, transparent)`,
+          borderRadius: "12px 12px 0 0",
+        }}
+      />
+
+      {/* Connection target pulse ring */}
       {isConnectionTarget && (
         <div
           style={{
             position: "absolute",
-            inset: -4,
-            borderRadius: 14,
-            border: "2px solid rgba(255,255,255,0.35)",
+            inset: -5,
+            borderRadius: 17,
+            border: "1.5px solid rgba(255,255,255,0.25)",
             pointerEvents: "none",
-            animation: "pulseRing 0.7s ease-in-out infinite alternate",
+            animation: "pulseRing 0.65s ease-in-out infinite alternate",
           }}
         />
       )}
 
+      {/* Handle visibility overrides */}
       {nodeClass === "sub" && (
         <style>{`[data-testid="node-${id}"] .react-flow__handle-right{opacity:0!important;pointer-events:none!important}`}</style>
       )}
@@ -74,27 +91,30 @@ export function NodeWrapper({ id, children, typeName, icon, accentColor, nodeCla
         <style>{`[data-testid="node-${id}"] .react-flow__handle{opacity:0!important;pointer-events:none!important}`}</style>
       )}
 
-      {/* Header */}
+      {/* ── Header ── */}
       <div
         style={{
-          padding: "8px 10px 7px",
-          borderBottom: "1px solid #333333",
+          padding: "10px 12px 9px",
+          borderBottom: "1px solid rgba(255,255,255,0.05)",
           display: "flex",
           alignItems: "center",
-          gap: 7,
+          gap: 8,
+          background: `linear-gradient(90deg, ${accentColor}12 0%, ${accentColor}05 40%, transparent 100%)`,
         }}
       >
         <div
           style={{
-            width: 24,
-            height: 24,
-            borderRadius: 6,
-            background: accentColor + "18",
+            width: 26,
+            height: 26,
+            borderRadius: 7,
+            background: `linear-gradient(135deg, ${accentColor}30, ${accentColor}15)`,
+            border: `1px solid ${accentColor}25`,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
             color: accentColor,
             flexShrink: 0,
+            boxShadow: `0 0 8px ${accentColor}15`,
           }}
         >
           {icon}
@@ -102,11 +122,11 @@ export function NodeWrapper({ id, children, typeName, icon, accentColor, nodeCla
 
         <span
           style={{
-            color: "#999999",
+            color: "rgba(255,255,255,0.5)",
             fontSize: 10,
             fontWeight: 600,
             textTransform: "uppercase",
-            letterSpacing: "0.08em",
+            letterSpacing: "0.09em",
             userSelect: "none",
             flex: 1,
           }}
@@ -116,16 +136,17 @@ export function NodeWrapper({ id, children, typeName, icon, accentColor, nodeCla
 
         <span
           style={{
-            background: badgeColor + "15",
-            border: `1px solid ${badgeColor}30`,
+            background: badgeColor + "12",
+            border: `1px solid ${badgeColor}25`,
             color: badgeColor,
             fontSize: 8,
             fontWeight: 700,
-            letterSpacing: "0.07em",
+            letterSpacing: "0.08em",
             padding: "1px 5px",
             borderRadius: 4,
             textTransform: "uppercase",
             userSelect: "none",
+            opacity: 0.85,
           }}
         >
           {badgeLabel}
@@ -134,26 +155,19 @@ export function NodeWrapper({ id, children, typeName, icon, accentColor, nodeCla
         {isSelected && (
           <div
             style={{
-              width: 5,
-              height: 5,
+              width: 6,
+              height: 6,
               borderRadius: "50%",
               background: "#5865F2",
               flexShrink: 0,
-              boxShadow: "0 0 4px rgba(88,101,242,0.6)",
+              boxShadow: "0 0 6px rgba(88,101,242,0.7)",
             }}
           />
         )}
       </div>
 
-      {/* Body */}
-      <div style={{ padding: "9px 12px 11px" }}>{children}</div>
-
-      <style>{`
-        @keyframes pulseRing {
-          from { opacity: 0.4; transform: scale(1); }
-          to   { opacity: 0.9; transform: scale(1.015); }
-        }
-      `}</style>
+      {/* ── Body ── */}
+      <div style={{ padding: "10px 12px 12px" }}>{children}</div>
     </div>
   );
 }
