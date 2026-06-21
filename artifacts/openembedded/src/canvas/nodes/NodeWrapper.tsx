@@ -28,20 +28,16 @@ export function NodeWrapper({
 
   let borderColor: string;
   let shadowVal: string;
-  let bgGradient: string;
 
   if (isConnectionTarget) {
-    borderColor = "rgba(255,255,255,0.4)";
-    shadowVal = "0 0 0 2px rgba(255,255,255,0.15), 0 0 32px rgba(255,255,255,0.05), 0 8px 24px rgba(0,0,0,0.6)";
-    bgGradient = `linear-gradient(180deg, rgba(255,255,255,0.04) 0%, transparent 50%), #1b1b1b`;
+    borderColor = "rgba(255,255,255,0.3)";
+    shadowVal = "0 0 0 2px rgba(255,255,255,0.08), 0 4px 16px rgba(0,0,0,0.5)";
   } else if (isSelected) {
-    borderColor = "rgba(88,101,242,0.55)";
-    shadowVal = "0 0 0 3px rgba(88,101,242,0.15), 0 0 24px rgba(88,101,242,0.08), 0 8px 32px rgba(0,0,0,0.6)";
-    bgGradient = `linear-gradient(180deg, ${accentColor}08 0%, transparent 60%), #1b1b1b`;
+    borderColor = accentColor + "90";
+    shadowVal = `0 0 0 2px ${accentColor}20, 0 4px 16px rgba(0,0,0,0.5)`;
   } else {
-    borderColor = "rgba(255,255,255,0.07)";
-    shadowVal = "0 2px 8px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.04)";
-    bgGradient = `linear-gradient(180deg, rgba(255,255,255,0.025) 0%, transparent 60%), #1b1b1b`;
+    borderColor = "rgba(255,255,255,0.08)";
+    shadowVal = "0 1px 4px rgba(0,0,0,0.4)";
   }
 
   return (
@@ -49,23 +45,29 @@ export function NodeWrapper({
       data-testid={`node-${id}`}
       onClick={() => setSelectedNode(id)}
       style={{
-        background: bgGradient,
+        background: "#161616",
         border: `1px solid ${borderColor}`,
-        borderRadius: 12,
+        borderRadius: 8,
         minWidth: 220,
         cursor: "pointer",
         position: "relative",
         boxShadow: shadowVal,
-        transition: "border-color 0.15s cubic-bezier(0.4,0,0.2,1), box-shadow 0.15s cubic-bezier(0.4,0,0.2,1)",
+        transition: "border-color 0.15s ease, box-shadow 0.15s ease",
         overflow: "hidden",
+        display: "flex",
+        flexDirection: "column",
       }}
     >
-      {/* Accent gradient top bar */}
+      {/* Left accent strip */}
       <div
         style={{
-          position: "absolute", top: 0, left: 0, right: 0, height: 2,
-          background: `linear-gradient(90deg, ${accentColor}, ${accentColor}60, transparent)`,
-          borderRadius: "12px 12px 0 0",
+          position: "absolute",
+          top: 0, left: 0, bottom: 0,
+          width: 3,
+          background: accentColor,
+          borderRadius: "8px 0 0 8px",
+          opacity: isSelected ? 1 : 0.6,
+          transition: "opacity 0.15s ease",
         }}
       />
 
@@ -73,8 +75,8 @@ export function NodeWrapper({
       {isConnectionTarget && (
         <div
           style={{
-            position: "absolute", inset: -5, borderRadius: 17,
-            border: "1.5px solid rgba(255,255,255,0.25)",
+            position: "absolute", inset: -5, borderRadius: 13,
+            border: "1.5px solid rgba(255,255,255,0.2)",
             pointerEvents: "none",
             animation: "pulseRing 0.65s ease-in-out infinite alternate",
           }}
@@ -95,20 +97,19 @@ export function NodeWrapper({
       {/* ── Header ── */}
       <div
         style={{
-          padding: "10px 12px 9px",
-          borderBottom: "1px solid rgba(255,255,255,0.05)",
+          padding: "9px 12px 9px 18px",
+          borderBottom: "1px solid rgba(255,255,255,0.06)",
           display: "flex", alignItems: "center", gap: 8,
-          background: `linear-gradient(90deg, ${accentColor}12 0%, ${accentColor}05 40%, transparent 100%)`,
+          background: "rgba(255,255,255,0.025)",
         }}
       >
         <div
           style={{
-            width: 26, height: 26, borderRadius: 7,
-            background: `linear-gradient(135deg, ${accentColor}30, ${accentColor}15)`,
-            border: `1px solid ${accentColor}25`,
+            width: 24, height: 24, borderRadius: 6,
+            background: accentColor + "1a",
+            border: `1px solid ${accentColor}30`,
             display: "flex", alignItems: "center", justifyContent: "center",
             color: accentColor, flexShrink: 0,
-            boxShadow: `0 0 8px ${accentColor}15`,
           }}
         >
           {icon}
@@ -116,8 +117,8 @@ export function NodeWrapper({
 
         <span
           style={{
-            color: "rgba(255,255,255,0.5)", fontSize: 10, fontWeight: 600,
-            textTransform: "uppercase", letterSpacing: "0.09em",
+            color: "rgba(255,255,255,0.45)", fontSize: 10, fontWeight: 600,
+            textTransform: "uppercase", letterSpacing: "0.08em",
             userSelect: "none", flex: 1,
           }}
         >
@@ -126,12 +127,12 @@ export function NodeWrapper({
 
         <span
           style={{
-            background: badgeColor + "12",
-            border: `1px solid ${badgeColor}25`,
+            background: badgeColor + "15",
+            border: `1px solid ${badgeColor}22`,
             color: badgeColor,
-            fontSize: 8, fontWeight: 700, letterSpacing: "0.08em",
-            padding: "1px 5px", borderRadius: 4,
-            textTransform: "uppercase", userSelect: "none", opacity: 0.85,
+            fontSize: 8, fontWeight: 700, letterSpacing: "0.07em",
+            padding: "1px 5px", borderRadius: 3,
+            textTransform: "uppercase", userSelect: "none", opacity: 0.8,
           }}
         >
           {badgeLabel}
@@ -140,16 +141,15 @@ export function NodeWrapper({
         {isSelected && (
           <div
             style={{
-              width: 6, height: 6, borderRadius: "50%",
-              background: "#5865F2", flexShrink: 0,
-              boxShadow: "0 0 6px rgba(88,101,242,0.7)",
+              width: 5, height: 5, borderRadius: "50%",
+              background: accentColor, flexShrink: 0,
             }}
           />
         )}
       </div>
 
       {/* ── Body ── */}
-      <div style={{ padding: "10px 12px 12px" }}>{children}</div>
+      <div style={{ padding: "10px 12px 12px 18px" }}>{children}</div>
     </div>
   );
 }
