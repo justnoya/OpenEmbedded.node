@@ -178,48 +178,59 @@ export function Home() {
       onClick={() => setOpenMenuId(null)}
     >
       {/* ── Header ──────────────────────────────────────────────────────── */}
-      <header style={{
-        position: "sticky", top: 0, zIndex: 100,
-        background: "rgba(15,15,15,0.9)",
-        backdropFilter: "blur(20px) saturate(160%)",
-        WebkitBackdropFilter: "blur(20px) saturate(160%)",
-        borderBottom: "1px solid rgba(255,255,255,0.06)",
-        display: "flex", alignItems: "center",
-        padding: "0 28px", height: 58, gap: 16,
-      }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 10, flexShrink: 0 }}>
-          <div style={{
-            width: 32, height: 32, borderRadius: 9,
-            display: "flex", alignItems: "center", justifyContent: "center",
-          }}>
-            <AppLogo size={32} />
+      <div style={{ position: "sticky", top: 0, zIndex: 100, padding: "10px 16px" }}>
+        <header style={{
+          background: "rgba(22,22,22,0.93)",
+          backdropFilter: "blur(24px) saturate(160%)",
+          WebkitBackdropFilter: "blur(24px) saturate(160%)",
+          border: "1px solid rgba(255,255,255,0.10)",
+          borderRadius: 14,
+          boxShadow: "0 4px 28px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.07)",
+          display: "flex", alignItems: "center",
+          padding: "0 18px", height: 50, gap: 14,
+        }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 9, flexShrink: 0 }}>
+            <div style={{
+              width: 28, height: 28, borderRadius: 8,
+              display: "flex", alignItems: "center", justifyContent: "center",
+            }}>
+              <AppLogo size={28} />
+            </div>
+            <span style={{ fontSize: 14, fontWeight: 700, color: "#f0f0f0", letterSpacing: "-0.03em" }}>
+              OpenEmbedded
+            </span>
           </div>
-          <span style={{ fontSize: 15, fontWeight: 700, color: "#f0f0f0", letterSpacing: "-0.03em" }}>
-            OpenEmbedded
-          </span>
-        </div>
 
-        <div style={{ flex: 1 }} />
+          <div style={{ flex: 1 }} />
 
-        <button
-          onClick={openCreate}
-          style={{
-            display: "flex", alignItems: "center", gap: 6,
-            background: "linear-gradient(135deg, #5865F2, #7c3aed)",
-            border: "none", borderRadius: 8, color: "#fff",
-            fontSize: 13, fontWeight: 600, padding: "7px 16px",
-            cursor: "pointer",
-            boxShadow: "0 2px 14px rgba(88,101,242,0.38), 0 0 0 1px rgba(88,101,242,0.2)",
-            transition: "opacity 0.15s, transform 0.15s",
-            flexShrink: 0,
-          }}
-          onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.opacity = "0.88"; }}
-          onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.opacity = "1"; }}
-        >
-          <Plus size={14} strokeWidth={2.5} />
-          New Project
-        </button>
-      </header>
+          <div style={{
+            display: "flex", alignItems: "center",
+            background: "rgba(255,255,255,0.04)",
+            border: "1px solid rgba(255,255,255,0.07)",
+            borderRadius: 10,
+            padding: "3px 4px",
+          }}>
+            <button
+              onClick={openCreate}
+              style={{
+                display: "flex", alignItems: "center", gap: 6,
+                background: "linear-gradient(135deg, #5865F2, #7c3aed)",
+                border: "none", borderRadius: 7, color: "#fff",
+                fontSize: 13, fontWeight: 600, padding: "6px 14px",
+                cursor: "pointer",
+                boxShadow: "0 2px 12px rgba(88,101,242,0.35), 0 0 0 1px rgba(88,101,242,0.18)",
+                transition: "opacity 0.15s",
+                flexShrink: 0,
+              }}
+              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.opacity = "0.88"; }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.opacity = "1"; }}
+            >
+              <Plus size={13} strokeWidth={2.5} />
+              New Project
+            </button>
+          </div>
+        </header>
+      </div>
 
       {/* ── Main ────────────────────────────────────────────────────────── */}
       <main style={{ flex: 1, padding: "36px 28px 72px", maxWidth: 1320, margin: "0 auto", width: "100%", boxSizing: "border-box" }}>

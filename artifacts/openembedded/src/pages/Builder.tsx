@@ -282,19 +282,20 @@ export function Builder() {
   const projectList = (projects as Project[] | undefined) ?? [];
 
   const toolbar = (
+    <div style={{ padding: "10px 16px", flexShrink: 0, zIndex: 20 }}>
     <div
       style={{
         height: 48,
-        flexShrink: 0,
         display: "flex",
         alignItems: "center",
         padding: "0 14px",
-        background: "rgba(15,15,15,0.92)",
+        background: "rgba(22,22,22,0.93)",
         backdropFilter: "blur(24px) saturate(180%)",
         WebkitBackdropFilter: "blur(24px) saturate(180%)",
-        borderBottom: "1px solid rgba(255,255,255,0.06)",
+        border: "1px solid rgba(255,255,255,0.10)",
+        borderRadius: 14,
+        boxShadow: "0 4px 28px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.07)",
         gap: 0,
-        zIndex: 20,
         overflowX: "auto",
         scrollbarWidth: "none",
       }}
@@ -678,6 +679,7 @@ export function Builder() {
 
         <DiscordUserBadge />
       </div>
+    </div>
     </div>
   );
 
