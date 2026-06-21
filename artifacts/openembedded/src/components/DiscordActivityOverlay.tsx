@@ -1,208 +1,337 @@
-/**
- * Full-screen loading overlay shown while the Discord Activity SDK is
- * initialising or performing the OAuth handshake.
- * Only rendered when sdkState is "loading" or "auth" inside Discord.
- */
+import { useState } from "react";
 import { useDiscord } from "@/lib/discordContext";
 
-const STEPS = [
-  { id: "loading", label: "Connecting to Discord" },
-  { id: "auth",    label: "Authorising account" },
-  { id: "ready",   label: "Launching OpenEmbedded" },
-];
+function LayersIcon() {
+  return (
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+      <polygon points="12 2 2 7 12 12 22 7 12 2" />
+      <polyline points="2 17 12 22 22 17" />
+      <polyline points="2 12 12 17 22 12" />
+    </svg>
+  );
+}
 
-function getStepIndex(state: string): number {
-  if (state === "loading") return 0;
-  if (state === "auth") return 1;
-  if (state === "ready") return 2;
-  return 0;
+function Spinner() {
+  return (
+    <svg width="15" height="15" viewBox="0 0 15 15" fill="none" style={{ animation: "oe-spin 0.85s linear infinite" }}>
+      <circle cx="7.5" cy="7.5" r="6" stroke="rgba(88,101,242,0.18)" strokeWidth="1.5" />
+      <path d="M7.5 1.5A6 6 0 0 1 13.5 7.5" stroke="#5865F2" strokeWidth="1.5" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function SectionLabel({ children }: { children: string }) {
+  return (
+    <div style={{
+      fontSize: 12,
+      fontWeight: 600,
+      textTransform: "uppercase",
+      letterSpacing: "0.06em",
+      color: "#3a3a3a",
+      marginBottom: 8,
+    }}>
+      {children}
+    </div>
+  );
 }
 
 export function DiscordActivityOverlay() {
-  const { isDiscord, sdkState } = useDiscord();
+  const { isDiscord, sdkState, user, accessToken, syncUser } = useDiscord();
+  const [confirmed, setConfirmed] = useState(false);
+  const [imgError, setImgError] = useState(false);
+  const [hoverContinue, setHoverContinue] = useState(false);
+  const [continuing, setContinuing] = useState(false);
 
-  if (!isDiscord || sdkState === "idle" || sdkState === "ready") return null;
+  if (!isDiscord || sdkState === "idle" || confirmed) return null;
 
+  const isLoading = sdkState === "loading" || sdkState === "auth";
+  const isReady = sdkState === "ready";
   const isError = sdkState === "error";
-  const activeStep = getStepIndex(sdkState);
+
+  const avatarUrl = user
+    ? (!imgError && user.avatar
+        ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=128`
+        : `https://cdn.discordapp.com/embed/avatars/${parseInt(user.id) % 6}.png`)
+    : null;
+
+  const displayName = user?.global_name ?? user?.username ?? "";
+  const username = user?.username ?? "";
+
+  const handleContinue = async () => {
+    setContinuing(true);
+    try {
+      if (accessToken) await syncUser(accessToken);
+    } catch {
+      // non-blocking — proceed even if backend sync fails
+    }
+    setConfirmed(true);
+  };
 
   return (
     <div style={{
-      position: "fixed", inset: 0, zIndex: 9999,
-      background: "#0a0a0a",
-      display: "flex", flexDirection: "column",
-      alignItems: "center", justifyContent: "center",
-      fontFamily: `"Inter", system-ui, sans-serif`,
+      position: "fixed",
+      inset: 0,
+      zIndex: 9999,
+      background: "#111111",
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      justifyContent: "center",
+      fontFamily: `"DM Sans", "Inter", system-ui, sans-serif`,
     }}>
       {/* Ambient glow */}
       <div style={{
         position: "absolute",
-        width: 480, height: 480,
+        width: 560,
+        height: 560,
         borderRadius: "50%",
-        background: "radial-gradient(circle, rgba(88,101,242,0.12) 0%, transparent 70%)",
-        top: "50%", left: "50%",
-        transform: "translate(-50%, -60%)",
+        background: "radial-gradient(circle, rgba(88,101,242,0.07) 0%, transparent 70%)",
+        top: "50%",
+        left: "50%",
+        transform: "translate(-50%, -55%)",
         pointerEvents: "none",
       }} />
 
       <div style={{
         position: "relative",
-        display: "flex", flexDirection: "column",
-        alignItems: "center", gap: 36,
         zIndex: 1,
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        gap: 40,
+        width: "100%",
+        maxWidth: 340,
+        padding: "0 20px",
+        boxSizing: "border-box",
       }}>
-        {/* Logo */}
-        <div style={{ position: "relative" }}>
-          {/* Pulse ring */}
-          {!isError && (
-            <div style={{
-              position: "absolute", inset: -10,
-              borderRadius: 26,
-              border: "1px solid rgba(88,101,242,0.25)",
-              animation: "pulseRing 2s ease-in-out infinite",
-            }} />
-          )}
+
+        {/* ── Brand ─────────────────────────────────────────────────── */}
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 18 }}>
           <div style={{
-            width: 80, height: 80, borderRadius: 20,
-            overflow: "hidden",
+            width: 72,
+            height: 72,
+            borderRadius: 21,
+            background: isError
+              ? "linear-gradient(135deg, #7c3aed, #5865F2)"
+              : "linear-gradient(135deg, #5865F2, #7c3aed)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
             boxShadow: isError
-              ? "0 0 0 1px rgba(248,81,73,0.4), 0 8px 40px rgba(248,81,73,0.2)"
-              : "0 0 0 1px rgba(88,101,242,0.35), 0 8px 40px rgba(88,101,242,0.3), 0 2px 8px rgba(0,0,0,0.6)",
+              ? "0 0 40px rgba(248,81,73,0.18), 0 8px 32px rgba(0,0,0,0.55)"
+              : isLoading
+                ? "0 0 48px rgba(88,101,242,0.22), 0 8px 32px rgba(0,0,0,0.55)"
+                : "0 0 56px rgba(88,101,242,0.28), 0 8px 40px rgba(0,0,0,0.6)",
           }}>
-            <img
-              src="/logo.png"
-              alt="OpenEmbedded"
-              style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
-            />
+            <LayersIcon />
           </div>
-        </div>
 
-        {/* Name + State */}
-        <div style={{ textAlign: "center", display: "flex", flexDirection: "column", gap: 8 }}>
-          <div style={{
-            fontSize: 20, fontWeight: 700, color: "#f0f0f0",
-            letterSpacing: "-0.03em",
-          }}>
-            OpenEmbedded
-          </div>
-          <div style={{ fontSize: 13, color: "#606060", fontWeight: 400 }}>
-            {isError ? "Connection failed" : "Discord Activity"}
-          </div>
-        </div>
-
-        {/* Step indicators */}
-        {!isError ? (
-          <div style={{
-            display: "flex", flexDirection: "column", gap: 10,
-            width: 280,
-          }}>
-            {STEPS.map((step, i) => {
-              const isDone = i < activeStep;
-              const isActive = i === activeStep;
-              const isPending = i > activeStep;
-              return (
-                <div key={step.id} style={{
-                  display: "flex", alignItems: "center", gap: 12,
-                  opacity: isPending ? 0.3 : 1,
-                  transition: "opacity 0.3s ease",
-                }}>
-                  {/* Step dot / checkmark */}
-                  <div style={{
-                    width: 20, height: 20, borderRadius: "50%", flexShrink: 0,
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                    background: isDone
-                      ? "rgba(63,185,80,0.15)"
-                      : isActive
-                        ? "rgba(88,101,242,0.15)"
-                        : "rgba(255,255,255,0.04)",
-                    border: `1px solid ${
-                      isDone ? "rgba(63,185,80,0.4)"
-                      : isActive ? "rgba(88,101,242,0.5)"
-                      : "rgba(255,255,255,0.08)"
-                    }`,
-                    transition: "all 0.3s ease",
-                  }}>
-                    {isDone ? (
-                      <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
-                        <path d="M2 5L4.2 7.2L8 3" stroke="#3fb950" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                      </svg>
-                    ) : isActive ? (
-                      <div style={{
-                        width: 6, height: 6, borderRadius: "50%",
-                        background: "#5865F2",
-                        animation: "dotPulse 1.2s ease-in-out infinite",
-                      }} />
-                    ) : (
-                      <div style={{ width: 5, height: 5, borderRadius: "50%", background: "rgba(255,255,255,0.15)" }} />
-                    )}
-                  </div>
-                  {/* Label */}
-                  <span style={{
-                    fontSize: 13,
-                    color: isDone ? "#3fb950" : isActive ? "#e8e8e8" : "#404040",
-                    fontWeight: isActive ? 500 : 400,
-                    transition: "color 0.3s ease",
-                  }}>
-                    {step.label}
-                  </span>
-                  {/* Spinner for active */}
-                  {isActive && (
-                    <div style={{ marginLeft: "auto" }}>
-                      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style={{ animation: "spin 0.9s linear infinite" }}>
-                        <circle cx="7" cy="7" r="5.5" stroke="rgba(88,101,242,0.2)" strokeWidth="1.5" />
-                        <path d="M7 1.5A5.5 5.5 0 0 1 12.5 7" stroke="#5865F2" strokeWidth="1.5" strokeLinecap="round" />
-                      </svg>
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        ) : (
-          /* Error state */
-          <div style={{
-            width: 280, padding: "14px 16px", borderRadius: 12,
-            background: "rgba(248,81,73,0.06)",
-            border: "1px solid rgba(248,81,73,0.2)",
-            display: "flex", flexDirection: "column", gap: 8,
-          }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f85149" strokeWidth="2">
-                <circle cx="12" cy="12" r="10" />
-                <line x1="15" y1="9" x2="9" y2="15" />
-                <line x1="9" y1="9" x2="15" y2="15" />
-              </svg>
-              <span style={{ fontSize: 13, color: "#f85149", fontWeight: 600 }}>
-                Could not connect
-              </span>
+          <div style={{ textAlign: "center" }}>
+            <div style={{
+              fontSize: 22,
+              fontWeight: 700,
+              color: "#e2e2e2",
+              letterSpacing: "-0.035em",
+              lineHeight: 1.1,
+            }}>
+              OpenEmbedded
             </div>
-            <p style={{ margin: 0, fontSize: 12, color: "#606060", lineHeight: 1.55 }}>
-              Make sure{" "}
-              <code style={{ color: "#888888", background: "rgba(255,255,255,0.06)", padding: "1px 5px", borderRadius: 4, fontSize: 11 }}>
-                DISCORD_CLIENT_ID
-              </code>{" "}
-              and{" "}
-              <code style={{ color: "#888888", background: "rgba(255,255,255,0.06)", padding: "1px 5px", borderRadius: 4, fontSize: 11 }}>
-                DISCORD_CLIENT_SECRET
-              </code>{" "}
-              are set in your environment.
-            </p>
+            <div style={{
+              fontSize: 13,
+              color: "#3a3a3a",
+              marginTop: 5,
+              fontWeight: 400,
+            }}>
+              {isError ? "Sign in failed" : isLoading ? "Discord Activity" : "Welcome back"}
+            </div>
+          </div>
+        </div>
+
+        {/* ── Loading / Auth ─────────────────────────────────────────── */}
+        {isLoading && (
+          <div style={{ width: "100%", display: "flex", flexDirection: "column", gap: 8 }}>
+            <SectionLabel>Status</SectionLabel>
+
+            {/* Status row */}
+            <div style={{ background: "#1a1a1a", borderRadius: 12, overflow: "hidden" }}>
+              <div style={{
+                display: "flex",
+                alignItems: "center",
+                minHeight: 54,
+                padding: "0 16px",
+                gap: 12,
+                position: "relative",
+              }}>
+                <Spinner />
+                <span style={{ fontSize: 16, fontWeight: 400, color: "#e2e2e2", flex: 1 }}>
+                  {sdkState === "loading" ? "Connecting to Discord" : "Signing you in"}
+                </span>
+                {/* Divider */}
+                <div style={{
+                  position: "absolute",
+                  bottom: 0, left: 0, right: 0,
+                  height: 1,
+                  background: "#242424",
+                }} />
+              </div>
+
+              {/* Skeleton row */}
+              <div style={{
+                display: "flex",
+                alignItems: "center",
+                minHeight: 54,
+                padding: "0 16px",
+                gap: 12,
+                opacity: 0.35,
+              }}>
+                <div style={{ width: 32, height: 32, borderRadius: "50%", background: "#282828", flexShrink: 0 }} />
+                <div style={{ flex: 1 }}>
+                  <div style={{ height: 11, width: 96, background: "#282828", borderRadius: 4 }} />
+                </div>
+                <div style={{ height: 11, width: 60, background: "#282828", borderRadius: 4 }} />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ── Ready — User card + Continue ──────────────────────────── */}
+        {isReady && user && (
+          <div style={{ width: "100%", display: "flex", flexDirection: "column", gap: 0 }}>
+
+            {/* Account group */}
+            <SectionLabel>Account</SectionLabel>
+            <div style={{
+              background: "#1a1a1a",
+              borderRadius: 12,
+              overflow: "hidden",
+              marginBottom: 20,
+            }}>
+              {/* User row */}
+              <div style={{
+                display: "flex",
+                alignItems: "center",
+                minHeight: 54,
+                padding: "0 16px",
+                gap: 12,
+              }}>
+                {/* Avatar */}
+                {avatarUrl && (
+                  <img
+                    src={avatarUrl}
+                    onError={() => setImgError(true)}
+                    alt={displayName}
+                    style={{
+                      width: 34,
+                      height: 34,
+                      borderRadius: "50%",
+                      objectFit: "cover",
+                      flexShrink: 0,
+                    }}
+                  />
+                )}
+
+                {/* Display name */}
+                <span style={{
+                  flex: 1,
+                  fontSize: 16,
+                  fontWeight: 400,
+                  color: "#e2e2e2",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                  paddingRight: 8,
+                }}>
+                  {displayName}
+                </span>
+
+                {/* @username muted value */}
+                <span style={{
+                  fontSize: 15,
+                  color: "#4a4a4a",
+                  whiteSpace: "nowrap",
+                  flexShrink: 0,
+                  marginRight: 6,
+                }}>
+                  @{username}
+                </span>
+              </div>
+            </div>
+
+            {/* Access group */}
+            <SectionLabel>Access</SectionLabel>
+            <div style={{ background: "#1a1a1a", borderRadius: 12, overflow: "hidden" }}>
+              <button
+                onClick={handleContinue}
+                disabled={continuing}
+                onMouseEnter={() => setHoverContinue(true)}
+                onMouseLeave={() => setHoverContinue(false)}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  width: "100%",
+                  minHeight: 54,
+                  padding: "0 16px",
+                  background: hoverContinue && !continuing ? "#202020" : "transparent",
+                  border: "none",
+                  cursor: continuing ? "default" : "pointer",
+                  transition: "background 0.1s",
+                  boxSizing: "border-box",
+                }}
+              >
+                <span style={{
+                  flex: 1,
+                  textAlign: "left",
+                  fontSize: 16,
+                  fontWeight: 400,
+                  color: continuing ? "#4a4a4a" : "#e2e2e2",
+                  fontFamily: "inherit",
+                  letterSpacing: "-0.01em",
+                }}>
+                  {continuing ? "Signing in…" : "Continue to OpenEmbedded"}
+                </span>
+
+                {continuing ? (
+                  <Spinner />
+                ) : (
+                  <span style={{ fontSize: 18, color: "#3a3a3a", flexShrink: 0 }}>›</span>
+                )}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* ── Error ─────────────────────────────────────────────────── */}
+        {isError && (
+          <div style={{ width: "100%", display: "flex", flexDirection: "column" }}>
+            <SectionLabel>Error</SectionLabel>
+            <div style={{ background: "#1a1a1a", borderRadius: 12, overflow: "hidden" }}>
+              <div style={{
+                minHeight: 54,
+                padding: "14px 16px",
+                display: "flex",
+                flexDirection: "column",
+                gap: 6,
+              }}>
+                <span style={{ fontSize: 15, color: "#f85149", fontWeight: 400 }}>
+                  Could not sign in
+                </span>
+                <span style={{ fontSize: 13, color: "#4a4a4a", lineHeight: 1.6 }}>
+                  Ensure{" "}
+                  <span style={{ color: "#606060", fontFamily: "monospace" }}>DISCORD_CLIENT_ID</span>
+                  {" "}and{" "}
+                  <span style={{ color: "#606060", fontFamily: "monospace" }}>DISCORD_CLIENT_SECRET</span>
+                  {" "}are set.
+                </span>
+              </div>
+            </div>
           </div>
         )}
       </div>
 
       <style>{`
-        @keyframes spin {
+        @keyframes oe-spin {
           from { transform: rotate(0deg); }
           to { transform: rotate(360deg); }
-        }
-        @keyframes pulseRing {
-          0%, 100% { opacity: 0.4; transform: scale(1); }
-          50% { opacity: 0.9; transform: scale(1.04); }
-        }
-        @keyframes dotPulse {
-          0%, 100% { opacity: 0.5; transform: scale(0.75); }
-          50% { opacity: 1; transform: scale(1); }
         }
       `}</style>
     </div>

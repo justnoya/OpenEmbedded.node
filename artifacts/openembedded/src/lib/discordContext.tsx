@@ -54,6 +54,10 @@ interface DiscordContextValue {
   guildId: string | null;
   channelId: string | null;
   instanceId: string | null;
+  /** The OAuth access token — available once sdkState === "ready". */
+  accessToken: string | null;
+  /** Explicitly sync the authenticated user to the backend. Called by the sign-in overlay on Continue. */
+  syncUser: (token: string) => Promise<void>;
   setActivity: (presence: ActivityPresence) => Promise<void>;
   clearActivity: () => Promise<void>;
 }
@@ -67,6 +71,8 @@ const DiscordContext = createContext<DiscordContextValue>({
   guildId: null,
   channelId: null,
   instanceId: null,
+  accessToken: null,
+  syncUser: async () => {},
   setActivity: async () => {},
   clearActivity: async () => {},
 });
@@ -92,6 +98,7 @@ export function DiscordProvider({ children }: { children: ReactNode }) {
   const [guildId, setGuildId] = useState<string | null>(null);
   const [channelId, setChannelId] = useState<string | null>(null);
   const [instanceId, setInstanceId] = useState<string | null>(null);
+  const [accessToken, setAccessToken] = useState<string | null>(null);
 
   const sdkRef = useRef<DiscordSDK | DiscordSDKMock | null>(null);
   const isDiscord = sdkState !== "idle";
@@ -114,7 +121,6 @@ export function DiscordProvider({ children }: { children: ReactNode }) {
 
         if (!config.configured || !config.clientId) {
           console.warn("[Discord] No client ID configured, using mock SDK");
-          // DiscordSDKMock(clientId, guildId, channelId, locationId)
           sdk = new DiscordSDKMock("", null, null, null);
         } else {
           sdk = new DiscordSDK(config.clientId);
@@ -124,9 +130,7 @@ export function DiscordProvider({ children }: { children: ReactNode }) {
         await sdk.ready();
         if (cancelled) return;
 
-        // Pull instanceId from SDK (DiscordSDK has it, mock has a constant)
         setInstanceId((sdk as DiscordSDK).instanceId ?? null);
-        // guildId / channelId are properties on both real SDK and mock
         setGuildId((sdk as DiscordSDK).guildId ?? null);
         setChannelId((sdk as DiscordSDK).channelId ?? null);
 
@@ -160,14 +164,9 @@ export function DiscordProvider({ children }: { children: ReactNode }) {
         if (cancelled) return;
 
         setUser(authed.user as DiscordUser);
+        setAccessToken(access_token);
         setSdkState("ready");
-
-        // 5. Upsert user account in our DB (fire-and-forget, non-blocking)
-        fetch("/api/v1/discord/me", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ access_token }),
-        }).catch((e) => console.warn("[Discord] Failed to sync user account:", e));
+        // Backend sync is deferred — the sign-in overlay calls syncUser() on Continue.
       } catch (err) {
         if (!cancelled) {
           console.error("[Discord SDK] Init error:", err);
@@ -180,6 +179,20 @@ export function DiscordProvider({ children }: { children: ReactNode }) {
     return () => {
       cancelled = true;
     };
+  }, []);
+
+  // ── syncUser — called explicitly by the sign-in overlay ────────────────
+
+  const syncUser = useCallback(async (token: string) => {
+    try {
+      await fetch("/api/v1/discord/me", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ access_token: token }),
+      });
+    } catch (e) {
+      console.warn("[Discord] Failed to sync user account:", e);
+    }
   }, []);
 
   // ── Rich Presence ──────────────────────────────────────────────────────
@@ -234,6 +247,8 @@ export function DiscordProvider({ children }: { children: ReactNode }) {
         guildId,
         channelId,
         instanceId,
+        accessToken,
+        syncUser,
         setActivity,
         clearActivity,
       }}
