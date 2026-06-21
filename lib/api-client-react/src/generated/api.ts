@@ -20,6 +20,12 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  BotChannelsInput,
+  BotChannelsResult,
+  BotSendInput,
+  BotSendResult,
+  BotValidateInput,
+  BotValidateResult,
   CodeExportResult,
   ErrorResponse,
   ExportResult,
@@ -699,5 +705,218 @@ export const useSendWebhook = <TError = ErrorType<ErrorResponse>,
         TContext
       > => {
       return useMutation(getSendWebhookMutationOptions(options));
+    }
+
+export const getBotValidateUrl = () => {
+
+
+
+
+  return `/api/v1/bot/validate`
+}
+
+/**
+ * @summary Validate a bot token and return guilds
+ */
+export const botValidate = async (botValidateInput: BotValidateInput, options?: RequestInit): Promise<BotValidateResult> => {
+
+  return customFetch<BotValidateResult>(getBotValidateUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      botValidateInput,)
+  }
+);}
+
+
+
+
+export const getBotValidateMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof botValidate>>, TError,{data: BodyType<BotValidateInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof botValidate>>, TError,{data: BodyType<BotValidateInput>}, TContext> => {
+
+const mutationKey = ['botValidate'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof botValidate>>, {data: BodyType<BotValidateInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  botValidate(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type BotValidateMutationResult = NonNullable<Awaited<ReturnType<typeof botValidate>>>
+    export type BotValidateMutationBody = BodyType<BotValidateInput>
+    export type BotValidateMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Validate a bot token and return guilds
+ */
+export const useBotValidate = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof botValidate>>, TError,{data: BodyType<BotValidateInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof botValidate>>,
+        TError,
+        {data: BodyType<BotValidateInput>},
+        TContext
+      > => {
+      return useMutation(getBotValidateMutationOptions(options));
+    }
+
+export const getBotGetChannelsUrl = () => {
+
+
+
+
+  return `/api/v1/bot/channels`
+}
+
+/**
+ * @summary Get text channels for a guild
+ */
+export const botGetChannels = async (botChannelsInput: BotChannelsInput, options?: RequestInit): Promise<BotChannelsResult> => {
+
+  return customFetch<BotChannelsResult>(getBotGetChannelsUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      botChannelsInput,)
+  }
+);}
+
+
+
+
+export const getBotGetChannelsMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof botGetChannels>>, TError,{data: BodyType<BotChannelsInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof botGetChannels>>, TError,{data: BodyType<BotChannelsInput>}, TContext> => {
+
+const mutationKey = ['botGetChannels'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof botGetChannels>>, {data: BodyType<BotChannelsInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  botGetChannels(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type BotGetChannelsMutationResult = NonNullable<Awaited<ReturnType<typeof botGetChannels>>>
+    export type BotGetChannelsMutationBody = BodyType<BotChannelsInput>
+    export type BotGetChannelsMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Get text channels for a guild
+ */
+export const useBotGetChannels = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof botGetChannels>>, TError,{data: BodyType<BotChannelsInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof botGetChannels>>,
+        TError,
+        {data: BodyType<BotChannelsInput>},
+        TContext
+      > => {
+      return useMutation(getBotGetChannelsMutationOptions(options));
+    }
+
+export const getBotSendUrl = () => {
+
+
+
+
+  return `/api/v1/bot/send`
+}
+
+/**
+ * @summary Send a message to a channel using a bot token
+ */
+export const botSend = async (botSendInput: BotSendInput, options?: RequestInit): Promise<BotSendResult> => {
+
+  return customFetch<BotSendResult>(getBotSendUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      botSendInput,)
+  }
+);}
+
+
+
+
+export const getBotSendMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof botSend>>, TError,{data: BodyType<BotSendInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof botSend>>, TError,{data: BodyType<BotSendInput>}, TContext> => {
+
+const mutationKey = ['botSend'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof botSend>>, {data: BodyType<BotSendInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  botSend(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type BotSendMutationResult = NonNullable<Awaited<ReturnType<typeof botSend>>>
+    export type BotSendMutationBody = BodyType<BotSendInput>
+    export type BotSendMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Send a message to a channel using a bot token
+ */
+export const useBotSend = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof botSend>>, TError,{data: BodyType<BotSendInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof botSend>>,
+        TError,
+        {data: BodyType<BotSendInput>},
+        TContext
+      > => {
+      return useMutation(getBotSendMutationOptions(options));
     }
 

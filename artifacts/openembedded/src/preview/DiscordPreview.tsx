@@ -671,7 +671,7 @@ export function DiscordPreview() {
         flexDirection: "column",
         height: "100%",
         overflow: "hidden",
-        background: "#1e1f22",
+        background: "#1a1a1a",
       }}
     >
       {/* Channel header */}

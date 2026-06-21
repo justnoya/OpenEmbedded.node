@@ -194,3 +194,58 @@ export const SendWebhookResponse = zod.object({
 })
 
 
+/**
+ * @summary Validate a bot token and return guilds
+ */
+export const BotValidateBody = zod.object({
+  "token": zod.string()
+})
+
+export const BotValidateResponse = zod.object({
+  "success": zod.boolean(),
+  "botName": zod.string().nullish(),
+  "botAvatar": zod.string().nullish(),
+  "guilds": zod.array(zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "icon": zod.string().nullish()
+})).optional(),
+  "message": zod.string().nullish()
+})
+
+
+/**
+ * @summary Get text channels for a guild
+ */
+export const BotGetChannelsBody = zod.object({
+  "token": zod.string(),
+  "guildId": zod.string()
+})
+
+export const BotGetChannelsResponse = zod.object({
+  "success": zod.boolean(),
+  "channels": zod.array(zod.object({
+  "id": zod.string(),
+  "name": zod.string()
+})).optional(),
+  "message": zod.string().nullish()
+})
+
+
+/**
+ * @summary Send a message to a channel using a bot token
+ */
+export const BotSendBody = zod.object({
+  "token": zod.string(),
+  "channelId": zod.string(),
+  "payload": zod.object({
+
+}).passthrough()
+})
+
+export const BotSendResponse = zod.object({
+  "success": zod.boolean(),
+  "message": zod.string().nullish()
+})
+
+

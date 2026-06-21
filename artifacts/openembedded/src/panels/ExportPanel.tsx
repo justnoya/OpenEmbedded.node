@@ -3,7 +3,7 @@ import { useGraphStore } from "@/lib/graphStore";
 import { usePreviewStore } from "@/lib/previewStore";
 import { useSettingsStore } from "@/lib/settingsStore";
 import { useExportCode, useSendWebhook } from "@workspace/api-client-react";
-import { Copy, Check, Code2, Webhook, FileJson, Send, Loader2, AlertTriangle } from "lucide-react";
+import { Copy, Check, Code2, Webhook, FileJson, Send, Loader2 } from "lucide-react";
 
 type Tab = "json" | "code" | "webhook";
 
@@ -44,20 +44,6 @@ export function ExportPanel() {
   const exportCode = useExportCode();
   const sendWebhook = useSendWebhook();
   const jsonText = payload ? JSON.stringify(payload, null, 2) : "{}";
-
-  const CV2_TYPES = new Set([9, 10, 11, 12, 14, 17]);
-  function hasCV2(components: unknown): boolean {
-    if (!Array.isArray(components)) return false;
-    for (const c of components) {
-      if (c && typeof c === "object") {
-        const comp = c as Record<string, unknown>;
-        if (CV2_TYPES.has(comp.type as number)) return true;
-        if (hasCV2(comp.components)) return true;
-      }
-    }
-    return false;
-  }
-  const payloadHasCV2 = payload ? hasCV2((payload as Record<string, unknown>).components) : false;
 
   const handleCopy = (text: string) => {
     navigator.clipboard.writeText(text);
@@ -204,23 +190,6 @@ export function ExportPanel() {
 
         {activeTab === "webhook" && (
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-            {payloadHasCV2 && (
-              <div style={{
-                padding: "10px 12px",
-                borderRadius: 8,
-                background: "rgba(255,166,0,0.06)",
-                border: "1px solid rgba(255,166,0,0.2)",
-                color: "#e3a008",
-                fontSize: 11, lineHeight: 1.55,
-                display: "flex", gap: 8, alignItems: "flex-start",
-              }}>
-                <AlertTriangle size={13} style={{ flexShrink: 0, marginTop: 1 }} />
-                <span>
-                  <strong>CV2 not supported via webhooks.</strong>{" "}
-                  Containers and Text Display require a bot. Use V1 Embeds for webhooks.
-                </span>
-              </div>
-            )}
             <div>
               <label style={{
                 display: "block", color: "#484848", fontSize: 10, fontWeight: 700,
@@ -245,7 +214,7 @@ export function ExportPanel() {
                 }}
               />
               <div style={{ color: "#383838", fontSize: 10, marginTop: 4 }}>
-                Saved locally in your browser
+                Supports both V1 Embeds and Components V2
               </div>
             </div>
 

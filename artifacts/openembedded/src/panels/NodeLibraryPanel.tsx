@@ -1,10 +1,10 @@
 import { useCallback, useState } from "react";
 import { useGraphStore, AppNode, AppNodeData } from "@/lib/graphStore";
 import {
-  Box, Layers, Type, Image, LayoutGrid,
-  SeparatorHorizontal, AlignJustify, MousePointerClick, MessageSquare,
-  Search, ChevronDown, ChevronRight, Users, Shield, AtSign, Hash,
-  TextCursorInput, X,
+  Package, LayoutTemplate, FileText, ImageIcon, GalleryHorizontalEnd,
+  Minus, Rows3, PointerIcon, ListFilter, UserRound, ShieldCheck,
+  AtSign, Hash, FormInput, MessageSquareCode, Search, ChevronDown,
+  ChevronRight, X, Bot,
 } from "lucide-react";
 import { ReactNode } from "react";
 
@@ -19,21 +19,22 @@ interface NodeDef {
 }
 
 const NODE_DEFS: NodeDef[] = [
-  { type: "container",        label: "Container",           description: "Root wrapper with accent & spoiler",   componentType: 17, accentColor: "#8b5cf6", icon: <Box size={14} />,              defaultData: { componentType: 17, accent_color: null, spoiler: false } },
-  { type: "section",          label: "Section",             description: "Text + thumbnail accessory",           componentType: 9,  accentColor: "#10b981", icon: <Layers size={14} />,           defaultData: { componentType: 9 } },
-  { type: "textDisplay",      label: "Text Display",        description: "Markdown content block",              componentType: 10, accentColor: "#3b82f6", icon: <Type size={14} />,             defaultData: { componentType: 10, content: "" } },
-  { type: "thumbnail",        label: "Thumbnail",           description: "Image accessory for sections",        componentType: 11, accentColor: "#f59e0b", icon: <Image size={14} />,            defaultData: { componentType: 11, url: "", description: "" } },
-  { type: "mediaGallery",     label: "Media Gallery",       description: "Image grid layout",                   componentType: 12, accentColor: "#ec4899", icon: <LayoutGrid size={14} />,       defaultData: { componentType: 12, items: [] } },
-  { type: "separator",        label: "Separator",           description: "Spacing with optional divider",       componentType: 14, accentColor: "#6b7280", icon: <SeparatorHorizontal size={14} />, defaultData: { componentType: 14, spacing: "md", divider: false } },
-  { type: "actionRow",        label: "Action Row",          description: "Container for buttons & selects",     componentType: 1,  accentColor: "#14b8a6", icon: <AlignJustify size={14} />,     defaultData: { componentType: 1 } },
-  { type: "button",           label: "Button",              description: "Clickable button",                    componentType: 2,  accentColor: "#5865F2", icon: <MousePointerClick size={14} />, defaultData: { componentType: 2, label: "Click me", style: "Primary", custom_id: "", emoji: "", disabled: false } },
-  { type: "selectMenu",       label: "String Select",       description: "Dropdown with custom options",        componentType: 3,  accentColor: "#f97316", icon: <ChevronDown size={14} />,      defaultData: { componentType: 3, custom_id: "", placeholder: "Make a selection…", min_values: 1, max_values: 1, options: [], disabled: false } },
-  { type: "userSelect",       label: "User Select",         description: "Discord user picker",                 componentType: 5,  accentColor: "#06b6d4", icon: <Users size={14} />,            defaultData: { componentType: 5, custom_id: "", placeholder: "Select a user…", min_values: 1, max_values: 1, disabled: false } },
-  { type: "roleSelect",       label: "Role Select",         description: "Discord role picker",                 componentType: 6,  accentColor: "#a855f7", icon: <Shield size={14} />,           defaultData: { componentType: 6, custom_id: "", placeholder: "Select a role…", min_values: 1, max_values: 1, disabled: false } },
-  { type: "mentionableSelect",label: "Mentionable Select",  description: "User + role picker",                  componentType: 7,  accentColor: "#ec4899", icon: <AtSign size={14} />,           defaultData: { componentType: 7, custom_id: "", placeholder: "Select a user or role…", min_values: 1, max_values: 1, disabled: false } },
-  { type: "channelSelect",    label: "Channel Select",      description: "Discord channel picker",              componentType: 8,  accentColor: "#22c55e", icon: <Hash size={14} />,             defaultData: { componentType: 8, custom_id: "", placeholder: "Select a channel…", min_values: 1, max_values: 1, disabled: false } },
-  { type: "textInput",        label: "Text Input",          description: "Short or paragraph modal input",      componentType: 4,  accentColor: "#64748b", icon: <TextCursorInput size={14} />,  defaultData: { componentType: 4, custom_id: "", label: "Label", style: "Short", placeholder: "", required: true, min_length: null, max_length: null, value: "" } },
-  { type: "embed",            label: "Embed (V1)",          description: "Legacy rich embed message",           componentType: 0,  accentColor: "#f59e0b", icon: <MessageSquare size={14} />,    defaultData: { componentType: 0, title: "", description: "", color: 0x5865f2 } },
+  { type: "container",        label: "Container",           description: "Root wrapper with accent & spoiler",   componentType: 17, accentColor: "#8b5cf6", icon: <Package size={14} />,              defaultData: { componentType: 17, accent_color: null, spoiler: false } },
+  { type: "section",          label: "Section",             description: "Text + thumbnail accessory",           componentType: 9,  accentColor: "#10b981", icon: <LayoutTemplate size={14} />,      defaultData: { componentType: 9 } },
+  { type: "textDisplay",      label: "Text Display",        description: "Markdown content block",              componentType: 10, accentColor: "#3b82f6", icon: <FileText size={14} />,             defaultData: { componentType: 10, content: "" } },
+  { type: "thumbnail",        label: "Thumbnail",           description: "Image accessory for sections",        componentType: 11, accentColor: "#f59e0b", icon: <ImageIcon size={14} />,            defaultData: { componentType: 11, url: "", description: "" } },
+  { type: "mediaGallery",     label: "Media Gallery",       description: "Image grid layout",                   componentType: 12, accentColor: "#ec4899", icon: <GalleryHorizontalEnd size={14} />, defaultData: { componentType: 12, items: [] } },
+  { type: "separator",        label: "Separator",           description: "Spacing with optional divider",       componentType: 14, accentColor: "#6b7280", icon: <Minus size={14} />,               defaultData: { componentType: 14, spacing: "md", divider: false } },
+  { type: "actionRow",        label: "Action Row",          description: "Container for buttons & selects",     componentType: 1,  accentColor: "#14b8a6", icon: <Rows3 size={14} />,               defaultData: { componentType: 1 } },
+  { type: "button",           label: "Button",              description: "Clickable button",                    componentType: 2,  accentColor: "#5865F2", icon: <PointerIcon size={14} />,          defaultData: { componentType: 2, label: "Click me", style: "Primary", custom_id: "", emoji: "", disabled: false } },
+  { type: "selectMenu",       label: "String Select",       description: "Dropdown with custom options",        componentType: 3,  accentColor: "#f97316", icon: <ListFilter size={14} />,           defaultData: { componentType: 3, custom_id: "", placeholder: "Make a selection…", min_values: 1, max_values: 1, options: [], disabled: false } },
+  { type: "userSelect",       label: "User Select",         description: "Discord user picker",                 componentType: 5,  accentColor: "#06b6d4", icon: <UserRound size={14} />,            defaultData: { componentType: 5, custom_id: "", placeholder: "Select a user…", min_values: 1, max_values: 1, disabled: false } },
+  { type: "roleSelect",       label: "Role Select",         description: "Discord role picker",                 componentType: 6,  accentColor: "#a855f7", icon: <ShieldCheck size={14} />,          defaultData: { componentType: 6, custom_id: "", placeholder: "Select a role…", min_values: 1, max_values: 1, disabled: false } },
+  { type: "mentionableSelect",label: "Mentionable Select",  description: "User + role picker",                  componentType: 7,  accentColor: "#ec4899", icon: <AtSign size={14} />,               defaultData: { componentType: 7, custom_id: "", placeholder: "Select a user or role…", min_values: 1, max_values: 1, disabled: false } },
+  { type: "channelSelect",    label: "Channel Select",      description: "Discord channel picker",              componentType: 8,  accentColor: "#22c55e", icon: <Hash size={14} />,                 defaultData: { componentType: 8, custom_id: "", placeholder: "Select a channel…", min_values: 1, max_values: 1, disabled: false } },
+  { type: "textInput",        label: "Text Input",          description: "Short or paragraph modal input",      componentType: 4,  accentColor: "#64748b", icon: <FormInput size={14} />,            defaultData: { componentType: 4, custom_id: "", label: "Label", style: "Short", placeholder: "", required: true, min_length: null, max_length: null, value: "" } },
+  { type: "embed",            label: "Embed (V1)",          description: "Legacy rich embed message",           componentType: 0,  accentColor: "#f59e0b", icon: <MessageSquareCode size={14} />,    defaultData: { componentType: 0, title: "", description: "", color: 0x5865f2 } },
+  { type: "bot",              label: "Bot",                 description: "Send messages using your Discord bot",componentType: null,accentColor: "#5865F2", icon: <Bot size={14} />,                 defaultData: { componentType: -1, token: "", connected: false, botName: null, botAvatar: null, selectedGuildId: null, selectedChannelId: null, guilds: [], channels: [] } },
 ];
 
 const GROUPS = [
@@ -42,6 +43,7 @@ const GROUPS = [
   { label: "Interactive", types: ["actionRow", "button", "selectMenu", "userSelect", "roleSelect", "mentionableSelect", "channelSelect"] },
   { label: "Modals",      types: ["textInput"] },
   { label: "Legacy",      types: ["embed"] },
+  { label: "Advanced",    types: ["bot"] },
 ];
 
 let nodeIdCounter = Date.now();
@@ -101,7 +103,6 @@ export function NodeLibraryPanel() {
         if (pip) pip.style.opacity = "0";
       }}
     >
-      {/* Animated accent pip */}
       <div className="accent-pip" style={{
         position: "absolute", left: 0, top: "50%",
         transform: "translateY(-50%)",

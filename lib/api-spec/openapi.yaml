@@ -16,6 +16,8 @@ tags:
     description: Export and validation
   - name: webhook
     description: Discord webhook proxy
+  - name: bot
+    description: Discord bot operations
 paths:
   /healthz:
     get:
@@ -192,6 +194,63 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
 
+  /v1/bot/validate:
+    post:
+      operationId: botValidate
+      tags: [bot]
+      summary: Validate a bot token and return guilds
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BotValidateInput"
+      responses:
+        "200":
+          description: Bot info and guilds
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BotValidateResult"
+
+  /v1/bot/channels:
+    post:
+      operationId: botGetChannels
+      tags: [bot]
+      summary: Get text channels for a guild
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BotChannelsInput"
+      responses:
+        "200":
+          description: List of text channels
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BotChannelsResult"
+
+  /v1/bot/send:
+    post:
+      operationId: botSend
+      tags: [bot]
+      summary: Send a message to a channel using a bot token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BotSendInput"
+      responses:
+        "200":
+          description: Send result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BotSendResult"
+
 components:
   schemas:
     HealthStatus:
@@ -305,3 +364,89 @@ components:
       properties:
         error:
           type: string
+
+    BotValidateInput:
+      type: object
+      required: [token]
+      properties:
+        token:
+          type: string
+
+    BotGuild:
+      type: object
+      required: [id, name]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        icon:
+          type: ["string", "null"]
+
+    BotChannel:
+      type: object
+      required: [id, name]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+
+    BotValidateResult:
+      type: object
+      required: [success]
+      properties:
+        success:
+          type: boolean
+        botName:
+          type: ["string", "null"]
+        botAvatar:
+          type: ["string", "null"]
+        guilds:
+          type: array
+          items:
+            $ref: "#/components/schemas/BotGuild"
+        message:
+          type: ["string", "null"]
+
+    BotChannelsInput:
+      type: object
+      required: [token, guildId]
+      properties:
+        token:
+          type: string
+        guildId:
+          type: string
+
+    BotChannelsResult:
+      type: object
+      required: [success]
+      properties:
+        success:
+          type: boolean
+        channels:
+          type: array
+          items:
+            $ref: "#/components/schemas/BotChannel"
+        message:
+          type: ["string", "null"]
+
+    BotSendInput:
+      type: object
+      required: [token, channelId, payload]
+      properties:
+        token:
+          type: string
+        channelId:
+          type: string
+        payload:
+          type: object
+
+    BotSendResult:
+      type: object
+      required: [success]
+      properties:
+        success:
+          type: boolean
+        message:
+          type: ["string", "null"]

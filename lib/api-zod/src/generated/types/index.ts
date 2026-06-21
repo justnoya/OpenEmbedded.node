@@ -6,6 +6,15 @@
  * OpenAPI spec version: 0.1.0
  */
 
+export * from './botChannel';
+export * from './botChannelsInput';
+export * from './botChannelsResult';
+export * from './botGuild';
+export * from './botSendInput';
+export * from './botSendInputPayload';
+export * from './botSendResult';
+export * from './botValidateInput';
+export * from './botValidateResult';
 export * from './codeExportResult';
 export * from './errorResponse';
 export * from './exportResult';

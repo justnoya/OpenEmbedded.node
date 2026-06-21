@@ -3,7 +3,7 @@
  *
  * Main nodes  — can parent other nodes (container, section, actionRow)
  * Sub-nodes   — leaf/content components (cannot parent anything)
- * Root nodes  — standalone, no parent or children in graph (embed)
+ * Root nodes  — standalone, no parent or children in graph (embed, bot)
  */
 
 export type NodeClass = "main" | "sub" | "root";
@@ -13,6 +13,7 @@ export const NODE_CLASSES: Record<string, NodeClass> = {
   section:           "main",
   actionRow:         "main",
   embed:             "root",
+  bot:               "root",
   textDisplay:       "sub",
   thumbnail:         "sub",
   mediaGallery:      "sub",
@@ -55,7 +56,7 @@ export const ALLOWED_CHILDREN: Record<string, string[]> = {
     "mentionableSelect",
     "channelSelect",
   ],
-  // embed, textDisplay, thumbnail, mediaGallery, separator,
+  // embed, bot, textDisplay, thumbnail, mediaGallery, separator,
   // button, selectMenu, textInput, *Select → no children allowed
 };
 

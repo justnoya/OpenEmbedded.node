@@ -89,3 +89,56 @@ export interface ErrorResponse {
   error: string;
 }
 
+export interface BotValidateInput {
+  token: string;
+}
+
+export interface BotGuild {
+  id: string;
+  name: string;
+  /** @nullable */
+  icon?: string | null;
+}
+
+export interface BotChannel {
+  id: string;
+  name: string;
+}
+
+export interface BotValidateResult {
+  success: boolean;
+  /** @nullable */
+  botName?: string | null;
+  /** @nullable */
+  botAvatar?: string | null;
+  guilds?: BotGuild[];
+  /** @nullable */
+  message?: string | null;
+}
+
+export interface BotChannelsInput {
+  token: string;
+  guildId: string;
+}
+
+export interface BotChannelsResult {
+  success: boolean;
+  channels?: BotChannel[];
+  /** @nullable */
+  message?: string | null;
+}
+
+export type BotSendInputPayload = { [key: string]: unknown };
+
+export interface BotSendInput {
+  token: string;
+  channelId: string;
+  payload: BotSendInputPayload;
+}
+
+export interface BotSendResult {
+  success: boolean;
+  /** @nullable */
+  message?: string | null;
+}
+

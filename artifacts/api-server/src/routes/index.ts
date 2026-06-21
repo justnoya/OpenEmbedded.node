@@ -4,6 +4,7 @@ import projectsRouter from "./projects";
 import exportRouter from "./export";
 import webhookRouter from "./webhook";
 import discordRouter from "./discord";
+import botRouter from "./bot";
 
 const router: IRouter = Router();
 
@@ -12,5 +13,6 @@ router.use(projectsRouter);
 router.use(exportRouter);
 router.use(webhookRouter);
 router.use(discordRouter);
+router.use(botRouter);
 
 export default router;
