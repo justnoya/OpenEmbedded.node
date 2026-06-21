@@ -1,13 +1,15 @@
 import { useState } from "react";
 import { useDiscord } from "@/lib/discordContext";
 
-function LayersIcon() {
+function AppLogoImg({ size = 40 }: { size?: number }) {
   return (
-    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-      <polygon points="12 2 2 7 12 12 22 7 12 2" />
-      <polyline points="2 17 12 22 22 17" />
-      <polyline points="2 12 12 17 22 12" />
-    </svg>
+    <img
+      src="/logo.png"
+      alt="OpenEmbedded logo"
+      width={size}
+      height={size}
+      style={{ objectFit: "contain", display: "block" }}
+    />
   );
 }
 
@@ -123,7 +125,7 @@ export function DiscordActivityOverlay() {
                 ? "0 0 48px rgba(88,101,242,0.22), 0 8px 32px rgba(0,0,0,0.55)"
                 : "0 0 56px rgba(88,101,242,0.28), 0 8px 40px rgba(0,0,0,0.6)",
           }}>
-            <LayersIcon />
+            <AppLogoImg size={40} />
           </div>
 
           <div style={{ textAlign: "center" }}>

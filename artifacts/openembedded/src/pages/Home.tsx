@@ -12,7 +12,6 @@ import {
   MoreVertical,
   Trash2,
   ExternalLink,
-  Layers,
   Zap,
   MousePointerClick,
   X,
@@ -20,6 +19,16 @@ import {
   Box,
   Loader2,
 } from "lucide-react";
+
+const AppLogo = ({ size = 32 }: { size?: number }) => (
+  <img
+    src="/logo.png"
+    alt="OpenEmbedded logo"
+    width={size}
+    height={size}
+    style={{ objectFit: "contain", display: "block" }}
+  />
+);
 
 type Project = {
   id: string;
@@ -181,11 +190,9 @@ export function Home() {
         <div style={{ display: "flex", alignItems: "center", gap: 10, flexShrink: 0 }}>
           <div style={{
             width: 32, height: 32, borderRadius: 9,
-            background: "linear-gradient(135deg, #5865F2 0%, #7c3aed 100%)",
             display: "flex", alignItems: "center", justifyContent: "center",
-            boxShadow: "0 0 18px rgba(88,101,242,0.35), 0 2px 8px rgba(0,0,0,0.5)",
           }}>
-            <Layers size={16} color="#fff" strokeWidth={2} />
+            <AppLogo size={32} />
           </div>
           <span style={{ fontSize: 15, fontWeight: 700, color: "#f0f0f0", letterSpacing: "-0.03em" }}>
             OpenEmbedded
@@ -251,14 +258,12 @@ export function Home() {
             {/* Hero block */}
             <div style={{ textAlign: "center", maxWidth: 500 }}>
               <div style={{
-                width: 68, height: 68, borderRadius: 18,
-                background: "linear-gradient(135deg, rgba(88,101,242,0.2), rgba(124,58,237,0.12))",
-                border: "1px solid rgba(88,101,242,0.2)",
+                width: 80, height: 80,
                 display: "flex", alignItems: "center", justifyContent: "center",
                 margin: "0 auto 26px",
-                boxShadow: "0 0 56px rgba(88,101,242,0.12), 0 8px 28px rgba(0,0,0,0.5)",
+                filter: "drop-shadow(0 0 28px rgba(88,101,242,0.35))",
               }}>
-                <Layers size={30} color="#818cf8" strokeWidth={1.5} />
+                <AppLogo size={80} />
               </div>
 
               <h1 style={{
@@ -309,7 +314,7 @@ export function Home() {
               gap: 14, width: "100%", maxWidth: 680,
             }}>
               {[
-                { icon: <Layers size={17} />, color: "#8b5cf6", title: "Visual Node Graph", desc: "Drag & drop all Discord CV2 components on an infinite canvas" },
+                { icon: <AppLogo size={17} />, color: "#8b5cf6", title: "Visual Node Graph", desc: "Drag & drop all Discord CV2 components on an infinite canvas" },
                 { icon: <MousePointerClick size={17} />, color: "#5865F2", title: "All CV2 Types", desc: "Container, Section, Text, Gallery, Button, Select, and more" },
                 { icon: <Zap size={17} />, color: "#10b981", title: "Instant Export", desc: "JSON, discord.js v14 code, or send directly via webhook" },
               ].map((f) => (
