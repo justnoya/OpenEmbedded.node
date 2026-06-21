@@ -1,7 +1,7 @@
 import { usePreviewStore } from "@/lib/previewStore";
 import { useGraphStore } from "@/lib/graphStore";
-import { AlertTriangle, Hash, ChevronDown, Pencil, X, ImageIcon, ExternalLink } from "lucide-react";
-import { useState, useRef } from "react";
+import { AlertTriangle, Hash, ChevronDown, X, Upload, ExternalLink } from "lucide-react";
+import { useState, useRef, useCallback } from "react";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -650,204 +650,114 @@ function RenderEmbed({ embed }: { embed: Embed }) {
   );
 }
 
-// ─── Sender identity bar (shown when no bot is connected) ────────────────────
+// ─── Avatar upload panel ──────────────────────────────────────────────────────
 
-function SenderBar() {
-  const senderName = usePreviewStore((s) => s.senderName);
-  const senderAvatarUrl = usePreviewStore((s) => s.senderAvatarUrl);
-  const setSenderName = usePreviewStore((s) => s.setSenderName);
-  const setSenderAvatarUrl = usePreviewStore((s) => s.setSenderAvatarUrl);
+function AvatarUploadPanel({ onClose, onUpload }: { onClose: () => void; onUpload: (url: string) => void }) {
+  const [dragOver, setDragOver] = useState(false);
+  const [preview, setPreview] = useState<string | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
 
-  const [editingAvatar, setEditingAvatar] = useState(false);
-  const [avatarInput, setAvatarInput] = useState(senderAvatarUrl);
-  const [avatarError, setAvatarError] = useState(false);
-  const avatarInputRef = useRef<HTMLInputElement>(null);
-
-  const commitAvatar = () => {
-    setSenderAvatarUrl(avatarInput.trim());
-    setEditingAvatar(false);
-  };
+  const readFile = useCallback((file: File) => {
+    if (!file.type.startsWith("image/")) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const url = e.target?.result as string;
+      setPreview(url);
+      onUpload(url);
+    };
+    reader.readAsDataURL(file);
+  }, [onUpload]);
 
   return (
     <div
       style={{
-        flexShrink: 0,
-        background: "#232428",
-        borderBottom: "1px solid rgba(255,255,255,0.06)",
-        padding: "7px 12px",
-        display: "flex",
-        alignItems: "center",
-        gap: 10,
+        position: "absolute", inset: 0, zIndex: 40,
+        background: "rgba(0,0,0,0.7)",
+        display: "flex", alignItems: "flex-end",
       }}
+      onClick={onClose}
     >
-      {/* Avatar preview + edit trigger */}
-      <div style={{ position: "relative", flexShrink: 0 }}>
+      <div
+        style={{
+          width: "100%",
+          background: "#1e1f22",
+          borderTop: "1px solid rgba(255,255,255,0.1)",
+          borderRadius: "12px 12px 0 0",
+          padding: 16,
+          boxShadow: "0 -8px 32px rgba(0,0,0,0.5)",
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+          <span style={{ color: "#dbdee1", fontSize: 13, fontWeight: 700, fontFamily: DC_FONT }}>
+            Change Bot Avatar
+          </span>
+          <button
+            onClick={onClose}
+            style={{ background: "none", border: "none", color: "#949ba4", cursor: "pointer", padding: 4, display: "flex" }}
+          >
+            <X size={16} />
+          </button>
+        </div>
+
+        {/* Drop zone */}
         <div
+          onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+          onDragLeave={() => setDragOver(false)}
+          onDrop={(e) => {
+            e.preventDefault();
+            setDragOver(false);
+            const file = e.dataTransfer.files[0];
+            if (file) readFile(file);
+          }}
+          onClick={() => fileRef.current?.click()}
           style={{
-            width: 32,
-            height: 32,
-            borderRadius: "50%",
-            background: "#5865f2",
-            overflow: "hidden",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
+            border: `2px dashed ${dragOver ? "#5865f2" : "rgba(255,255,255,0.12)"}`,
+            borderRadius: 8,
+            padding: "24px 16px",
+            textAlign: "center",
             cursor: "pointer",
-            border: "2px solid rgba(88,101,242,0.4)",
-            flexShrink: 0,
+            background: dragOver ? "rgba(88,101,242,0.08)" : "rgba(255,255,255,0.03)",
+            transition: "all 0.15s ease",
           }}
-          onClick={() => {
-            setAvatarInput(senderAvatarUrl);
-            setEditingAvatar(true);
-            setAvatarError(false);
-            setTimeout(() => avatarInputRef.current?.focus(), 50);
-          }}
-          title="Click to set avatar URL"
         >
-          {senderAvatarUrl && !avatarError ? (
-            <img
-              src={senderAvatarUrl}
-              alt=""
-              style={{ width: "100%", height: "100%", objectFit: "cover" }}
-              onError={() => setAvatarError(true)}
-              onLoad={() => setAvatarError(false)}
-            />
+          {preview ? (
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
+              <img src={preview} alt="" style={{ width: 56, height: 56, borderRadius: "50%", objectFit: "cover" }} />
+              <span style={{ color: "#3fb950", fontSize: 12, fontFamily: DC_FONT }}>✓ Avatar set</span>
+            </div>
           ) : (
-            <ImageIcon size={13} color="rgba(255,255,255,0.6)" />
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
+              <Upload size={22} color={dragOver ? "#5865f2" : "#949ba4"} />
+              <span style={{ color: "#949ba4", fontSize: 13, fontFamily: DC_FONT }}>
+                Drop image here or <span style={{ color: "#00a8fc" }}>browse</span>
+              </span>
+              <span style={{ color: "#5c6068", fontSize: 11, fontFamily: DC_FONT }}>PNG, JPG, GIF · preview only</span>
+            </div>
           )}
         </div>
-        <div
-          style={{
-            position: "absolute",
-            bottom: -2,
-            right: -2,
-            width: 14,
-            height: 14,
-            borderRadius: "50%",
-            background: "#5865F2",
-            border: "1.5px solid #232428",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            pointerEvents: "none",
-          }}
-        >
-          <Pencil size={7} color="#fff" />
-        </div>
-      </div>
 
-      {/* Name input */}
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ color: "#555", fontSize: 9, fontWeight: 700, letterSpacing: "0.07em", textTransform: "uppercase", marginBottom: 2 }}>
-          Sender name
-        </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-          <input
-            type="text"
-            value={senderName}
-            maxLength={10}
-            onChange={(e) => setSenderName(e.target.value)}
-            placeholder="MyBot"
+        <input
+          ref={fileRef}
+          type="file"
+          accept="image/*"
+          style={{ display: "none" }}
+          onChange={(e) => { const f = e.target.files?.[0]; if (f) readFile(f); }}
+        />
+
+        {preview && (
+          <button
+            onClick={onClose}
             style={{
-              background: "rgba(255,255,255,0.04)",
-              border: "1px solid rgba(255,255,255,0.09)",
-              borderRadius: 6,
-              color: "#d0d0d0",
-              fontSize: 12,
-              fontWeight: 600,
-              padding: "3px 7px",
-              outline: "none",
-              fontFamily: "inherit",
-              width: 90,
-              transition: "border-color 0.12s",
+              marginTop: 10, width: "100%", background: "#5865f2", border: "none",
+              borderRadius: 6, color: "#fff", fontSize: 13, fontWeight: 600,
+              padding: "9px 0", cursor: "pointer", fontFamily: DC_FONT,
             }}
-            onFocus={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "rgba(88,101,242,0.5)"; }}
-            onBlur={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "rgba(255,255,255,0.09)"; }}
-          />
-          <span style={{ color: "#383838", fontSize: 10 }}>{senderName.length}/10</span>
-        </div>
+          >
+            Done
+          </button>
+        )}
       </div>
-
-      <div style={{ color: "#3a3a3a", fontSize: 10, textAlign: "right", lineHeight: 1.4, flexShrink: 0 }}>
-        Preview<br />identity
-      </div>
-
-      {/* Avatar URL popover */}
-      {editingAvatar && (
-        <div
-          style={{
-            position: "absolute",
-            top: "100%",
-            left: 12,
-            right: 12,
-            zIndex: 50,
-            background: "#1e1f22",
-            border: "1px solid rgba(255,255,255,0.1)",
-            borderRadius: 10,
-            padding: 12,
-            boxShadow: "0 8px 32px rgba(0,0,0,0.7)",
-            marginTop: 4,
-          }}
-        >
-          <div style={{ color: "#606060", fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 6 }}>
-            Avatar Image URL
-          </div>
-          <div style={{ display: "flex", gap: 6 }}>
-            <input
-              ref={avatarInputRef}
-              type="text"
-              value={avatarInput}
-              onChange={(e) => setAvatarInput(e.target.value)}
-              placeholder="https://example.com/avatar.png"
-              onKeyDown={(e) => { if (e.key === "Enter") commitAvatar(); if (e.key === "Escape") setEditingAvatar(false); }}
-              style={{
-                flex: 1,
-                background: "rgba(255,255,255,0.05)",
-                border: "1px solid rgba(255,255,255,0.1)",
-                borderRadius: 7,
-                color: "#d0d0d0",
-                fontSize: 12,
-                padding: "6px 9px",
-                outline: "none",
-                fontFamily: "inherit",
-              }}
-            />
-            <button
-              onClick={commitAvatar}
-              style={{
-                background: "#5865F2",
-                border: "none",
-                borderRadius: 7,
-                color: "#fff",
-                fontSize: 12,
-                fontWeight: 600,
-                padding: "6px 12px",
-                cursor: "pointer",
-              }}
-            >
-              Set
-            </button>
-            <button
-              onClick={() => setEditingAvatar(false)}
-              style={{
-                background: "rgba(255,255,255,0.06)",
-                border: "1px solid rgba(255,255,255,0.08)",
-                borderRadius: 7,
-                color: "#888",
-                padding: "6px 8px",
-                cursor: "pointer",
-                display: "flex",
-                alignItems: "center",
-              }}
-            >
-              <X size={12} />
-            </button>
-          </div>
-          <div style={{ color: "#383838", fontSize: 10, marginTop: 5 }}>
-            Paste any image URL — shown only in this preview
-          </div>
-        </div>
-      )}
     </div>
   );
 }
@@ -860,6 +770,8 @@ export function DiscordPreview() {
   const errors = usePreviewStore((s) => s.errors);
   const senderName = usePreviewStore((s) => s.senderName);
   const senderAvatarUrl = usePreviewStore((s) => s.senderAvatarUrl);
+  const setSenderName = usePreviewStore((s) => s.setSenderName);
+  const setSenderAvatarUrl = usePreviewStore((s) => s.setSenderAvatarUrl);
 
   // Check for a connected bot node
   const nodes = useGraphStore((s) => s.nodes);
@@ -877,12 +789,25 @@ export function DiscordPreview() {
   const embeds = (payload?.embeds ?? []) as Embed[];
   const hasContent = components.length > 0 || embeds.length > 0;
 
-  const timeStr = new Date().toLocaleTimeString([], {
-    hour: "numeric",
-    minute: "2-digit",
-  });
+  const timeStr = new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
 
   const [avatarError, setAvatarError] = useState(false);
+  const [avatarUploadOpen, setAvatarUploadOpen] = useState(false);
+  const [editingName, setEditingName] = useState(false);
+  const [nameValue, setNameValue] = useState(senderName);
+  const nameInputRef = useRef<HTMLInputElement>(null);
+
+  const commitName = () => {
+    setSenderName(nameValue || "MyBot");
+    setEditingName(false);
+  };
+
+  const openNameEdit = () => {
+    if (isBotConnected) return;
+    setNameValue(senderName);
+    setEditingName(true);
+    setTimeout(() => { nameInputRef.current?.select(); }, 30);
+  };
 
   return (
     <div
@@ -934,13 +859,6 @@ export function DiscordPreview() {
         )}
       </div>
 
-      {/* Sender identity bar — only when no bot connected */}
-      {!isBotConnected && (
-        <div style={{ position: "relative" }}>
-          <SenderBar />
-        </div>
-      )}
-
       {/* Bot connected indicator */}
       {isBotConnected && (
         <div
@@ -955,46 +873,23 @@ export function DiscordPreview() {
           }}
         >
           {displayAvatar ? (
-            <img
-              src={displayAvatar}
-              alt=""
-              style={{ width: 20, height: 20, borderRadius: "50%", flexShrink: 0 }}
-              onError={() => setAvatarError(true)}
-            />
+            <img src={displayAvatar} alt="" style={{ width: 20, height: 20, borderRadius: "50%", flexShrink: 0 }} onError={() => setAvatarError(true)} />
           ) : (
-            <div style={{ width: 20, height: 20, borderRadius: "50%", background: "#5865f2", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10 }}>
-              🤖
-            </div>
+            <div style={{ width: 20, height: 20, borderRadius: "50%", background: "#5865f2", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10 }}>🤖</div>
           )}
-          <span style={{ color: "#3fb950", fontSize: 11, fontWeight: 600 }}>
-            {displayName}
-          </span>
-          <span style={{ color: "#3fb950", fontSize: 10, opacity: 0.65 }}>
-            Bot connected · showing real identity
-          </span>
+          <span style={{ color: "#3fb950", fontSize: 11, fontWeight: 600 }}>{displayName}</span>
+          <span style={{ color: "#3fb950", fontSize: 10, opacity: 0.65 }}>Bot connected · showing real identity</span>
         </div>
       )}
 
       {/* Messages area */}
-      <div
-        style={{
-          flex: 1,
-          overflowY: "auto",
-          background: CHAT_BG,
-          padding: "20px 0 8px",
-        }}
-      >
+      <div style={{ flex: 1, overflowY: "auto", background: CHAT_BG, padding: "20px 0 8px" }}>
         {!hasContent ? (
           <div
             style={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-              height: "100%",
-              gap: 10,
-              color: TEXT_MUTED,
-              fontFamily: DC_FONT,
+              display: "flex", flexDirection: "column", alignItems: "center",
+              justifyContent: "center", height: "100%", gap: 10,
+              color: TEXT_MUTED, fontFamily: DC_FONT,
             }}
           >
             <div style={{ fontSize: 32 }}>🤖</div>
@@ -1002,103 +897,125 @@ export function DiscordPreview() {
             <div style={{ fontSize: 13 }}>Add nodes from the left panel to preview your message</div>
           </div>
         ) : (
-          <div
-            style={{
-              display: "flex",
-              alignItems: "flex-start",
-              gap: 14,
-              padding: "2px 16px 2px 14px",
-            }}
-          >
-            {/* Avatar */}
+          <div style={{ display: "flex", alignItems: "flex-start", gap: 14, padding: "2px 16px 2px 14px" }}>
+
+            {/* Avatar — double-click to upload (preview mode only) */}
             <div
-              style={{
-                width: 40,
-                height: 40,
-                borderRadius: "50%",
-                background: "#5865f2",
-                flexShrink: 0,
-                overflow: "hidden",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontSize: 18,
-                marginTop: 2,
-              }}
+              style={{ position: "relative", flexShrink: 0, marginTop: 2 }}
+              onDoubleClick={() => { if (!isBotConnected) setAvatarUploadOpen(true); }}
+              title={isBotConnected ? undefined : "Double-click to change avatar"}
             >
-              {displayAvatar && !avatarError ? (
-                <img
-                  src={displayAvatar}
-                  alt=""
-                  style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                  onError={() => setAvatarError(true)}
-                  onLoad={() => setAvatarError(false)}
+              <div
+                style={{
+                  width: 40, height: 40, borderRadius: "50%",
+                  background: "#5865f2", overflow: "hidden",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  fontSize: 18,
+                  cursor: isBotConnected ? "default" : "pointer",
+                  outline: avatarUploadOpen ? "2px solid #5865f2" : "none",
+                  outlineOffset: 2,
+                }}
+              >
+                {displayAvatar && !avatarError ? (
+                  <img
+                    src={displayAvatar} alt=""
+                    style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                    onError={() => setAvatarError(true)}
+                    onLoad={() => setAvatarError(false)}
+                  />
+                ) : "🤖"}
+              </div>
+              {/* Subtle upload hint ring */}
+              {!isBotConnected && (
+                <div
+                  style={{
+                    position: "absolute", inset: -2, borderRadius: "50%",
+                    border: "1.5px dashed rgba(255,255,255,0.18)",
+                    pointerEvents: "none",
+                  }}
                 />
-              ) : (
-                "🤖"
               )}
             </div>
 
             <div style={{ flex: 1, minWidth: 0 }}>
               {/* Name row */}
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "baseline",
-                  gap: 8,
-                  marginBottom: 4,
-                }}
-              >
+              <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 4 }}>
+
+                {/* Bot name — double-click to edit (preview mode only) */}
+                {editingName && !isBotConnected ? (
+                  <input
+                    ref={nameInputRef}
+                    value={nameValue}
+                    maxLength={10}
+                    autoFocus
+                    onChange={(e) => setNameValue(e.target.value)}
+                    onBlur={commitName}
+                    onKeyDown={(e) => { if (e.key === "Enter") commitName(); if (e.key === "Escape") { setEditingName(false); } }}
+                    style={{
+                      background: "rgba(88,101,242,0.15)",
+                      border: "1px solid rgba(88,101,242,0.5)",
+                      borderRadius: 4,
+                      color: TEXT_NORMAL,
+                      fontWeight: 700,
+                      fontSize: 15,
+                      fontFamily: DC_FONT,
+                      outline: "none",
+                      padding: "0 4px",
+                      width: Math.max(60, nameValue.length * 9 + 16),
+                      lineHeight: "22px",
+                    }}
+                  />
+                ) : (
+                  <span
+                    style={{
+                      color: TEXT_NORMAL, fontWeight: 700, fontSize: 15, fontFamily: DC_FONT,
+                      cursor: isBotConnected ? "default" : "text",
+                      borderBottom: isBotConnected ? "none" : "1px dashed rgba(255,255,255,0.15)",
+                      paddingBottom: 1,
+                    }}
+                    onDoubleClick={openNameEdit}
+                    title={isBotConnected ? undefined : "Double-click to edit name"}
+                  >
+                    {displayName}
+                  </span>
+                )}
+
                 <span
                   style={{
-                    color: TEXT_NORMAL,
-                    fontWeight: 700,
-                    fontSize: 15,
-                    fontFamily: DC_FONT,
-                  }}
-                >
-                  {displayName}
-                </span>
-                <span
-                  style={{
-                    background: "#5865f2",
-                    color: "#fff",
-                    fontSize: 10,
-                    fontWeight: 700,
-                    padding: "1px 5px",
-                    borderRadius: 3,
-                    fontFamily: DC_FONT,
-                    lineHeight: "16px",
+                    background: "#5865f2", color: "#fff", fontSize: 10, fontWeight: 700,
+                    padding: "1px 5px", borderRadius: 3, fontFamily: DC_FONT, lineHeight: "16px",
                   }}
                 >
                   BOT
                 </span>
-                <span style={{ color: TEXT_MUTED, fontSize: 12, fontFamily: DC_FONT }}>
-                  {timeStr}
-                </span>
+                <span style={{ color: TEXT_MUTED, fontSize: 12, fontFamily: DC_FONT }}>{timeStr}</span>
               </div>
 
               {/* Embeds (V1) */}
               {embeds.length > 0 && (
                 <div style={{ display: "flex", flexDirection: "column", gap: 4, marginBottom: components.length > 0 ? 8 : 0 }}>
-                  {embeds.map((embed, i) => (
-                    <RenderEmbed key={i} embed={embed} />
-                  ))}
+                  {embeds.map((embed, i) => <RenderEmbed key={i} embed={embed} />)}
                 </div>
               )}
 
               {/* V2 Components */}
               {components.length > 0 && (
                 <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                  {components.map((comp, i) => (
-                    <RenderComponent key={i} comp={comp} />
-                  ))}
+                  {components.map((comp, i) => <RenderComponent key={i} comp={comp} />)}
                 </div>
               )}
             </div>
           </div>
         )}
       </div>
+
+      {/* Avatar upload panel overlay */}
+      {avatarUploadOpen && (
+        <AvatarUploadPanel
+          onClose={() => setAvatarUploadOpen(false)}
+          onUpload={(url) => { setSenderAvatarUrl(url); setAvatarError(false); }}
+        />
+      )}
     </div>
   );
 }
