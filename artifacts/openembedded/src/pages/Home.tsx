@@ -10,12 +10,12 @@ import {
 import { Plus, MoreVertical, Trash2, ExternalLink, FolderOpen, Zap, Layers, MousePointerClick, X } from "lucide-react";
 
 const BG = "#090C14";
-const PANEL = "#111827";
-const SURFACE = "#141926";
-const BORDER = "#1D2539";
-const TEXT = "#E8EDFF";
-const MUTED = "#64748B";
-const FAINT = "#374165";
+const PANEL = "#0E1117";
+const SURFACE = "#131720";
+const BORDER = "#1A1F2E";
+const TEXT = "#DDE3F5";
+const MUTED = "#5C6882";
+const FAINT = "#2D3652";
 const ACCENT = "#5865F2";
 
 type Project = {
@@ -41,7 +41,7 @@ const MiniCanvasPreview = ({ nodeCount }: { nodeCount: number }) => (
   <div style={{
     width: "100%",
     height: "100%",
-    background: "#0C0F1A",
+    background: "#0B0E18",
     position: "relative",
     overflow: "hidden",
   }}>
@@ -185,7 +185,7 @@ export function Home() {
         minHeight: "100dvh",
         background: BG,
         color: TEXT,
-        fontFamily: `"gg sans","Noto Sans","Helvetica Neue",Arial,sans-serif`,
+        fontFamily: `inherit`,
         display: "flex",
         flexDirection: "column",
       }}

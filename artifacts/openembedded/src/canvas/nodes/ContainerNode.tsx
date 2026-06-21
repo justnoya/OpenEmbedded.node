@@ -10,7 +10,7 @@ function ContainerNodeComponent({ id, data }: NodeProps) {
       : null;
   return (
     <NodeWrapper id={id} typeName="Container · 17" icon={<Box size={13} />} accentColor="#8b5cf6" nodeClass="main">
-      <div style={{ color: "#e6edf3", fontSize: 13, fontWeight: 600, marginBottom: 4 }}>
+      <div style={{ color: "#DDE3F5", fontSize: 13, fontWeight: 600, marginBottom: 4 }}>
         Container
       </div>
       <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
@@ -22,17 +22,17 @@ function ContainerNodeComponent({ id, data }: NodeProps) {
                 height: 10,
                 borderRadius: 3,
                 background: accentHex,
-                border: "1px solid rgba(255,255,255,0.15)",
+                border: "1px solid rgba(255,255,255,0.12)",
                 flexShrink: 0,
               }}
             />
-            <span style={{ color: "#7d8590", fontSize: 11 }}>{accentHex}</span>
+            <span style={{ color: "#5C6882", fontSize: 11, fontFamily: "monospace" }}>{accentHex}</span>
           </div>
         )}
         {!!data.spoiler && (
           <span
             style={{
-              background: "rgba(254,231,92,0.12)",
+              background: "rgba(254,231,92,0.1)",
               color: "#d29922",
               fontSize: 10,
               fontWeight: 600,
@@ -45,11 +45,11 @@ function ContainerNodeComponent({ id, data }: NodeProps) {
           </span>
         )}
         {!accentHex && !data.spoiler && (
-          <span style={{ color: "#484f58", fontSize: 11 }}>Root wrapper</span>
+          <span style={{ color: "#2D3652", fontSize: 11 }}>Root wrapper</span>
         )}
       </div>
-      <Handle type="target" position={Position.Left} style={{ background: "#3fb950", border: "2px solid #141822", width: 10, height: 10 }} />
-      <Handle type="source" position={Position.Right} style={{ background: "#8b5cf6", border: "2px solid #141822", width: 10, height: 10 }} />
+      <Handle type="target" position={Position.Left} style={{ background: "#3fb950", border: "2px solid #0F1420", width: 10, height: 10 }} />
+      <Handle type="source" position={Position.Right} style={{ background: "#8b5cf6", border: "2px solid #0F1420", width: 10, height: 10 }} />
     </NodeWrapper>
   );
 }

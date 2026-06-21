@@ -10,13 +10,13 @@ function SeparatorNodeComponent({ id, data }: NodeProps) {
     <NodeWrapper id={id} typeName="Separator · 14" icon={<SeparatorHorizontal size={13} />} accentColor="#6b7280">
       <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-          <span style={{ color: "#e6edf3", fontSize: 12, fontWeight: 500 }}>
+          <span style={{ color: "#8B95B0", fontSize: 11, fontWeight: 500 }}>
             Spacing:
           </span>
           <span
             style={{
-              background: "rgba(107,114,128,0.15)",
-              color: "#9ca3af",
+              background: "rgba(107,114,128,0.12)",
+              color: "#8B95B0",
               fontSize: 11,
               fontWeight: 600,
               padding: "1px 6px",
@@ -29,14 +29,14 @@ function SeparatorNodeComponent({ id, data }: NodeProps) {
           </span>
         </div>
         {divider && (
-          <div style={{ borderTop: "1px solid rgba(255,255,255,0.15)", margin: "2px 0" }} />
+          <div style={{ borderTop: "1px solid #1A1F2E", margin: "2px 0" }} />
         )}
         {!divider && (
-          <div style={{ color: "#484f58", fontSize: 11 }}>No divider line</div>
+          <div style={{ color: "#2D3652", fontSize: 11 }}>No divider line</div>
         )}
       </div>
-      <Handle type="target" position={Position.Left} style={{ background: "#3fb950", border: "2px solid #141822", width: 10, height: 10 }} />
-      <Handle type="source" position={Position.Right} style={{ background: "#6b7280", border: "2px solid #141822", width: 10, height: 10 }} />
+      <Handle type="target" position={Position.Left} style={{ background: "#3fb950", border: "2px solid #0F1420", width: 10, height: 10 }} />
+      <Handle type="source" position={Position.Right} style={{ background: "#6b7280", border: "2px solid #0F1420", width: 10, height: 10 }} />
     </NodeWrapper>
   );
 }

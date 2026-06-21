@@ -9,7 +9,7 @@ function MediaGalleryNodeComponent({ id, data }: NodeProps) {
 
   return (
     <NodeWrapper id={id} typeName="Media Gallery · 12" icon={<LayoutGrid size={13} />} accentColor="#ec4899">
-      <div style={{ color: "#e6edf3", fontSize: 13, fontWeight: 600, marginBottom: 6 }}>
+      <div style={{ color: "#DDE3F5", fontSize: 13, fontWeight: 600, marginBottom: 6 }}>
         Media Gallery
       </div>
       {preview.length > 0 ? (
@@ -20,24 +20,24 @@ function MediaGalleryNodeComponent({ id, data }: NodeProps) {
                 key={i}
                 src={item.url}
                 alt=""
-                style={{ width: 28, height: 28, objectFit: "cover", borderRadius: 3, border: "1px solid rgba(255,255,255,0.08)" }}
+                style={{ width: 28, height: 28, objectFit: "cover", borderRadius: 4, border: "1px solid #1D2436" }}
                 onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
               />
             ) : (
-              <div key={i} style={{ width: 28, height: 28, background: "rgba(236,72,153,0.1)", borderRadius: 3, border: "1px dashed rgba(236,72,153,0.3)" }} />
+              <div key={i} style={{ width: 28, height: 28, background: "rgba(236,72,153,0.08)", borderRadius: 4, border: "1px dashed rgba(236,72,153,0.25)" }} />
             )
           )}
           {items.length > 4 && (
-            <div style={{ width: 28, height: 28, background: "rgba(236,72,153,0.15)", borderRadius: 3, display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <div style={{ width: 28, height: 28, background: "rgba(236,72,153,0.12)", borderRadius: 4, display: "flex", alignItems: "center", justifyContent: "center" }}>
               <span style={{ color: "#ec4899", fontSize: 9, fontWeight: 700 }}>+{items.length - 4}</span>
             </div>
           )}
         </div>
       ) : (
-        <div style={{ color: "#484f58", fontSize: 11 }}>0 images</div>
+        <div style={{ color: "#2D3652", fontSize: 11 }}>0 images</div>
       )}
-      <Handle type="target" position={Position.Left} style={{ background: "#3fb950", border: "2px solid #141822", width: 10, height: 10 }} />
-      <Handle type="source" position={Position.Right} style={{ background: "#ec4899", border: "2px solid #141822", width: 10, height: 10 }} />
+      <Handle type="target" position={Position.Left} style={{ background: "#3fb950", border: "2px solid #0F1420", width: 10, height: 10 }} />
+      <Handle type="source" position={Position.Right} style={{ background: "#ec4899", border: "2px solid #0F1420", width: 10, height: 10 }} />
     </NodeWrapper>
   );
 }

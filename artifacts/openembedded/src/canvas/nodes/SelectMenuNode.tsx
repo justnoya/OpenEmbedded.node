@@ -23,16 +23,16 @@ function SelectMenuNodeComponent({ id, data }: NodeProps) {
           maxWidth: 200,
         }}
       >
-        <span style={{ color: "#7d8590", fontSize: 12, flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+        <span style={{ color: "#5C6882", fontSize: 12, flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
           {placeholder}
         </span>
-        <ChevronDown size={12} color="#7d8590" style={{ flexShrink: 0 }} />
+        <ChevronDown size={12} color="#5C6882" style={{ flexShrink: 0 }} />
       </div>
-      <div style={{ color: "#484f58", fontSize: 10, marginTop: 4 }}>
+      <div style={{ color: "#2D3652", fontSize: 10, marginTop: 4 }}>
         {options.length} option{options.length !== 1 ? "s" : ""}
       </div>
-      <Handle type="target" position={Position.Left} style={{ background: "#3fb950", border: "2px solid #141822", width: 10, height: 10 }} />
-      <Handle type="source" position={Position.Right} style={{ background: "#f97316", border: "2px solid #141822", width: 10, height: 10 }} />
+      <Handle type="target" position={Position.Left} style={{ background: "#3fb950", border: "2px solid #0F1420", width: 10, height: 10 }} />
+      <Handle type="source" position={Position.Right} style={{ background: "#f97316", border: "2px solid #0F1420", width: 10, height: 10 }} />
     </NodeWrapper>
   );
 }

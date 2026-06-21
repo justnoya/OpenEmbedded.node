@@ -21,13 +21,13 @@ function EmbedNodeComponent({ id, data }: NodeProps) {
           }}
         />
         <div>
-          <div style={{ color: "#e6edf3", fontSize: 13, fontWeight: 600 }}>
+          <div style={{ color: "#DDE3F5", fontSize: 13, fontWeight: 600 }}>
             {title || "Embed"}
           </div>
           {data.description != null && String(data.description).trim() !== "" && (
             <div
               style={{
-                color: "#7d8590",
+                color: "#5C6882",
                 fontSize: 11,
                 marginTop: 2,
                 maxWidth: 175,
@@ -41,8 +41,8 @@ function EmbedNodeComponent({ id, data }: NodeProps) {
           )}
         </div>
       </div>
-      <Handle type="target" position={Position.Left} style={{ background: "#3fb950", border: "2px solid #141822", width: 10, height: 10 }} />
-      <Handle type="source" position={Position.Right} style={{ background: accentHex, border: "2px solid #141822", width: 10, height: 10 }} />
+      <Handle type="target" position={Position.Left} style={{ background: "#3fb950", border: "2px solid #0F1420", width: 10, height: 10 }} />
+      <Handle type="source" position={Position.Right} style={{ background: accentHex, border: "2px solid #0F1420", width: 10, height: 10 }} />
     </NodeWrapper>
   );
 }

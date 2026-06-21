@@ -7,12 +7,12 @@ import { Copy, Check, Code2, Webhook, FileJson, Send, Loader2 } from "lucide-rea
 
 type Tab = "json" | "code" | "webhook";
 
-const BG = "#111827";
-const SURFACE = "#141926";
-const BORDER = "#1D2539";
-const TEXT = "#E8EDFF";
-const MUTED = "#64748B";
-const FAINT = "#374165";
+const BG = "#0D1117";
+const SURFACE = "#131720";
+const BORDER = "#1A1F2E";
+const TEXT = "#DDE3F5";
+const MUTED = "#5C6882";
+const FAINT = "#2D3652";
 
 const tabDefs: { id: Tab; label: string; icon: React.ReactNode }[] = [
   { id: "json", label: "JSON", icon: <FileJson size={13} /> },
@@ -143,7 +143,7 @@ export function ExportPanel() {
         style={{
           display: "flex",
           alignItems: "center",
-          padding: "6px 12px",
+          padding: "0 12px",
           borderBottom: `1px solid ${BORDER}`,
           gap: 2,
           flexShrink: 0,
@@ -158,14 +158,15 @@ export function ExportPanel() {
               alignItems: "center",
               gap: 5,
               padding: "5px 11px",
-              background: activeTab === t.id ? "rgba(88,101,242,0.12)" : "transparent",
+              background: "transparent",
               border: "none",
-              borderRadius: 5,
+              borderBottom: activeTab === t.id ? "2px solid #5865F2" : "2px solid transparent",
+              borderRadius: 0,
               color: activeTab === t.id ? "#818cf8" : MUTED,
               fontSize: 12,
               fontWeight: activeTab === t.id ? 600 : 400,
               cursor: "pointer",
-              transition: "all 0.12s",
+              transition: "color 0.12s, border-color 0.12s",
             }}
           >
             {t.icon}

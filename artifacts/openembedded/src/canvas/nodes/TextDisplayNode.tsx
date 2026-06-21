@@ -9,9 +9,9 @@ function TextDisplayNodeComponent({ id, data }: NodeProps) {
     <NodeWrapper id={id} typeName="Text Display · 10" icon={<Type size={13} />} accentColor="#3b82f6">
       <div
         style={{
-          color: "#e6edf3",
+          color: "#DDE3F5",
           fontSize: 12,
-          lineHeight: 1.5,
+          lineHeight: 1.55,
           maxWidth: 220,
           overflow: "hidden",
           display: "-webkit-box",
@@ -20,10 +20,10 @@ function TextDisplayNodeComponent({ id, data }: NodeProps) {
           wordBreak: "break-word",
         }}
       >
-        {content || <span style={{ color: "#484f58", fontStyle: "italic" }}>Empty text…</span>}
+        {content || <span style={{ color: "#2D3652", fontStyle: "italic" }}>Empty text…</span>}
       </div>
-      <Handle type="target" position={Position.Left} style={{ background: "#3fb950", border: "2px solid #141822", width: 10, height: 10 }} />
-      <Handle type="source" position={Position.Right} style={{ background: "#3b82f6", border: "2px solid #141822", width: 10, height: 10 }} />
+      <Handle type="target" position={Position.Left} style={{ background: "#3fb950", border: "2px solid #0F1420", width: 10, height: 10 }} />
+      <Handle type="source" position={Position.Right} style={{ background: "#3b82f6", border: "2px solid #0F1420", width: 10, height: 10 }} />
     </NodeWrapper>
   );
 }
