@@ -10,10 +10,16 @@ import { DiscordActivityOverlay } from "@/components/DiscordActivityOverlay";
 
 const queryClient = new QueryClient();
 
+function Support() {
+  window.location.replace("https://discord.gg/P84XzN2UKh");
+  return null;
+}
+
 function Router() {
   return (
     <Switch>
       <Route path="/" component={Home} />
+      <Route path="/support" component={Support} />
       <Route path="/builder/:id" component={Builder} />
       <Route component={NotFound} />
     </Switch>
