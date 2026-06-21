@@ -25,13 +25,21 @@ export function compileGraph(nodes: AppNode[], edges: Edge[]): CompileResult {
   const childrenOf = new Map<string, string[]>();
   const parentOf = new Map<string, string>();
 
-  for (const edge of edges) {
+  // Only structural edges (type "default" or undefined) define the message hierarchy.
+  // Interaction edges (type "interaction") represent flows, not structure.
+  const structuralEdges = edges.filter((e) => e.type !== "interaction");
+
+  for (const edge of structuralEdges) {
     if (!childrenOf.has(edge.source)) childrenOf.set(edge.source, []);
     childrenOf.get(edge.source)!.push(edge.target);
     parentOf.set(edge.target, edge.source);
   }
 
-  const rootIds = nodes.filter((n) => !parentOf.has(n.id)).map((n) => n.id);
+  // Root nodes: no incoming structural edges, and not a utility node (bot, openembedded)
+  const UTILITY_TYPES = new Set(["bot", "openembedded"]);
+  const rootIds = nodes
+    .filter((n) => !parentOf.has(n.id) && !UTILITY_TYPES.has(n.type ?? ""))
+    .map((n) => n.id);
 
   let hasV2 = false;
 
@@ -44,26 +52,18 @@ export function compileGraph(nodes: AppNode[], edges: Edge[]): CompileResult {
     switch (d.componentType) {
       case 17: {
         hasV2 = true;
-        // Separate direct thumbnail children — auto-wrap each into an anonymous section
-        // so the output JSON stays valid (Container → Section → Thumbnail is the Discord spec).
         const builtComponents: Record<string, unknown>[] = [];
         for (const kid of kids) {
           const kidNode = nodeMap.get(kid);
           if (kidNode?.data?.componentType === 11) {
-            // thumbnail wired directly to container → auto-wrap in a section
             const thumbBuilt = buildComponent(kid);
-            if (thumbBuilt) {
-              builtComponents.push({ type: 9, components: [], accessory: thumbBuilt });
-            }
+            if (thumbBuilt) builtComponents.push({ type: 9, components: [], accessory: thumbBuilt });
           } else {
             const built = buildComponent(kid);
             if (built) builtComponents.push(built);
           }
         }
-        const comp: Record<string, unknown> = {
-          type: 17,
-          components: builtComponents,
-        };
+        const comp: Record<string, unknown> = { type: 17, components: builtComponents };
         if (d.accent_color != null) comp.accent_color = d.accent_color;
         if (d.spoiler) comp.spoiler = true;
         return comp;
@@ -95,11 +95,7 @@ export function compileGraph(nodes: AppNode[], edges: Edge[]): CompileResult {
       case 14: {
         hasV2 = true;
         const spacingMap: Record<string, number> = { sm: 0, md: 1, lg: 2 };
-        return {
-          type: 14,
-          spacing: spacingMap[d.spacing as string] ?? 1,
-          divider: d.divider ?? false,
-        };
+        return { type: 14, spacing: spacingMap[d.spacing as string] ?? 1, divider: d.divider ?? false };
       }
       case 1: {
         hasV2 = true;
@@ -111,11 +107,7 @@ export function compileGraph(nodes: AppNode[], edges: Edge[]): CompileResult {
           Primary: 1, Secondary: 2, Success: 3, Danger: 4, Link: 5, Premium: 6,
         };
         const style = styleMap[d.style as string] ?? 1;
-        const btn: Record<string, unknown> = {
-          type: 2,
-          style,
-          label: d.label ?? "Button",
-        };
+        const btn: Record<string, unknown> = { type: 2, style, label: d.label ?? "Button" };
         if (style === 5) btn.url = d.url ?? "";
         else if (style === 6) btn.sku_id = d.sku_id ?? "";
         else btn.custom_id = d.custom_id ?? `btn_${id}`;
@@ -129,9 +121,7 @@ export function compileGraph(nodes: AppNode[], edges: Edge[]): CompileResult {
         const options = (d.options as Array<{ label: string; value: string; description?: string; default?: boolean }>) ?? [];
         if (options.length === 0) errors.push({ nodeId: id, message: "StringSelect: at least one option required" });
         const sel: Record<string, unknown> = {
-          type: 3,
-          custom_id: d.custom_id ?? `sel_${id}`,
-          options,
+          type: 3, custom_id: d.custom_id ?? `sel_${id}`, options,
         };
         if (d.placeholder) sel.placeholder = d.placeholder;
         if (d.min_values != null) sel.min_values = Number(d.min_values);
@@ -144,9 +134,7 @@ export function compileGraph(nodes: AppNode[], edges: Edge[]): CompileResult {
         if (!d.label) errors.push({ nodeId: id, message: "TextInput: label is required" });
         if (!d.custom_id) errors.push({ nodeId: id, message: "TextInput: custom_id is required" });
         const ti: Record<string, unknown> = {
-          type: 4,
-          custom_id: d.custom_id ?? `ti_${id}`,
-          label: d.label ?? "Input",
+          type: 4, custom_id: d.custom_id ?? `ti_${id}`, label: d.label ?? "Input",
           style: d.style === "Paragraph" ? 2 : 1,
         };
         if (d.placeholder) ti.placeholder = d.placeholder;
@@ -163,8 +151,7 @@ export function compileGraph(nodes: AppNode[], edges: Edge[]): CompileResult {
         hasV2 = true;
         if (!d.custom_id) errors.push({ nodeId: id, message: `Select (type ${d.componentType}): custom_id is required` });
         const autoSel: Record<string, unknown> = {
-          type: d.componentType,
-          custom_id: d.custom_id ?? `sel_${id}`,
+          type: d.componentType, custom_id: d.custom_id ?? `sel_${id}`,
         };
         if (d.placeholder) autoSel.placeholder = d.placeholder;
         if (d.min_values != null) autoSel.min_values = Number(d.min_values);
@@ -204,9 +191,7 @@ export function compileGraph(nodes: AppNode[], edges: Edge[]): CompileResult {
     payload.flags = 32768;
     payload.components = components;
   }
-  if (embeds.length > 0) {
-    payload.embeds = embeds;
-  }
+  if (embeds.length > 0) payload.embeds = embeds;
 
   return { payload, isValid: errors.length === 0, errors };
 }

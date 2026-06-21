@@ -11,6 +11,7 @@ import { SelectMenuNode } from "./nodes/SelectMenuNode";
 import { AutoSelectNode } from "./nodes/AutoSelectNode";
 import { TextInputNode } from "./nodes/TextInputNode";
 import { BotNode } from "./nodes/BotNode";
+import { OpenEmbeddedNode } from "./nodes/OpenEmbeddedNode";
 
 export const nodeTypes = {
   container: ContainerNode,
@@ -29,4 +30,5 @@ export const nodeTypes = {
   channelSelect: AutoSelectNode,
   textInput: TextInputNode,
   bot: BotNode,
+  openembedded: OpenEmbeddedNode,
 };

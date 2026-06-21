@@ -14,7 +14,8 @@ import { useGraphStore } from "@/lib/graphStore";
 import { usePreviewStore } from "@/lib/previewStore";
 import { nodeTypes } from "@/canvas/nodeTypes";
 import { CustomEdge } from "@/canvas/edges/CustomEdge";
-import { isValidNodeConnection } from "@/lib/connectionRules";
+import { InteractionEdge } from "@/canvas/edges/InteractionEdge";
+import { isValidNodeConnection, isInteractionConnection } from "@/lib/connectionRules";
 import { NodeLibraryPanel } from "@/panels/NodeLibraryPanel";
 import { PropertiesPanel } from "@/panels/PropertiesPanel";
 import { DiscordPreview } from "@/preview/DiscordPreview";
@@ -36,7 +37,7 @@ import {
   Eye, Settings2, Trash2, Loader2, Check, AlertCircle, LayoutGrid,
 } from "lucide-react";
 
-const edgeTypes = { default: CustomEdge };
+const edgeTypes = { default: CustomEdge, interaction: InteractionEdge };
 
 type RightTab = "properties" | "preview";
 type MobilePanel = "library" | "canvas" | "properties" | "preview";
@@ -175,7 +176,9 @@ export function Builder() {
       const sourceNode = nodes.find((n) => n.id === connection.source);
       const targetNode = nodes.find((n) => n.id === connection.target);
       if (!sourceNode || !targetNode) return false;
-      return isValidNodeConnection(sourceNode.type ?? "", targetNode.type ?? "");
+      const srcType = sourceNode.type ?? "";
+      const tgtType = targetNode.type ?? "";
+      return isValidNodeConnection(srcType, tgtType) || isInteractionConnection(srcType, tgtType);
     },
     [nodes]
   );

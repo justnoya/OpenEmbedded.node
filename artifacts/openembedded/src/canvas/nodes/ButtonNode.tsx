@@ -8,7 +8,8 @@ const STYLE_MAP: Record<string, { bg: string; color: string; label: string }> = 
   Secondary: { bg: "#4e5058", color: "#fff", label: "Secondary" },
   Success:   { bg: "#3fb950", color: "#000", label: "Success" },
   Danger:    { bg: "#f85149", color: "#fff", label: "Danger" },
-  Link:      { bg: "transparent", color: "#58a6ff", label: "Link" },
+  Link:      { bg: "transparent", color: "#58a6ff", label: "Link ↗" },
+  Premium:   { bg: "#f47fff", color: "#fff", label: "Premium" },
 };
 
 function ButtonNodeComponent({ id, data }: NodeProps) {
@@ -17,38 +18,38 @@ function ButtonNodeComponent({ id, data }: NodeProps) {
   const s = STYLE_MAP[style] ?? STYLE_MAP.Primary;
 
   return (
-    <NodeWrapper id={id} typeName="Button · 2" icon={<MousePointerClick size={13} />} accentColor="#5865F2">
+    <NodeWrapper
+      id={id}
+      typeName="Button · 2"
+      icon={<MousePointerClick size={13} />}
+      accentColor="#5865F2"
+      nodeClass="interactive"
+      showInteractionHandle
+    >
       <div
         style={{
-          display: "inline-flex",
-          alignItems: "center",
-          background: s.bg,
-          color: s.color,
-          fontSize: 12,
-          fontWeight: 600,
-          padding: "4px 12px",
-          borderRadius: 4,
+          display: "inline-flex", alignItems: "center",
+          background: s.bg, color: s.color,
+          fontSize: 12, fontWeight: 600,
+          padding: "4px 12px", borderRadius: 4,
           border: style === "Link" ? "1px solid rgba(88,166,255,0.3)" : "none",
-          gap: 5,
-          maxWidth: 180,
-          overflow: "hidden",
+          gap: 5, maxWidth: 180, overflow: "hidden",
         }}
       >
-        <span
-          style={{
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            whiteSpace: "nowrap",
-          }}
-        >
+        <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
           {label}
         </span>
       </div>
       <div style={{ color: "#888888", fontSize: 10, marginTop: 4, textTransform: "uppercase", letterSpacing: "0.05em" }}>
         {s.label}
       </div>
+      <div style={{ color: "#4a3a00", fontSize: 9, marginTop: 2 }}>
+        Drag right handle → to set response
+      </div>
+
       <Handle type="target" position={Position.Left} style={{ background: "#3fb950", border: "2px solid #1b1b1b", width: 10, height: 10 }} />
-      <Handle type="source" position={Position.Right} style={{ background: "#5865F2", border: "2px solid #1b1b1b", width: 10, height: 10 }} />
+      {/* Amber handle = interaction output */}
+      <Handle type="source" position={Position.Right} style={{ background: "#f59e0b", border: "2px solid #1b1b1b", width: 10, height: 10 }} />
     </NodeWrapper>
   );
 }

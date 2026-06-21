@@ -10,9 +10,13 @@ interface NodeWrapperProps {
   icon: ReactNode;
   accentColor: string;
   nodeClass?: NodeClass;
+  /** When true, the right (source) handle is NOT hidden — used for interactive nodes that emit interaction edges. */
+  showInteractionHandle?: boolean;
 }
 
-export function NodeWrapper({ id, children, typeName, icon, accentColor, nodeClass = "sub" }: NodeWrapperProps) {
+export function NodeWrapper({
+  id, children, typeName, icon, accentColor, nodeClass = "sub", showInteractionHandle = false,
+}: NodeWrapperProps) {
   const selectedNodeId = useGraphStore((s) => s.selectedNodeId);
   const setSelectedNode = useGraphStore((s) => s.setSelectedNode);
   const isSelected = selectedNodeId === id;
@@ -59,11 +63,7 @@ export function NodeWrapper({ id, children, typeName, icon, accentColor, nodeCla
       {/* Accent gradient top bar */}
       <div
         style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          right: 0,
-          height: 2,
+          position: "absolute", top: 0, left: 0, right: 0, height: 2,
           background: `linear-gradient(90deg, ${accentColor}, ${accentColor}60, transparent)`,
           borderRadius: "12px 12px 0 0",
         }}
@@ -73,9 +73,7 @@ export function NodeWrapper({ id, children, typeName, icon, accentColor, nodeCla
       {isConnectionTarget && (
         <div
           style={{
-            position: "absolute",
-            inset: -5,
-            borderRadius: 17,
+            position: "absolute", inset: -5, borderRadius: 17,
             border: "1.5px solid rgba(255,255,255,0.25)",
             pointerEvents: "none",
             animation: "pulseRing 0.65s ease-in-out infinite alternate",
@@ -87,6 +85,9 @@ export function NodeWrapper({ id, children, typeName, icon, accentColor, nodeCla
       {nodeClass === "sub" && (
         <style>{`[data-testid="node-${id}"] .react-flow__handle-right{opacity:0!important;pointer-events:none!important}`}</style>
       )}
+      {nodeClass === "interactive" && !showInteractionHandle && (
+        <style>{`[data-testid="node-${id}"] .react-flow__handle-right{opacity:0!important;pointer-events:none!important}`}</style>
+      )}
       {nodeClass === "root" && (
         <style>{`[data-testid="node-${id}"] .react-flow__handle{opacity:0!important;pointer-events:none!important}`}</style>
       )}
@@ -96,24 +97,17 @@ export function NodeWrapper({ id, children, typeName, icon, accentColor, nodeCla
         style={{
           padding: "10px 12px 9px",
           borderBottom: "1px solid rgba(255,255,255,0.05)",
-          display: "flex",
-          alignItems: "center",
-          gap: 8,
+          display: "flex", alignItems: "center", gap: 8,
           background: `linear-gradient(90deg, ${accentColor}12 0%, ${accentColor}05 40%, transparent 100%)`,
         }}
       >
         <div
           style={{
-            width: 26,
-            height: 26,
-            borderRadius: 7,
+            width: 26, height: 26, borderRadius: 7,
             background: `linear-gradient(135deg, ${accentColor}30, ${accentColor}15)`,
             border: `1px solid ${accentColor}25`,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            color: accentColor,
-            flexShrink: 0,
+            display: "flex", alignItems: "center", justifyContent: "center",
+            color: accentColor, flexShrink: 0,
             boxShadow: `0 0 8px ${accentColor}15`,
           }}
         >
@@ -122,13 +116,9 @@ export function NodeWrapper({ id, children, typeName, icon, accentColor, nodeCla
 
         <span
           style={{
-            color: "rgba(255,255,255,0.5)",
-            fontSize: 10,
-            fontWeight: 600,
-            textTransform: "uppercase",
-            letterSpacing: "0.09em",
-            userSelect: "none",
-            flex: 1,
+            color: "rgba(255,255,255,0.5)", fontSize: 10, fontWeight: 600,
+            textTransform: "uppercase", letterSpacing: "0.09em",
+            userSelect: "none", flex: 1,
           }}
         >
           {typeName}
@@ -139,14 +129,9 @@ export function NodeWrapper({ id, children, typeName, icon, accentColor, nodeCla
             background: badgeColor + "12",
             border: `1px solid ${badgeColor}25`,
             color: badgeColor,
-            fontSize: 8,
-            fontWeight: 700,
-            letterSpacing: "0.08em",
-            padding: "1px 5px",
-            borderRadius: 4,
-            textTransform: "uppercase",
-            userSelect: "none",
-            opacity: 0.85,
+            fontSize: 8, fontWeight: 700, letterSpacing: "0.08em",
+            padding: "1px 5px", borderRadius: 4,
+            textTransform: "uppercase", userSelect: "none", opacity: 0.85,
           }}
         >
           {badgeLabel}
@@ -155,11 +140,8 @@ export function NodeWrapper({ id, children, typeName, icon, accentColor, nodeCla
         {isSelected && (
           <div
             style={{
-              width: 6,
-              height: 6,
-              borderRadius: "50%",
-              background: "#5865F2",
-              flexShrink: 0,
+              width: 6, height: 6, borderRadius: "50%",
+              background: "#5865F2", flexShrink: 0,
               boxShadow: "0 0 6px rgba(88,101,242,0.7)",
             }}
           />

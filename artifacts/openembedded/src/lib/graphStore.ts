@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { Node, Edge, Connection, addEdge, applyNodeChanges, applyEdgeChanges, NodeChange, EdgeChange } from '@xyflow/react';
-import { isValidNodeConnection } from './connectionRules';
+import { isValidNodeConnection, isInteractionConnection, InteractionMode } from './connectionRules';
 
 export type DiscordComponentType = 'container' | 'section' | 'text' | 'thumbnail' | 'media' | 'separator' | 'actionRow' | 'button' | 'embed';
 
@@ -22,6 +22,7 @@ interface GraphState {
   future: Snapshot[];
   addNode: (node: AppNode) => void;
   updateNodeData: (id: string, data: Partial<AppNodeData>) => void;
+  updateEdgeData: (id: string, data: Record<string, unknown>) => void;
   removeNode: (id: string) => void;
   removeEdge: (id: string) => void;
   setSelectedNode: (id: string | null) => void;
@@ -34,7 +35,6 @@ interface GraphState {
   redo: () => void;
   canUndo: () => boolean;
   canRedo: () => boolean;
-  /** Reorder the children of a parent node. newChildOrder is the desired child ID sequence. */
   reorderChildEdges: (parentId: string, newChildOrder: string[]) => void;
 }
 
@@ -43,6 +43,8 @@ const MAX_HISTORY = 50;
 function snap(nodes: AppNode[], edges: Edge[]): Snapshot {
   return { nodes: nodes.map(n => ({ ...n })), edges: edges.map(e => ({ ...e })) };
 }
+
+let edgeIdCounter = Date.now();
 
 export const useGraphStore = create<GraphState>((set, get) => ({
   nodes: [],
@@ -66,6 +68,15 @@ export const useGraphStore = create<GraphState>((set, get) => ({
       past: [...past.slice(-MAX_HISTORY + 1), snap(nodes, edges)],
       future: [],
       nodes: nodes.map(n => n.id === id ? { ...n, data: { ...n.data, ...data } } : n),
+    });
+  },
+
+  /** Update edge data without touching undo history (used for quick mode changes). */
+  updateEdgeData: (id, data) => {
+    set({
+      edges: get().edges.map(e =>
+        e.id === id ? { ...e, data: { ...(e.data ?? {}), ...data } } : e
+      ),
     });
   },
 
@@ -104,11 +115,35 @@ export const useGraphStore = create<GraphState>((set, get) => ({
     const sourceNode = nodes.find((n) => n.id === connection.source);
     const targetNode = nodes.find((n) => n.id === connection.target);
     if (!sourceNode || !targetNode) return;
-    if (!isValidNodeConnection(sourceNode.type ?? "", targetNode.type ?? "")) return;
+
+    const srcType = sourceNode.type ?? "";
+    const tgtType = targetNode.type ?? "";
+
+    // ── Interaction edge (button/select → container/embed) ───────────────────
+    if (isInteractionConnection(srcType, tgtType)) {
+      const interactionEdge: Edge = {
+        id: `ie_${edgeIdCounter++}`,
+        source: connection.source,
+        target: connection.target,
+        sourceHandle: connection.sourceHandle ?? undefined,
+        targetHandle: connection.targetHandle ?? undefined,
+        type: "interaction",
+        data: { mode: "send_new" as InteractionMode },
+      };
+      set({
+        past: [...past.slice(-MAX_HISTORY + 1), snap(nodes, edges)],
+        future: [],
+        edges: [...edges, interactionEdge],
+      });
+      return;
+    }
+
+    // ── Structural edge (parent → child) ────────────────────────────────────
+    if (!isValidNodeConnection(srcType, tgtType)) return;
     set({
       past: [...past.slice(-MAX_HISTORY + 1), snap(nodes, edges)],
       future: [],
-      edges: addEdge(connection, edges),
+      edges: addEdge({ ...connection, type: "default" }, edges),
     });
   },
 
@@ -149,13 +184,11 @@ export const useGraphStore = create<GraphState>((set, get) => ({
 
   reorderChildEdges: (parentId, newChildOrder) => {
     const { edges, nodes, past } = get();
-    // Edges from this parent, in the new desired order
     const parentEdges = edges.filter(e => e.source === parentId);
     const otherEdges = edges.filter(e => e.source !== parentId);
     const reordered = newChildOrder
       .map(childId => parentEdges.find(e => e.target === childId))
       .filter((e): e is Edge => e !== undefined);
-    // Append any parent edges not in newChildOrder (safety net)
     const reorderedIds = new Set(reordered.map(e => e.id));
     const remaining = parentEdges.filter(e => !reorderedIds.has(e.id));
     set({
