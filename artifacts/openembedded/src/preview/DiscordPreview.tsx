@@ -64,7 +64,7 @@ interface Embed {
 // ─── Discord accurate colors ──────────────────────────────────────────────────
 
 const DC_FONT = `"gg sans","Noto Sans",Whitney,"Helvetica Neue",Helvetica,Arial,sans-serif`;
-const CHAT_BG = "#313338";
+const CHAT_BG = "#1a1a1a";
 const CONTAINER_BG = "#2b2d31";
 const TEXT_NORMAL = "#dbdee1";
 const TEXT_MUTED = "#949ba4";

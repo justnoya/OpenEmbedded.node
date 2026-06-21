@@ -57,8 +57,8 @@ HSL Tailwind values:
 - `--foreground: 0 0% 94%`
 - `--muted: 0 0% 60%`
 
-## Discord Preview — intentionally NOT changed
-DiscordPreview.tsx uses Discord's own CHAT_BG `#313338` etc — never change these.
+## Discord Preview
+DiscordPreview.tsx `CHAT_BG` is `#1a1a1a` (user changed from Discord's default `#313338` to match app theme).
 
 ## Key Principles
 - **Borders**: use `rgba(255,255,255,0.07)` primarily, NOT hard hex like `#333333`
