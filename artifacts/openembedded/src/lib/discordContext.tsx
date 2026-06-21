@@ -115,10 +115,20 @@ export function DiscordProvider({ children }: { children: ReactNode }) {
       try {
         // 1. Fetch public client ID from backend
         const configRes = await fetch("/api/v1/discord/config");
-        const config = (await configRes.json()) as {
+        if (!configRes.ok) {
+          const text = await configRes.text().catch(() => "");
+          throw new Error(
+            `Config endpoint returned HTTP ${configRes.status}. ` +
+            (text.startsWith("<") ? "Server returned an HTML error page — check Vercel function logs." : text.slice(0, 200))
+          );
+        }
+        const config = await configRes.json().catch(() => null) as {
           clientId: string;
           configured: boolean;
-        };
+        } | null;
+        if (!config) {
+          throw new Error("Config endpoint returned invalid JSON. Check Vercel function logs.");
+        }
 
         let sdk: DiscordSDK | DiscordSDKMock;
 
