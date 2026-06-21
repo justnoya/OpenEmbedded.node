@@ -7,8 +7,19 @@ import {
   useDeleteProject,
   getListProjectsQueryKey,
 } from "@workspace/api-client-react";
-import { Plus, MoreVertical, Trash2, ExternalLink, FolderOpen, Zap, Layers, MousePointerClick, X, ArrowRight } from "lucide-react";
-import { DiscordUserBadge } from "@/components/DiscordUserBadge";
+import {
+  Plus,
+  MoreVertical,
+  Trash2,
+  ExternalLink,
+  Layers,
+  Zap,
+  MousePointerClick,
+  X,
+  Clock,
+  Box,
+  Loader2,
+} from "lucide-react";
 
 type Project = {
   id: string;
@@ -28,7 +39,7 @@ function timeAgo(iso: string): string {
   return `${Math.floor(h / 24)}d ago`;
 }
 
-const ACCENT_COLORS = ["#8b5cf6", "#10b981", "#3b82f6", "#f59e0b", "#ec4899", "#14b8a6", "#5865F2"];
+const NODE_COLORS = ["#5865F2", "#8b5cf6", "#10b981", "#f59e0b", "#ec4899", "#14b8a6"];
 
 const MiniCanvasPreview = ({ nodeCount }: { nodeCount: number }) => (
   <div style={{
@@ -37,79 +48,58 @@ const MiniCanvasPreview = ({ nodeCount }: { nodeCount: number }) => (
     position: "relative",
     overflow: "hidden",
   }}>
-    {/* Dot grid */}
     <div style={{
       position: "absolute", inset: 0,
-      backgroundImage: "radial-gradient(circle, rgba(255,255,255,0.06) 1px, transparent 1px)",
+      backgroundImage: "radial-gradient(circle, rgba(255,255,255,0.055) 1px, transparent 1px)",
       backgroundSize: "18px 18px",
     }} />
-    {/* Gradient overlay */}
     <div style={{
       position: "absolute", inset: 0,
-      background: "radial-gradient(ellipse at 30% 50%, rgba(88,101,242,0.05) 0%, transparent 70%)",
+      background: "radial-gradient(ellipse at 30% 50%, rgba(88,101,242,0.06) 0%, transparent 70%)",
     }} />
-    {/* Mini sidebar */}
     <div style={{
-      position: "absolute", left: 0, top: 0, bottom: 0, width: 60,
-      background: "#161616",
-      borderRight: "1px solid rgba(255,255,255,0.05)",
-      padding: "8px 5px",
-      display: "flex", flexDirection: "column", gap: 4,
-    }}>
-      {ACCENT_COLORS.map((c, i) => (
-        <div key={i} style={{
-          height: 12, borderRadius: 3,
-          background: `linear-gradient(90deg, ${c}20, ${c}08)`,
-          borderLeft: `2px solid ${c}`,
-        }} />
-      ))}
-    </div>
-    {/* Canvas content */}
-    <div style={{
-      position: "absolute", left: 60, top: 0, bottom: 0, right: 0,
+      position: "absolute", inset: 0,
       display: "flex", alignItems: "center", justifyContent: "center",
     }}>
       {nodeCount > 0 ? (
         <div style={{ display: "flex", flexDirection: "column", gap: 8, alignItems: "center" }}>
-          {ACCENT_COLORS.slice(0, Math.min(nodeCount, 3)).map((c, i) => (
+          {NODE_COLORS.slice(0, Math.min(nodeCount, 4)).map((c, i) => (
             <div key={i} style={{
-              width: 100 - i * 10,
-              height: 28,
-              borderRadius: 8,
-              background: `linear-gradient(180deg, rgba(255,255,255,0.025) 0%, transparent 100%), #1b1b1b`,
+              width: 110 - i * 12,
+              height: 26,
+              borderRadius: 7,
+              background: "#1b1b1b",
               border: `1px solid rgba(255,255,255,0.07)`,
               display: "flex", alignItems: "center",
-              padding: "0 8px", gap: 6,
+              padding: "0 9px", gap: 7,
               boxShadow: "0 2px 6px rgba(0,0,0,0.4)",
-              position: "relative",
-              overflow: "hidden",
+              position: "relative", overflow: "hidden",
             }}>
               <div style={{
                 position: "absolute", top: 0, left: 0, right: 0, height: 1.5,
                 background: `linear-gradient(90deg, ${c}, ${c}40, transparent)`,
               }} />
-              <div style={{ width: 5, height: 5, borderRadius: "50%", background: c, boxShadow: `0 0 4px ${c}` }} />
-              <div style={{ flex: 1, height: 3, borderRadius: 2, background: `${c}20` }} />
+              <div style={{ width: 5, height: 5, borderRadius: "50%", background: c, flexShrink: 0 }} />
+              <div style={{ flex: 1, height: 3, borderRadius: 2, background: `${c}25` }} />
             </div>
           ))}
-          {nodeCount > 3 && (
-            <span style={{ color: "rgba(255,255,255,0.2)", fontSize: 9, letterSpacing: "0.05em" }}>
-              +{nodeCount - 3} more
+          {nodeCount > 4 && (
+            <span style={{ color: "rgba(255,255,255,0.18)", fontSize: 9, letterSpacing: "0.05em" }}>
+              +{nodeCount - 4} more
             </span>
           )}
         </div>
       ) : (
         <div style={{ textAlign: "center" }}>
           <div style={{
-            width: 34, height: 34,
-            borderRadius: 9,
+            width: 36, height: 36, borderRadius: 10,
             border: "1px dashed rgba(255,255,255,0.1)",
             display: "flex", alignItems: "center", justifyContent: "center",
             margin: "0 auto 6px",
           }}>
-            <Plus size={14} color="rgba(255,255,255,0.2)" />
+            <Plus size={15} color="rgba(255,255,255,0.2)" />
           </div>
-          <span style={{ color: "rgba(255,255,255,0.18)", fontSize: 10 }}>Empty</span>
+          <span style={{ color: "rgba(255,255,255,0.18)", fontSize: 10 }}>Empty canvas</span>
         </div>
       )}
     </div>
@@ -131,12 +121,14 @@ export function Home() {
   const projects = (rawProjects as Project[] | undefined) ?? [];
   const sorted = [...projects].reverse();
 
-  const handleCreate = (name: string) => {
+  const handleCreate = () => {
     createProject.mutate(
-      { data: { name: name.trim() || "Untitled Project", graph: { nodes: [], edges: [] } } },
+      { data: { name: newName.trim() || "Untitled Project", graph: { nodes: [], edges: [] } } },
       {
         onSuccess: (p: unknown) => {
           queryClient.invalidateQueries({ queryKey: getListProjectsQueryKey() });
+          setShowCreateModal(false);
+          setNewName("");
           navigate(`/builder/${(p as Project).id}`);
         },
       }
@@ -156,7 +148,13 @@ export function Home() {
     );
   };
 
-  const openCreate = () => { setNewName(""); setShowCreateModal(true); };
+  const openCreate = () => {
+    setNewName("");
+    setShowCreateModal(true);
+  };
+
+  const isCreating = createProject.isPending;
+  const isDeleting = deleteProject.isPending;
 
   return (
     <div
@@ -170,116 +168,103 @@ export function Home() {
       }}
       onClick={() => setOpenMenuId(null)}
     >
-      {/* ── Glass Header ─────────────────────────────────────────────── */}
+      {/* ── Header ──────────────────────────────────────────────────────── */}
       <header style={{
         position: "sticky", top: 0, zIndex: 100,
-        background: "rgba(15,15,15,0.85)",
-        backdropFilter: "blur(24px) saturate(180%)",
-        WebkitBackdropFilter: "blur(24px) saturate(180%)",
+        background: "rgba(15,15,15,0.9)",
+        backdropFilter: "blur(20px) saturate(160%)",
+        WebkitBackdropFilter: "blur(20px) saturate(160%)",
         borderBottom: "1px solid rgba(255,255,255,0.06)",
         display: "flex", alignItems: "center",
-        padding: "0 24px", height: 56, gap: 16,
+        padding: "0 28px", height: 58, gap: 16,
       }}>
-        {/* Brand */}
         <div style={{ display: "flex", alignItems: "center", gap: 10, flexShrink: 0 }}>
           <div style={{
             width: 32, height: 32, borderRadius: 9,
             background: "linear-gradient(135deg, #5865F2 0%, #7c3aed 100%)",
             display: "flex", alignItems: "center", justifyContent: "center",
-            boxShadow: "0 0 20px rgba(88,101,242,0.4), 0 2px 8px rgba(0,0,0,0.5)",
+            boxShadow: "0 0 18px rgba(88,101,242,0.35), 0 2px 8px rgba(0,0,0,0.5)",
           }}>
             <Layers size={16} color="#fff" strokeWidth={2} />
           </div>
-          <span style={{
-            fontSize: 15, fontWeight: 700, color: "#f0f0f0",
-            letterSpacing: "-0.03em",
-          }}>
+          <span style={{ fontSize: 15, fontWeight: 700, color: "#f0f0f0", letterSpacing: "-0.03em" }}>
             OpenEmbedded
           </span>
         </div>
 
         <div style={{ flex: 1 }} />
 
-        {sorted.length > 0 && (
-          <div style={{
-            display: "flex", alignItems: "center", gap: 5,
-            background: "rgba(255,255,255,0.04)",
-            border: "1px solid rgba(255,255,255,0.07)",
-            borderRadius: 20, padding: "4px 12px",
-          }}>
-            <FolderOpen size={12} color="#606060" />
-            <span style={{ fontSize: 12, color: "#606060", fontWeight: 500 }}>
-              {sorted.length} project{sorted.length !== 1 ? "s" : ""}
-            </span>
-          </div>
-        )}
-
         <button
           onClick={openCreate}
           style={{
             display: "flex", alignItems: "center", gap: 6,
             background: "linear-gradient(135deg, #5865F2, #7c3aed)",
-            border: "none",
-            borderRadius: 8, color: "#fff",
-            fontSize: 13, fontWeight: 600,
-            padding: "7px 15px", cursor: "pointer",
-            boxShadow: "0 2px 16px rgba(88,101,242,0.4), 0 0 0 1px rgba(88,101,242,0.2)",
+            border: "none", borderRadius: 8, color: "#fff",
+            fontSize: 13, fontWeight: 600, padding: "7px 16px",
+            cursor: "pointer",
+            boxShadow: "0 2px 14px rgba(88,101,242,0.38), 0 0 0 1px rgba(88,101,242,0.2)",
             transition: "opacity 0.15s, transform 0.15s",
             flexShrink: 0,
           }}
-          onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.opacity = "0.9"; }}
+          onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.opacity = "0.88"; }}
           onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.opacity = "1"; }}
         >
           <Plus size={14} strokeWidth={2.5} />
           New Project
         </button>
-
-        <DiscordUserBadge />
       </header>
 
-      {/* ── Main ─────────────────────────────────────────────────────── */}
-      <main style={{ flex: 1, padding: "32px 24px 64px", maxWidth: 1400, margin: "0 auto", width: "100%" }}>
+      {/* ── Main ────────────────────────────────────────────────────────── */}
+      <main style={{ flex: 1, padding: "36px 28px 72px", maxWidth: 1320, margin: "0 auto", width: "100%", boxSizing: "border-box" }}>
         {isLoading ? (
-          <div style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(290px, 1fr))",
-            gap: 16,
-          }}>
-            {[1, 2, 3].map((i) => (
-              <div key={i} style={{
-                height: 296,
-                background: "linear-gradient(180deg, rgba(255,255,255,0.02) 0%, transparent 100%), #161616",
-                border: "1px solid rgba(255,255,255,0.06)",
-                borderRadius: 16, opacity: 0.5,
-                animation: "shimmer 2s ease-in-out infinite",
-              }} />
-            ))}
+          /* ── Skeleton ─────────────────────────────────────────────── */
+          <div>
+            <div style={{ marginBottom: 28 }}>
+              <div style={{ width: 140, height: 22, borderRadius: 6, background: "rgba(255,255,255,0.05)", marginBottom: 8 }} />
+              <div style={{ width: 80, height: 14, borderRadius: 4, background: "rgba(255,255,255,0.03)" }} />
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(288px, 1fr))", gap: 16 }}>
+              {[1, 2, 3].map((i) => (
+                <div key={i} style={{
+                  borderRadius: 16, border: "1px solid rgba(255,255,255,0.06)",
+                  background: "#161616", overflow: "hidden",
+                  animation: "pulse 2s ease-in-out infinite",
+                  opacity: 0.6 - i * 0.1,
+                }}>
+                  <div style={{ height: 176, background: "rgba(255,255,255,0.02)" }} />
+                  <div style={{ padding: "14px 16px 16px", borderTop: "1px solid rgba(255,255,255,0.05)" }}>
+                    <div style={{ width: "60%", height: 14, borderRadius: 4, background: "rgba(255,255,255,0.06)", marginBottom: 10 }} />
+                    <div style={{ width: "35%", height: 11, borderRadius: 4, background: "rgba(255,255,255,0.03)" }} />
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
 
         ) : sorted.length === 0 ? (
-          /* ── Empty / Hero ─────────────────────────────────────────── */
+          /* ── Empty State ──────────────────────────────────────────── */
           <div style={{
             display: "flex", flexDirection: "column",
             alignItems: "center", justifyContent: "center",
-            minHeight: "68vh", gap: 64,
+            minHeight: "64vh", gap: 52,
           }}>
-            <div style={{ textAlign: "center", maxWidth: 520 }}>
-              {/* Logo glow orb */}
+            {/* Hero block */}
+            <div style={{ textAlign: "center", maxWidth: 500 }}>
               <div style={{
-                width: 72, height: 72, borderRadius: 20,
-                background: "linear-gradient(135deg, rgba(88,101,242,0.25), rgba(124,58,237,0.15))",
+                width: 68, height: 68, borderRadius: 18,
+                background: "linear-gradient(135deg, rgba(88,101,242,0.2), rgba(124,58,237,0.12))",
                 border: "1px solid rgba(88,101,242,0.2)",
                 display: "flex", alignItems: "center", justifyContent: "center",
-                margin: "0 auto 28px",
-                boxShadow: "0 0 60px rgba(88,101,242,0.15), 0 8px 32px rgba(0,0,0,0.5)",
+                margin: "0 auto 26px",
+                boxShadow: "0 0 56px rgba(88,101,242,0.12), 0 8px 28px rgba(0,0,0,0.5)",
               }}>
-                <Layers size={32} color="#818cf8" strokeWidth={1.5} />
+                <Layers size={30} color="#818cf8" strokeWidth={1.5} />
               </div>
 
               <h1 style={{
-                fontSize: 40, fontWeight: 800, margin: "0 0 14px",
+                fontSize: 38, fontWeight: 800, margin: "0 0 12px",
                 letterSpacing: "-0.04em", lineHeight: 1.15,
-                background: "linear-gradient(135deg, #f2f2f2 30%, #707070 100%)",
+                background: "linear-gradient(135deg, #f2f2f2 30%, #666 100%)",
                 WebkitBackgroundClip: "text",
                 WebkitTextFillColor: "transparent",
                 backgroundClip: "text",
@@ -287,7 +272,7 @@ export function Home() {
                 Build Discord messages<br />visually
               </h1>
 
-              <p style={{ color: "#606060", fontSize: 15, lineHeight: 1.75, margin: "0 0 32px" }}>
+              <p style={{ color: "#555", fontSize: 15, lineHeight: 1.7, margin: "0 0 30px" }}>
                 Design Components V2 embeds with a drag-and-drop node graph.
                 Export ready-to-use discord.js code or send live via webhook.
               </p>
@@ -300,11 +285,11 @@ export function Home() {
                   border: "none", borderRadius: 10, color: "#fff",
                   fontSize: 15, fontWeight: 700, padding: "13px 28px",
                   cursor: "pointer",
-                  boxShadow: "0 4px 24px rgba(88,101,242,0.45), 0 0 0 1px rgba(88,101,242,0.15)",
+                  boxShadow: "0 4px 22px rgba(88,101,242,0.42), 0 0 0 1px rgba(88,101,242,0.15)",
                   transition: "opacity 0.15s, transform 0.15s",
                 }}
                 onMouseEnter={(e) => {
-                  (e.currentTarget as HTMLElement).style.opacity = "0.9";
+                  (e.currentTarget as HTMLElement).style.opacity = "0.88";
                   (e.currentTarget as HTMLElement).style.transform = "translateY(-1px)";
                 }}
                 onMouseLeave={(e) => {
@@ -314,67 +299,51 @@ export function Home() {
               >
                 <Plus size={17} strokeWidth={2.5} />
                 Create your first project
-                <ArrowRight size={15} />
               </button>
             </div>
 
-            {/* Feature grid */}
+            {/* Feature cards row */}
             <div style={{
               display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-              gap: 14, width: "100%", maxWidth: 700,
+              gridTemplateColumns: "repeat(3, 1fr)",
+              gap: 14, width: "100%", maxWidth: 680,
             }}>
               {[
-                {
-                  icon: <Layers size={18} />, color: "#8b5cf6",
-                  title: "Visual Node Graph",
-                  desc: "Drag & drop all Discord CV2 components on an infinite canvas",
-                },
-                {
-                  icon: <MousePointerClick size={18} />, color: "#5865F2",
-                  title: "All CV2 Types",
-                  desc: "Container, Section, Text, Gallery, Button, Select, and more",
-                },
-                {
-                  icon: <Zap size={18} />, color: "#10b981",
-                  title: "Instant Export",
-                  desc: "JSON, discord.js v14 code, or send directly via webhook",
-                },
+                { icon: <Layers size={17} />, color: "#8b5cf6", title: "Visual Node Graph", desc: "Drag & drop all Discord CV2 components on an infinite canvas" },
+                { icon: <MousePointerClick size={17} />, color: "#5865F2", title: "All CV2 Types", desc: "Container, Section, Text, Gallery, Button, Select, and more" },
+                { icon: <Zap size={17} />, color: "#10b981", title: "Instant Export", desc: "JSON, discord.js v14 code, or send directly via webhook" },
               ].map((f) => (
                 <div key={f.title} style={{
-                  padding: "18px 20px",
-                  background: "linear-gradient(180deg, rgba(255,255,255,0.025) 0%, transparent 100%), #161616",
+                  padding: "18px 18px",
+                  background: "#161616",
                   border: "1px solid rgba(255,255,255,0.07)",
                   borderRadius: 14,
                   display: "flex", flexDirection: "column", gap: 10,
-                  boxShadow: "0 2px 8px rgba(0,0,0,0.4)",
+                  boxShadow: "0 2px 8px rgba(0,0,0,0.35)",
                   transition: "border-color 0.2s, box-shadow 0.2s",
                 }}
                   onMouseEnter={(e) => {
                     const el = e.currentTarget as HTMLElement;
-                    el.style.borderColor = `${f.color}30`;
-                    el.style.boxShadow = `0 4px 24px rgba(0,0,0,0.5), 0 0 0 1px ${f.color}20`;
+                    el.style.borderColor = `${f.color}35`;
+                    el.style.boxShadow = `0 4px 20px rgba(0,0,0,0.5), 0 0 0 1px ${f.color}18`;
                   }}
                   onMouseLeave={(e) => {
                     const el = e.currentTarget as HTMLElement;
                     el.style.borderColor = "rgba(255,255,255,0.07)";
-                    el.style.boxShadow = "0 2px 8px rgba(0,0,0,0.4)";
+                    el.style.boxShadow = "0 2px 8px rgba(0,0,0,0.35)";
                   }}
                 >
                   <div style={{
-                    width: 38, height: 38, borderRadius: 10,
-                    background: `linear-gradient(135deg, ${f.color}25, ${f.color}10)`,
+                    width: 36, height: 36, borderRadius: 9,
+                    background: `linear-gradient(135deg, ${f.color}22, ${f.color}0c)`,
                     border: `1px solid ${f.color}20`,
                     display: "flex", alignItems: "center", justifyContent: "center",
                     color: f.color,
-                    boxShadow: `0 0 12px ${f.color}15`,
                   }}>
                     {f.icon}
                   </div>
-                  <div style={{ color: "#e8e8e8", fontSize: 13, fontWeight: 600, letterSpacing: "-0.01em" }}>
-                    {f.title}
-                  </div>
-                  <div style={{ color: "#606060", fontSize: 12, lineHeight: 1.6 }}>{f.desc}</div>
+                  <div style={{ color: "#e0e0e0", fontSize: 13, fontWeight: 600, letterSpacing: "-0.01em" }}>{f.title}</div>
+                  <div style={{ color: "#555", fontSize: 12, lineHeight: 1.6 }}>{f.desc}</div>
                 </div>
               ))}
             </div>
@@ -383,18 +352,16 @@ export function Home() {
         ) : (
           /* ── Project Grid ─────────────────────────────────────────── */
           <>
-            <div style={{
-              display: "flex", alignItems: "center", justifyContent: "space-between",
-              marginBottom: 24,
-            }}>
+            {/* Section header */}
+            <div style={{ marginBottom: 24, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
               <div>
                 <h2 style={{
-                  fontSize: 22, fontWeight: 800, color: "#e8e8e8",
-                  margin: "0 0 3px", letterSpacing: "-0.03em",
+                  fontSize: 20, fontWeight: 800, color: "#e8e8e8",
+                  margin: "0 0 2px", letterSpacing: "-0.03em",
                 }}>
-                  Recent Projects
+                  My Projects
                 </h2>
-                <p style={{ fontSize: 13, color: "#505050", margin: 0 }}>
+                <p style={{ fontSize: 12, color: "#484848", margin: 0 }}>
                   {sorted.length} project{sorted.length !== 1 ? "s" : ""}
                 </p>
               </div>
@@ -402,48 +369,49 @@ export function Home() {
 
             <div style={{
               display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(295px, 1fr))",
+              gridTemplateColumns: "repeat(auto-fill, minmax(288px, 1fr))",
               gap: 16,
             }}>
-              {/* New project card */}
+              {/* ── New Project card ──────────────────────────────── */}
               <button
                 onClick={openCreate}
                 style={{
-                  height: 296, border: "1px dashed rgba(255,255,255,0.1)",
-                  borderRadius: 16, background: "transparent",
+                  height: 288,
+                  border: "1.5px dashed rgba(255,255,255,0.09)",
+                  borderRadius: 16,
+                  background: "transparent",
                   display: "flex", flexDirection: "column",
                   alignItems: "center", justifyContent: "center",
-                  gap: 12, color: "rgba(255,255,255,0.2)",
+                  gap: 10, color: "rgba(255,255,255,0.22)",
                   cursor: "pointer", transition: "all 0.2s",
+                  flexShrink: 0,
                 }}
                 onMouseEnter={(e) => {
                   const el = e.currentTarget as HTMLElement;
-                  el.style.borderColor = "rgba(88,101,242,0.4)";
+                  el.style.borderColor = "rgba(88,101,242,0.45)";
                   el.style.color = "#818cf8";
                   el.style.background = "rgba(88,101,242,0.04)";
-                  el.style.boxShadow = "0 0 0 1px rgba(88,101,242,0.15)";
+                  el.style.boxShadow = "0 0 0 1px rgba(88,101,242,0.12)";
                 }}
                 onMouseLeave={(e) => {
                   const el = e.currentTarget as HTMLElement;
-                  el.style.borderColor = "rgba(255,255,255,0.1)";
-                  el.style.color = "rgba(255,255,255,0.2)";
+                  el.style.borderColor = "rgba(255,255,255,0.09)";
+                  el.style.color = "rgba(255,255,255,0.22)";
                   el.style.background = "transparent";
                   el.style.boxShadow = "none";
                 }}
               >
                 <div style={{
-                  width: 48, height: 48, borderRadius: 12,
+                  width: 44, height: 44, borderRadius: 11,
                   border: "1.5px dashed currentColor",
                   display: "flex", alignItems: "center", justifyContent: "center",
                 }}>
-                  <Plus size={22} strokeWidth={1.5} />
+                  <Plus size={20} strokeWidth={1.5} />
                 </div>
-                <div style={{ fontSize: 13, fontWeight: 600, letterSpacing: "-0.01em" }}>
-                  New Project
-                </div>
+                <span style={{ fontSize: 13, fontWeight: 600, letterSpacing: "-0.01em" }}>New Project</span>
               </button>
 
-              {/* Existing project cards */}
+              {/* ── Project cards ─────────────────────────────────── */}
               {sorted.map((project) => {
                 const nodeCount = project.graph?.nodes?.length ?? 0;
                 const isMenuOpen = openMenuId === project.id;
@@ -453,75 +421,90 @@ export function Home() {
                     style={{
                       borderRadius: 16,
                       border: "1px solid rgba(255,255,255,0.07)",
-                      overflow: "hidden",
-                      background: "linear-gradient(180deg, rgba(255,255,255,0.02) 0%, transparent 100%), #161616",
+                      overflow: "visible",
+                      background: "#161616",
                       position: "relative",
                       cursor: "pointer",
-                      boxShadow: "0 2px 8px rgba(0,0,0,0.4)",
+                      boxShadow: "0 2px 8px rgba(0,0,0,0.35)",
                       transition: "border-color 0.2s, box-shadow 0.2s, transform 0.15s",
                     }}
                     onClick={() => navigate(`/builder/${project.id}`)}
                     onMouseEnter={(e) => {
                       const el = e.currentTarget as HTMLElement;
-                      el.style.borderColor = "rgba(88,101,242,0.35)";
-                      el.style.boxShadow = "0 0 0 1px rgba(88,101,242,0.12), 0 8px 32px rgba(0,0,0,0.5)";
-                      el.style.transform = "translateY(-1px)";
+                      el.style.borderColor = "rgba(88,101,242,0.3)";
+                      el.style.boxShadow = "0 0 0 1px rgba(88,101,242,0.1), 0 8px 28px rgba(0,0,0,0.5)";
+                      el.style.transform = "translateY(-2px)";
                     }}
                     onMouseLeave={(e) => {
                       const el = e.currentTarget as HTMLElement;
                       el.style.borderColor = "rgba(255,255,255,0.07)";
-                      el.style.boxShadow = "0 2px 8px rgba(0,0,0,0.4)";
+                      el.style.boxShadow = "0 2px 8px rgba(0,0,0,0.35)";
                       el.style.transform = "translateY(0)";
                     }}
                   >
-                    {/* Canvas preview */}
-                    <div style={{ height: 186, position: "relative" }}>
+                    {/* Canvas preview area */}
+                    <div style={{ height: 176, borderRadius: "15px 15px 0 0", overflow: "hidden" }}>
                       <MiniCanvasPreview nodeCount={nodeCount} />
                     </div>
 
-                    {/* Footer */}
+                    {/* Card body */}
                     <div style={{
-                      padding: "13px 16px 15px",
+                      padding: "14px 16px 16px",
                       borderTop: "1px solid rgba(255,255,255,0.05)",
-                      background: "rgba(255,255,255,0.01)",
                     }}>
+                      {/* Name + menu */}
                       <div style={{
-                        display: "flex", alignItems: "flex-start",
-                        justifyContent: "space-between", marginBottom: 8,
+                        display: "flex", alignItems: "center",
+                        justifyContent: "space-between", marginBottom: 10,
                       }}>
-                        <div style={{
+                        <span style={{
                           fontSize: 14, fontWeight: 700, color: "#e8e8e8",
-                          letterSpacing: "-0.02em", flex: 1, paddingRight: 8,
+                          letterSpacing: "-0.02em",
                           overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                          flex: 1, paddingRight: 6,
                         }}>
                           {project.name}
-                        </div>
+                        </span>
                         <button
-                          onClick={(e) => { e.stopPropagation(); setOpenMenuId(isMenuOpen ? null : project.id); }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setOpenMenuId(isMenuOpen ? null : project.id);
+                          }}
                           style={{
                             background: "none", border: "none", cursor: "pointer",
-                            color: "rgba(255,255,255,0.3)", padding: "2px 3px",
-                            flexShrink: 0, borderRadius: 4, display: "flex",
-                            transition: "color 0.12s",
+                            color: "rgba(255,255,255,0.28)", padding: "3px 4px",
+                            flexShrink: 0, borderRadius: 5, display: "flex",
+                            transition: "color 0.12s, background 0.12s",
                           }}
-                          onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "#f0f0f0"; }}
-                          onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.3)"; }}
+                          onMouseEnter={(e) => {
+                            const el = e.currentTarget as HTMLElement;
+                            el.style.color = "#e8e8e8";
+                            el.style.background = "rgba(255,255,255,0.06)";
+                          }}
+                          onMouseLeave={(e) => {
+                            const el = e.currentTarget as HTMLElement;
+                            el.style.color = "rgba(255,255,255,0.28)";
+                            el.style.background = "none";
+                          }}
                         >
                           <MoreVertical size={15} />
                         </button>
                       </div>
 
-                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                        <span style={{ color: "#404040", fontSize: 11 }}>
+                      {/* Meta row */}
+                      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                        <span style={{
+                          display: "flex", alignItems: "center", gap: 4,
+                          color: "#404040", fontSize: 11,
+                        }}>
+                          <Clock size={10} />
                           {timeAgo(project.updatedAt)}
                         </span>
                         <span style={{
-                          background: "rgba(255,255,255,0.05)",
-                          border: "1px solid rgba(255,255,255,0.07)",
-                          borderRadius: 20, padding: "2px 8px",
-                          color: "#505050", fontSize: 10, fontWeight: 600,
-                          letterSpacing: "0.03em",
+                          display: "flex", alignItems: "center", gap: 4,
+                          color: "#404040", fontSize: 11,
                         }}>
+                          <Box size={10} />
                           {nodeCount} node{nodeCount !== 1 ? "s" : ""}
                         </span>
                       </div>
@@ -531,15 +514,15 @@ export function Home() {
                     {isMenuOpen && (
                       <div
                         style={{
-                          position: "absolute", top: 190, right: 10,
-                          background: "rgba(30,30,30,0.95)",
+                          position: "absolute", top: "calc(100% - 36px)", right: 10,
+                          background: "rgba(26,26,26,0.98)",
                           backdropFilter: "blur(20px)",
                           WebkitBackdropFilter: "blur(20px)",
                           border: "1px solid rgba(255,255,255,0.09)",
-                          borderRadius: 12, overflow: "hidden", zIndex: 50,
-                          boxShadow: "0 8px 32px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.06)",
-                          minWidth: 168,
-                          animation: "fadeIn 0.1s cubic-bezier(0.4,0,0.2,1)",
+                          borderRadius: 11, overflow: "hidden", zIndex: 50,
+                          boxShadow: "0 8px 28px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.05)",
+                          minWidth: 164,
+                          animation: "fadeIn 0.1s ease",
                         }}
                         onClick={(e) => e.stopPropagation()}
                       >
@@ -547,7 +530,7 @@ export function Home() {
                           onClick={(e) => { e.stopPropagation(); navigate(`/builder/${project.id}`); }}
                           style={{
                             display: "flex", alignItems: "center", gap: 8, width: "100%",
-                            background: "none", border: "none", padding: "10px 14px",
+                            background: "none", border: "none", padding: "10px 13px",
                             cursor: "pointer", color: "#d0d0d0", fontSize: 13, fontWeight: 500,
                             textAlign: "left", transition: "background 0.1s",
                           }}
@@ -557,16 +540,20 @@ export function Home() {
                           <ExternalLink size={13} />
                           Open in Builder
                         </button>
-                        <div style={{ height: 1, background: "rgba(255,255,255,0.05)" }} />
+                        <div style={{ height: 1, background: "rgba(255,255,255,0.05)", margin: "0 8px" }} />
                         <button
-                          onClick={(e) => { e.stopPropagation(); setConfirmDeleteId(project.id); setOpenMenuId(null); }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setConfirmDeleteId(project.id);
+                            setOpenMenuId(null);
+                          }}
                           style={{
                             display: "flex", alignItems: "center", gap: 8, width: "100%",
-                            background: "none", border: "none", padding: "10px 14px",
+                            background: "none", border: "none", padding: "10px 13px",
                             cursor: "pointer", color: "#f85149", fontSize: 13, fontWeight: 500,
                             textAlign: "left", transition: "background 0.1s",
                           }}
-                          onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "rgba(248,81,73,0.08)"; }}
+                          onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "rgba(248,81,73,0.07)"; }}
                           onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "none"; }}
                         >
                           <Trash2 size={13} />
@@ -582,116 +569,59 @@ export function Home() {
         )}
       </main>
 
-      {/* ── Delete Modal ──────────────────────────────────────────────── */}
-      {confirmDeleteId && (
-        <div
-          style={{
-            position: "fixed", inset: 0,
-            background: "rgba(0,0,0,0.75)",
-            backdropFilter: "blur(8px)",
-            display: "flex", alignItems: "center", justifyContent: "center",
-            zIndex: 999, padding: "0 20px",
-          }}
-          onClick={() => setConfirmDeleteId(null)}
-        >
-          <div
-            style={{
-              background: "linear-gradient(180deg, rgba(255,255,255,0.03) 0%, transparent 100%), #1a1a1a",
-              border: "1px solid rgba(255,255,255,0.09)",
-              borderRadius: 20, padding: "28px 26px",
-              width: "100%", maxWidth: 440,
-              display: "flex", flexDirection: "column", gap: 18,
-              boxShadow: "0 24px 64px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.06)",
-              animation: "scaleIn 0.15s cubic-bezier(0.4,0,0.2,1)",
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-              <h3 style={{ fontSize: 17, fontWeight: 700, color: "#f0f0f0", margin: 0, letterSpacing: "-0.02em" }}>
-                Delete Project?
-              </h3>
-              <button
-                onClick={() => setConfirmDeleteId(null)}
-                style={{ background: "none", border: "none", color: "#606060", cursor: "pointer", padding: 4, display: "flex", borderRadius: 6 }}
-              >
-                <X size={18} />
-              </button>
-            </div>
-            <p style={{ color: "#606060", fontSize: 13, margin: 0, lineHeight: 1.65 }}>
-              <strong style={{ color: "#b0b0b0", fontWeight: 600 }}>&ldquo;{projects.find((p) => p.id === confirmDeleteId)?.name}&rdquo;</strong>{" "}
-              and all its data will be permanently deleted. This cannot be undone.
-            </p>
-            <div style={{ display: "flex", gap: 10 }}>
-              <button
-                onClick={() => setConfirmDeleteId(null)}
-                style={{
-                  flex: 1, background: "rgba(255,255,255,0.05)",
-                  border: "1px solid rgba(255,255,255,0.08)", borderRadius: 10,
-                  color: "#d0d0d0", fontSize: 13, fontWeight: 600, padding: "10px",
-                  cursor: "pointer", transition: "background 0.12s",
-                }}
-                onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.08)"; }}
-                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.05)"; }}
-              >
-                Cancel
-              </button>
-              <button
-                onClick={() => handleDelete(confirmDeleteId)}
-                style={{
-                  flex: 1, background: "rgba(248,81,73,0.1)",
-                  border: "1px solid rgba(248,81,73,0.25)", borderRadius: 10,
-                  color: "#f85149", fontSize: 13, fontWeight: 700, padding: "10px",
-                  cursor: "pointer", transition: "background 0.12s",
-                }}
-                onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "rgba(248,81,73,0.16)"; }}
-                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "rgba(248,81,73,0.1)"; }}
-              >
-                Delete Project
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ── Create Modal ──────────────────────────────────────────────── */}
+      {/* ── Create Modal ────────────────────────────────────────────────── */}
       {showCreateModal && (
         <div
           style={{
             position: "fixed", inset: 0,
-            background: "rgba(0,0,0,0.75)",
-            backdropFilter: "blur(8px)",
+            background: "rgba(0,0,0,0.7)",
+            backdropFilter: "blur(10px)",
             display: "flex", alignItems: "center", justifyContent: "center",
             zIndex: 999, padding: "0 20px",
           }}
-          onClick={() => setShowCreateModal(false)}
+          onClick={() => { if (!isCreating) setShowCreateModal(false); }}
         >
           <div
             style={{
-              background: "linear-gradient(180deg, rgba(255,255,255,0.03) 0%, transparent 100%), #1a1a1a",
+              background: "#1a1a1a",
               border: "1px solid rgba(255,255,255,0.09)",
-              borderRadius: 20, padding: "28px 26px",
-              width: "100%", maxWidth: 440,
-              display: "flex", flexDirection: "column", gap: 18,
-              boxShadow: "0 24px 64px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.06)",
-              animation: "scaleIn 0.15s cubic-bezier(0.4,0,0.2,1)",
+              borderRadius: 18, padding: "26px 24px",
+              width: "100%", maxWidth: 420,
+              display: "flex", flexDirection: "column", gap: 20,
+              boxShadow: "0 24px 60px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.05)",
+              animation: "scaleIn 0.14s cubic-bezier(0.4,0,0.2,1)",
             }}
             onClick={(e) => e.stopPropagation()}
           >
+            {/* Header */}
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-              <h3 style={{ fontSize: 17, fontWeight: 700, color: "#f0f0f0", margin: 0, letterSpacing: "-0.02em" }}>
-                New Project
-              </h3>
+              <div>
+                <h3 style={{ fontSize: 16, fontWeight: 700, color: "#f0f0f0", margin: "0 0 2px", letterSpacing: "-0.02em" }}>
+                  New Project
+                </h3>
+                <p style={{ fontSize: 12, color: "#484848", margin: 0 }}>Give your project a name to get started</p>
+              </div>
               <button
-                onClick={() => setShowCreateModal(false)}
-                style={{ background: "none", border: "none", color: "#606060", cursor: "pointer", padding: 4, display: "flex", borderRadius: 6 }}
+                onClick={() => { if (!isCreating) setShowCreateModal(false); }}
+                style={{
+                  background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.07)",
+                  color: "#606060", cursor: isCreating ? "default" : "pointer",
+                  padding: "5px", display: "flex", borderRadius: 7,
+                  opacity: isCreating ? 0.4 : 1,
+                  transition: "background 0.12s, color 0.12s",
+                }}
+                onMouseEnter={(e) => { if (!isCreating) (e.currentTarget as HTMLElement).style.color = "#e0e0e0"; }}
+                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "#606060"; }}
               >
-                <X size={18} />
+                <X size={16} />
               </button>
             </div>
+
+            {/* Name input */}
             <div>
               <label style={{
                 display: "block", color: "#505050", fontSize: 11, fontWeight: 600,
-                textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 7,
+                textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 8,
               }}>
                 Project Name
               </label>
@@ -699,24 +629,29 @@ export function Home() {
                 autoFocus
                 type="text"
                 value={newName}
+                disabled={isCreating}
                 onChange={(e) => setNewName(e.target.value)}
                 onKeyDown={(e) => {
-                  if (e.key === "Enter") { handleCreate(newName); setShowCreateModal(false); }
-                  if (e.key === "Escape") setShowCreateModal(false);
+                  if (e.key === "Enter" && !isCreating) handleCreate();
+                  if (e.key === "Escape" && !isCreating) setShowCreateModal(false);
                 }}
                 placeholder="Untitled Project"
                 style={{
                   width: "100%",
                   background: "rgba(255,255,255,0.04)",
                   border: "1px solid rgba(255,255,255,0.09)",
-                  borderRadius: 10, color: "#f0f0f0",
-                  fontSize: 14, padding: "11px 14px",
-                  outline: "none", fontFamily: "inherit", boxSizing: "border-box",
+                  borderRadius: 9, color: isCreating ? "#808080" : "#f0f0f0",
+                  fontSize: 14, padding: "11px 13px",
+                  outline: "none", fontFamily: "inherit",
+                  boxSizing: "border-box",
                   transition: "border-color 0.15s, box-shadow 0.15s",
+                  cursor: isCreating ? "not-allowed" : "text",
                 }}
                 onFocus={(e) => {
-                  (e.currentTarget as HTMLElement).style.borderColor = "rgba(88,101,242,0.6)";
-                  (e.currentTarget as HTMLElement).style.boxShadow = "0 0 0 3px rgba(88,101,242,0.12)";
+                  if (!isCreating) {
+                    (e.currentTarget as HTMLElement).style.borderColor = "rgba(88,101,242,0.55)";
+                    (e.currentTarget as HTMLElement).style.boxShadow = "0 0 0 3px rgba(88,101,242,0.1)";
+                  }
                 }}
                 onBlur={(e) => {
                   (e.currentTarget as HTMLElement).style.borderColor = "rgba(255,255,255,0.09)";
@@ -724,40 +659,166 @@ export function Home() {
                 }}
               />
             </div>
+
+            {/* Actions */}
             <div style={{ display: "flex", gap: 10 }}>
               <button
                 onClick={() => setShowCreateModal(false)}
+                disabled={isCreating}
                 style={{
                   flex: 1, background: "rgba(255,255,255,0.05)",
-                  border: "1px solid rgba(255,255,255,0.08)", borderRadius: 10,
-                  color: "#d0d0d0", fontSize: 13, fontWeight: 600, padding: "11px",
-                  cursor: "pointer", transition: "background 0.12s",
+                  border: "1px solid rgba(255,255,255,0.08)", borderRadius: 9,
+                  color: isCreating ? "#3a3a3a" : "#c0c0c0", fontSize: 13, fontWeight: 600,
+                  padding: "10px", cursor: isCreating ? "not-allowed" : "pointer",
+                  transition: "background 0.12s",
                 }}
-                onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.08)"; }}
+                onMouseEnter={(e) => { if (!isCreating) (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.08)"; }}
                 onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.05)"; }}
               >
                 Cancel
               </button>
               <button
-                onClick={() => { handleCreate(newName); setShowCreateModal(false); }}
+                onClick={handleCreate}
+                disabled={isCreating}
                 style={{
                   flex: 1,
-                  background: "linear-gradient(135deg, #5865F2, #7c3aed)",
-                  border: "none", borderRadius: 10, color: "#fff",
-                  fontSize: 13, fontWeight: 700, padding: "11px",
-                  cursor: "pointer",
-                  boxShadow: "0 2px 12px rgba(88,101,242,0.35)",
-                  transition: "opacity 0.12s",
+                  background: isCreating
+                    ? "linear-gradient(135deg, rgba(88,101,242,0.5), rgba(124,58,237,0.5))"
+                    : "linear-gradient(135deg, #5865F2, #7c3aed)",
+                  border: "none", borderRadius: 9, color: "#fff",
+                  fontSize: 13, fontWeight: 700, padding: "10px",
+                  cursor: isCreating ? "not-allowed" : "pointer",
+                  boxShadow: isCreating ? "none" : "0 2px 12px rgba(88,101,242,0.3)",
+                  display: "flex", alignItems: "center", justifyContent: "center", gap: 7,
+                  transition: "opacity 0.12s, box-shadow 0.12s",
                 }}
-                onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.opacity = "0.88"; }}
+                onMouseEnter={(e) => { if (!isCreating) (e.currentTarget as HTMLElement).style.opacity = "0.88"; }}
                 onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.opacity = "1"; }}
               >
-                Create Project
+                {isCreating ? (
+                  <>
+                    <Loader2 size={14} style={{ animation: "spin 0.7s linear infinite" }} />
+                    Creating…
+                  </>
+                ) : (
+                  "Create Project"
+                )}
               </button>
             </div>
           </div>
         </div>
       )}
+
+      {/* ── Delete Confirm Modal ─────────────────────────────────────────── */}
+      {confirmDeleteId && (
+        <div
+          style={{
+            position: "fixed", inset: 0,
+            background: "rgba(0,0,0,0.7)",
+            backdropFilter: "blur(10px)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            zIndex: 999, padding: "0 20px",
+          }}
+          onClick={() => { if (!isDeleting) setConfirmDeleteId(null); }}
+        >
+          <div
+            style={{
+              background: "#1a1a1a",
+              border: "1px solid rgba(255,255,255,0.09)",
+              borderRadius: 18, padding: "26px 24px",
+              width: "100%", maxWidth: 420,
+              display: "flex", flexDirection: "column", gap: 18,
+              boxShadow: "0 24px 60px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.05)",
+              animation: "scaleIn 0.14s cubic-bezier(0.4,0,0.2,1)",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <h3 style={{ fontSize: 16, fontWeight: 700, color: "#f0f0f0", margin: 0, letterSpacing: "-0.02em" }}>
+                Delete Project?
+              </h3>
+              <button
+                onClick={() => setConfirmDeleteId(null)}
+                style={{
+                  background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.07)",
+                  color: "#606060", cursor: "pointer", padding: "5px",
+                  display: "flex", borderRadius: 7,
+                }}
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            <p style={{ color: "#555", fontSize: 13, margin: 0, lineHeight: 1.6 }}>
+              <strong style={{ color: "#a0a0a0", fontWeight: 600 }}>
+                &ldquo;{projects.find((p) => p.id === confirmDeleteId)?.name}&rdquo;
+              </strong>{" "}
+              will be permanently deleted. This cannot be undone.
+            </p>
+
+            <div style={{ display: "flex", gap: 10 }}>
+              <button
+                onClick={() => setConfirmDeleteId(null)}
+                disabled={isDeleting}
+                style={{
+                  flex: 1, background: "rgba(255,255,255,0.05)",
+                  border: "1px solid rgba(255,255,255,0.08)", borderRadius: 9,
+                  color: "#c0c0c0", fontSize: 13, fontWeight: 600, padding: "10px",
+                  cursor: isDeleting ? "not-allowed" : "pointer",
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => handleDelete(confirmDeleteId)}
+                disabled={isDeleting}
+                style={{
+                  flex: 1,
+                  background: isDeleting ? "rgba(248,81,73,0.06)" : "rgba(248,81,73,0.1)",
+                  border: "1px solid rgba(248,81,73,0.25)", borderRadius: 9,
+                  color: "#f85149", fontSize: 13, fontWeight: 700, padding: "10px",
+                  cursor: isDeleting ? "not-allowed" : "pointer",
+                  display: "flex", alignItems: "center", justifyContent: "center", gap: 7,
+                  transition: "background 0.12s",
+                }}
+                onMouseEnter={(e) => { if (!isDeleting) (e.currentTarget as HTMLElement).style.background = "rgba(248,81,73,0.16)"; }}
+                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = isDeleting ? "rgba(248,81,73,0.06)" : "rgba(248,81,73,0.1)"; }}
+              >
+                {isDeleting ? (
+                  <>
+                    <Loader2 size={14} style={{ animation: "spin 0.7s linear infinite" }} />
+                    Deleting…
+                  </>
+                ) : (
+                  <>
+                    <Trash2 size={13} />
+                    Delete Project
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <style>{`
+        @keyframes scaleIn {
+          from { opacity: 0; transform: scale(0.96) translateY(6px); }
+          to   { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(-4px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes spin {
+          from { transform: rotate(0deg); }
+          to   { transform: rotate(360deg); }
+        }
+        @keyframes pulse {
+          0%, 100% { opacity: 0.55; }
+          50% { opacity: 0.3; }
+        }
+      `}</style>
     </div>
   );
 }
