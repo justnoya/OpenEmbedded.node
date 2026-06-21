@@ -240,14 +240,14 @@ function generateDiscordJsCode(payload: Record<string, unknown>): string {
 router.post("/v1/export/json", async (req, res) => {
   const parsed = ExportJsonBody.safeParse(req.body);
   if (!parsed.success) { res.status(400).json({ error: "Invalid request body" }); return; }
-  const result = compileGraph(parsed.data.graph.nodes as FlowNode[], parsed.data.graph.edges as FlowEdge[]);
+  const result = compileGraph(parsed.data.graph.nodes as unknown as FlowNode[], parsed.data.graph.edges as unknown as FlowEdge[]);
   res.json(result);
 });
 
 router.post("/v1/export/code", async (req, res) => {
   const parsed = ExportCodeBody.safeParse(req.body);
   if (!parsed.success) { res.status(400).json({ error: "Invalid request body" }); return; }
-  const { payload } = compileGraph(parsed.data.graph.nodes as FlowNode[], parsed.data.graph.edges as FlowEdge[]);
+  const { payload } = compileGraph(parsed.data.graph.nodes as unknown as FlowNode[], parsed.data.graph.edges as unknown as FlowEdge[]);
   res.json({ code: generateDiscordJsCode(payload) });
 });
 

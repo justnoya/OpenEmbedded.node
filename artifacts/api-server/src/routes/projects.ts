@@ -1,6 +1,5 @@
 import { Router } from "express";
-import { db, projectsTable } from "@workspace/db";
-import { eq } from "drizzle-orm";
+import { db, projectsTable, eq } from "@workspace/db";
 import {
   ListProjectsResponseItem,
   CreateProjectBody,
