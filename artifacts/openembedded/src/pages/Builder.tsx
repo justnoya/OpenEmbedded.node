@@ -746,7 +746,7 @@ export function Builder() {
           style: { stroke: "#5865F2", strokeWidth: 2 },
           animated: false,
         }}
-        proOptions={{ hideAttribution: false }}
+        proOptions={{ hideAttribution: true }}
       >
         <Background
           variant={BackgroundVariant.Dots}
