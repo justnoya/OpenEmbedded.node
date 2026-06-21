@@ -1,5 +1,7 @@
 import { usePreviewStore } from "@/lib/previewStore";
-import { AlertTriangle, ExternalLink, Hash, ChevronDown } from "lucide-react";
+import { useGraphStore } from "@/lib/graphStore";
+import { AlertTriangle, Hash, ChevronDown, Pencil, X, ImageIcon, ExternalLink } from "lucide-react";
+import { useState, useRef } from "react";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -648,12 +650,228 @@ function RenderEmbed({ embed }: { embed: Embed }) {
   );
 }
 
+// ─── Sender identity bar (shown when no bot is connected) ────────────────────
+
+function SenderBar() {
+  const senderName = usePreviewStore((s) => s.senderName);
+  const senderAvatarUrl = usePreviewStore((s) => s.senderAvatarUrl);
+  const setSenderName = usePreviewStore((s) => s.setSenderName);
+  const setSenderAvatarUrl = usePreviewStore((s) => s.setSenderAvatarUrl);
+
+  const [editingAvatar, setEditingAvatar] = useState(false);
+  const [avatarInput, setAvatarInput] = useState(senderAvatarUrl);
+  const [avatarError, setAvatarError] = useState(false);
+  const avatarInputRef = useRef<HTMLInputElement>(null);
+
+  const commitAvatar = () => {
+    setSenderAvatarUrl(avatarInput.trim());
+    setEditingAvatar(false);
+  };
+
+  return (
+    <div
+      style={{
+        flexShrink: 0,
+        background: "#232428",
+        borderBottom: "1px solid rgba(255,255,255,0.06)",
+        padding: "7px 12px",
+        display: "flex",
+        alignItems: "center",
+        gap: 10,
+      }}
+    >
+      {/* Avatar preview + edit trigger */}
+      <div style={{ position: "relative", flexShrink: 0 }}>
+        <div
+          style={{
+            width: 32,
+            height: 32,
+            borderRadius: "50%",
+            background: "#5865f2",
+            overflow: "hidden",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            cursor: "pointer",
+            border: "2px solid rgba(88,101,242,0.4)",
+            flexShrink: 0,
+          }}
+          onClick={() => {
+            setAvatarInput(senderAvatarUrl);
+            setEditingAvatar(true);
+            setAvatarError(false);
+            setTimeout(() => avatarInputRef.current?.focus(), 50);
+          }}
+          title="Click to set avatar URL"
+        >
+          {senderAvatarUrl && !avatarError ? (
+            <img
+              src={senderAvatarUrl}
+              alt=""
+              style={{ width: "100%", height: "100%", objectFit: "cover" }}
+              onError={() => setAvatarError(true)}
+              onLoad={() => setAvatarError(false)}
+            />
+          ) : (
+            <ImageIcon size={13} color="rgba(255,255,255,0.6)" />
+          )}
+        </div>
+        <div
+          style={{
+            position: "absolute",
+            bottom: -2,
+            right: -2,
+            width: 14,
+            height: 14,
+            borderRadius: "50%",
+            background: "#5865F2",
+            border: "1.5px solid #232428",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            pointerEvents: "none",
+          }}
+        >
+          <Pencil size={7} color="#fff" />
+        </div>
+      </div>
+
+      {/* Name input */}
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ color: "#555", fontSize: 9, fontWeight: 700, letterSpacing: "0.07em", textTransform: "uppercase", marginBottom: 2 }}>
+          Sender name
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+          <input
+            type="text"
+            value={senderName}
+            maxLength={10}
+            onChange={(e) => setSenderName(e.target.value)}
+            placeholder="MyBot"
+            style={{
+              background: "rgba(255,255,255,0.04)",
+              border: "1px solid rgba(255,255,255,0.09)",
+              borderRadius: 6,
+              color: "#d0d0d0",
+              fontSize: 12,
+              fontWeight: 600,
+              padding: "3px 7px",
+              outline: "none",
+              fontFamily: "inherit",
+              width: 90,
+              transition: "border-color 0.12s",
+            }}
+            onFocus={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "rgba(88,101,242,0.5)"; }}
+            onBlur={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "rgba(255,255,255,0.09)"; }}
+          />
+          <span style={{ color: "#383838", fontSize: 10 }}>{senderName.length}/10</span>
+        </div>
+      </div>
+
+      <div style={{ color: "#3a3a3a", fontSize: 10, textAlign: "right", lineHeight: 1.4, flexShrink: 0 }}>
+        Preview<br />identity
+      </div>
+
+      {/* Avatar URL popover */}
+      {editingAvatar && (
+        <div
+          style={{
+            position: "absolute",
+            top: "100%",
+            left: 12,
+            right: 12,
+            zIndex: 50,
+            background: "#1e1f22",
+            border: "1px solid rgba(255,255,255,0.1)",
+            borderRadius: 10,
+            padding: 12,
+            boxShadow: "0 8px 32px rgba(0,0,0,0.7)",
+            marginTop: 4,
+          }}
+        >
+          <div style={{ color: "#606060", fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 6 }}>
+            Avatar Image URL
+          </div>
+          <div style={{ display: "flex", gap: 6 }}>
+            <input
+              ref={avatarInputRef}
+              type="text"
+              value={avatarInput}
+              onChange={(e) => setAvatarInput(e.target.value)}
+              placeholder="https://example.com/avatar.png"
+              onKeyDown={(e) => { if (e.key === "Enter") commitAvatar(); if (e.key === "Escape") setEditingAvatar(false); }}
+              style={{
+                flex: 1,
+                background: "rgba(255,255,255,0.05)",
+                border: "1px solid rgba(255,255,255,0.1)",
+                borderRadius: 7,
+                color: "#d0d0d0",
+                fontSize: 12,
+                padding: "6px 9px",
+                outline: "none",
+                fontFamily: "inherit",
+              }}
+            />
+            <button
+              onClick={commitAvatar}
+              style={{
+                background: "#5865F2",
+                border: "none",
+                borderRadius: 7,
+                color: "#fff",
+                fontSize: 12,
+                fontWeight: 600,
+                padding: "6px 12px",
+                cursor: "pointer",
+              }}
+            >
+              Set
+            </button>
+            <button
+              onClick={() => setEditingAvatar(false)}
+              style={{
+                background: "rgba(255,255,255,0.06)",
+                border: "1px solid rgba(255,255,255,0.08)",
+                borderRadius: 7,
+                color: "#888",
+                padding: "6px 8px",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+              }}
+            >
+              <X size={12} />
+            </button>
+          </div>
+          <div style={{ color: "#383838", fontSize: 10, marginTop: 5 }}>
+            Paste any image URL — shown only in this preview
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── Discord chrome shell ─────────────────────────────────────────────────────
 
 export function DiscordPreview() {
   const payload = usePreviewStore((s) => s.payload);
   const isValid = usePreviewStore((s) => s.isValid);
   const errors = usePreviewStore((s) => s.errors);
+  const senderName = usePreviewStore((s) => s.senderName);
+  const senderAvatarUrl = usePreviewStore((s) => s.senderAvatarUrl);
+
+  // Check for a connected bot node
+  const nodes = useGraphStore((s) => s.nodes);
+  const botNode = nodes.find(
+    (n) => n.type === "bot" && (n.data as Record<string, unknown>).connected === true
+  );
+  const botName = botNode ? (botNode.data as Record<string, unknown>).botName as string | null : null;
+  const botAvatar = botNode ? (botNode.data as Record<string, unknown>).botAvatar as string | null : null;
+  const isBotConnected = !!botNode;
+
+  const displayName = isBotConnected ? (botName ?? "Bot") : (senderName || "MyBot");
+  const displayAvatar = isBotConnected ? botAvatar : senderAvatarUrl;
 
   const components = (payload?.components ?? []) as DC[];
   const embeds = (payload?.embeds ?? []) as Embed[];
@@ -664,6 +882,8 @@ export function DiscordPreview() {
     minute: "2-digit",
   });
 
+  const [avatarError, setAvatarError] = useState(false);
+
   return (
     <div
       style={{
@@ -672,6 +892,7 @@ export function DiscordPreview() {
         height: "100%",
         overflow: "hidden",
         background: "#1a1a1a",
+        position: "relative",
       }}
     >
       {/* Channel header */}
@@ -693,7 +914,7 @@ export function DiscordPreview() {
         </span>
         <div style={{ width: 1, height: 18, background: "rgba(255,255,255,0.08)", margin: "0 2px" }} />
         <span style={{ color: TEXT_MUTED, fontSize: 13, fontFamily: DC_FONT }}>
-          Live Discord preview
+          Live preview
         </span>
         {!isValid && errors.length > 0 && (
           <div
@@ -712,6 +933,47 @@ export function DiscordPreview() {
           </div>
         )}
       </div>
+
+      {/* Sender identity bar — only when no bot connected */}
+      {!isBotConnected && (
+        <div style={{ position: "relative" }}>
+          <SenderBar />
+        </div>
+      )}
+
+      {/* Bot connected indicator */}
+      {isBotConnected && (
+        <div
+          style={{
+            flexShrink: 0,
+            background: "rgba(63,185,80,0.07)",
+            borderBottom: "1px solid rgba(63,185,80,0.15)",
+            padding: "5px 12px",
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+          }}
+        >
+          {displayAvatar ? (
+            <img
+              src={displayAvatar}
+              alt=""
+              style={{ width: 20, height: 20, borderRadius: "50%", flexShrink: 0 }}
+              onError={() => setAvatarError(true)}
+            />
+          ) : (
+            <div style={{ width: 20, height: 20, borderRadius: "50%", background: "#5865f2", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10 }}>
+              🤖
+            </div>
+          )}
+          <span style={{ color: "#3fb950", fontSize: 11, fontWeight: 600 }}>
+            {displayName}
+          </span>
+          <span style={{ color: "#3fb950", fontSize: 10, opacity: 0.65 }}>
+            Bot connected · showing real identity
+          </span>
+        </div>
+      )}
 
       {/* Messages area */}
       <div
@@ -740,7 +1002,6 @@ export function DiscordPreview() {
             <div style={{ fontSize: 13 }}>Add nodes from the left panel to preview your message</div>
           </div>
         ) : (
-          /* Webhook bot message */
           <div
             style={{
               display: "flex",
@@ -757,6 +1018,7 @@ export function DiscordPreview() {
                 borderRadius: "50%",
                 background: "#5865f2",
                 flexShrink: 0,
+                overflow: "hidden",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -764,7 +1026,17 @@ export function DiscordPreview() {
                 marginTop: 2,
               }}
             >
-              🤖
+              {displayAvatar && !avatarError ? (
+                <img
+                  src={displayAvatar}
+                  alt=""
+                  style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                  onError={() => setAvatarError(true)}
+                  onLoad={() => setAvatarError(false)}
+                />
+              ) : (
+                "🤖"
+              )}
             </div>
 
             <div style={{ flex: 1, minWidth: 0 }}>
@@ -785,7 +1057,7 @@ export function DiscordPreview() {
                     fontFamily: DC_FONT,
                   }}
                 >
-                  OpenEmbedded Bot
+                  {displayName}
                 </span>
                 <span
                   style={{
