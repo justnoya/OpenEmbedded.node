@@ -1,0 +1,6 @@
+attached_assets
+.agents
+lib/db/dist
+lib/api-zod/dist
+lib/api-client-react/dist
+artifacts/api-server/dist
