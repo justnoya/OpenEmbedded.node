@@ -6,7 +6,6 @@
     "lib": ["es2022"],
     "skipLibCheck": true,
     "noEmitOnError": false,
-    "isolatedModules": true,
     "types": ["node"]
   },
   "include": ["."]
