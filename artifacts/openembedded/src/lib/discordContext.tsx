@@ -161,6 +161,13 @@ export function DiscordProvider({ children }: { children: ReactNode }) {
 
         setUser(authed.user as DiscordUser);
         setSdkState("ready");
+
+        // 5. Upsert user account in our DB (fire-and-forget, non-blocking)
+        fetch("/api/v1/discord/me", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ access_token }),
+        }).catch((e) => console.warn("[Discord] Failed to sync user account:", e));
       } catch (err) {
         if (!cancelled) {
           console.error("[Discord SDK] Init error:", err);

@@ -8,6 +8,7 @@ import {
   getListProjectsQueryKey,
 } from "@workspace/api-client-react";
 import { Plus, MoreVertical, Trash2, ExternalLink, FolderOpen, Zap, Layers, MousePointerClick, X, ArrowRight } from "lucide-react";
+import { DiscordUserBadge } from "@/components/DiscordUserBadge";
 
 type Project = {
   id: string;
@@ -232,6 +233,8 @@ export function Home() {
           <Plus size={14} strokeWidth={2.5} />
           New Project
         </button>
+
+        <DiscordUserBadge />
       </header>
 
       {/* ── Main ─────────────────────────────────────────────────────── */}

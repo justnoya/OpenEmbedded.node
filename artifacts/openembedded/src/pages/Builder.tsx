@@ -20,6 +20,7 @@ import { PropertiesPanel } from "@/panels/PropertiesPanel";
 import { DiscordPreview } from "@/preview/DiscordPreview";
 import { ExportPanel } from "@/panels/ExportPanel";
 import { DiscordActivityBadge } from "@/components/DiscordActivityBadge";
+import { DiscordUserBadge } from "@/components/DiscordUserBadge";
 import { useRichPresence } from "@/lib/useRichPresence";
 import { useDiscord } from "@/lib/discordContext";
 import {
@@ -671,6 +672,8 @@ export function Builder() {
           <Upload size={13} />
           {!isMobile && "Export"}
         </button>
+
+        <DiscordUserBadge />
       </div>
     </div>
   );

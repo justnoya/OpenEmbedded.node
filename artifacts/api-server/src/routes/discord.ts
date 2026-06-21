@@ -1,4 +1,6 @@
 import { Router } from "express";
+import { db, usersTable } from "@workspace/db";
+import { eq } from "drizzle-orm";
 
 const router = Router();
 
@@ -60,6 +62,77 @@ router.post("/v1/discord/token", async (req, res) => {
 router.get("/v1/discord/config", (_req, res) => {
   const clientId = process.env.DISCORD_CLIENT_ID ?? "";
   res.json({ clientId, configured: clientId.length > 0 });
+});
+
+/**
+ * Upsert the current Discord user into our database.
+ * Called by the frontend after successful OAuth authentication.
+ * Receives the access_token, fetches profile from Discord, and upserts.
+ */
+router.post("/v1/discord/me", async (req, res) => {
+  const { access_token } = req.body as { access_token?: string };
+
+  if (!access_token || typeof access_token !== "string") {
+    res.status(400).json({ error: "Missing access_token" });
+    return;
+  }
+
+  try {
+    // Fetch user profile from Discord
+    const profileRes = await fetch("https://discord.com/api/v10/users/@me", {
+      headers: { Authorization: `Bearer ${access_token}` },
+    });
+
+    if (!profileRes.ok) {
+      const errText = await profileRes.text();
+      req.log.warn({ status: profileRes.status, errText }, "Discord profile fetch failed");
+      res.status(502).json({ error: "Failed to fetch Discord profile" });
+      return;
+    }
+
+    const profile = (await profileRes.json()) as {
+      id: string;
+      username: string;
+      global_name?: string | null;
+      discriminator: string;
+      avatar?: string | null;
+    };
+
+    // Upsert user record
+    await db
+      .insert(usersTable)
+      .values({
+        discordId: profile.id,
+        username: profile.username,
+        globalName: profile.global_name ?? null,
+        discriminator: profile.discriminator ?? "0",
+        avatar: profile.avatar ?? null,
+        lastSeenAt: new Date(),
+      })
+      .onConflictDoUpdate({
+        target: usersTable.discordId,
+        set: {
+          username: profile.username,
+          globalName: profile.global_name ?? null,
+          discriminator: profile.discriminator ?? "0",
+          avatar: profile.avatar ?? null,
+          lastSeenAt: new Date(),
+        },
+      });
+
+    req.log.info({ discordId: profile.id, username: profile.username }, "Discord user upserted");
+
+    res.json({
+      id: profile.id,
+      username: profile.username,
+      globalName: profile.global_name ?? null,
+      discriminator: profile.discriminator,
+      avatar: profile.avatar ?? null,
+    });
+  } catch (err) {
+    req.log.error({ err }, "Failed to upsert Discord user");
+    res.status(500).json({ error: "Internal error saving user" });
+  }
 });
 
 export default router;
