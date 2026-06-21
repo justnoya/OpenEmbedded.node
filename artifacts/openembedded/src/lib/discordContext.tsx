@@ -50,6 +50,7 @@ export type ActivityPresence = {
 interface DiscordContextValue {
   isDiscord: boolean;
   sdkState: SDKState;
+  errorMsg: string | null;
   user: DiscordUser | null;
   guildId: string | null;
   channelId: string | null;
@@ -67,6 +68,7 @@ interface DiscordContextValue {
 const DiscordContext = createContext<DiscordContextValue>({
   isDiscord: false,
   sdkState: "idle",
+  errorMsg: null,
   user: null,
   guildId: null,
   channelId: null,
@@ -94,6 +96,7 @@ export function DiscordProvider({ children }: { children: ReactNode }) {
   const [sdkState, setSdkState] = useState<SDKState>(
     isInsideDiscord() ? "loading" : "idle"
   );
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [user, setUser] = useState<DiscordUser | null>(null);
   const [guildId, setGuildId] = useState<string | null>(null);
   const [channelId, setChannelId] = useState<string | null>(null);
@@ -153,7 +156,10 @@ export function DiscordProvider({ children }: { children: ReactNode }) {
           body: JSON.stringify({ code }),
         });
 
-        if (!tokenRes.ok) throw new Error("Token exchange failed");
+        if (!tokenRes.ok) {
+          const errBody = await tokenRes.json().catch(() => ({ error: `HTTP ${tokenRes.status}` })) as { error?: string };
+          throw new Error(errBody.error ?? `Token exchange failed (HTTP ${tokenRes.status})`);
+        }
 
         const { access_token } = (await tokenRes.json()) as {
           access_token: string;
@@ -169,7 +175,9 @@ export function DiscordProvider({ children }: { children: ReactNode }) {
         // Backend sync is deferred — the sign-in overlay calls syncUser() on Continue.
       } catch (err) {
         if (!cancelled) {
-          console.error("[Discord SDK] Init error:", err);
+          const msg = err instanceof Error ? err.message : String(err);
+          console.error("[Discord SDK] Init error:", msg);
+          setErrorMsg(msg);
           setSdkState("error");
         }
       }
@@ -243,6 +251,7 @@ export function DiscordProvider({ children }: { children: ReactNode }) {
       value={{
         isDiscord,
         sdkState,
+        errorMsg,
         user,
         guildId,
         channelId,

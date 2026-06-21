@@ -38,7 +38,7 @@ function SectionLabel({ children }: { children: string }) {
 }
 
 export function DiscordActivityOverlay() {
-  const { isDiscord, sdkState, user, accessToken, syncUser } = useDiscord();
+  const { isDiscord, sdkState, errorMsg, user, accessToken, syncUser } = useDiscord();
   const [confirmed, setConfirmed] = useState(false);
   const [imgError, setImgError] = useState(false);
   const [hoverContinue, setHoverContinue] = useState(false);
@@ -317,12 +317,8 @@ export function DiscordActivityOverlay() {
                 <span style={{ fontSize: 15, color: "#f85149", fontWeight: 400 }}>
                   Could not sign in
                 </span>
-                <span style={{ fontSize: 13, color: "#4a4a4a", lineHeight: 1.6 }}>
-                  Ensure{" "}
-                  <span style={{ color: "#606060", fontFamily: "monospace" }}>DISCORD_CLIENT_ID</span>
-                  {" "}and{" "}
-                  <span style={{ color: "#606060", fontFamily: "monospace" }}>DISCORD_CLIENT_SECRET</span>
-                  {" "}are set.
+                <span style={{ fontSize: 13, color: "#4a4a4a", lineHeight: 1.6, wordBreak: "break-word" }}>
+                  {errorMsg ?? "An unknown error occurred. Check the browser console for details."}
                 </span>
               </div>
             </div>
