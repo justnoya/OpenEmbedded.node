@@ -1,3 +1,4 @@
+/// <reference lib="dom" />
 import { Router } from "express";
 import { SendWebhookBody } from "@workspace/api-zod";
 

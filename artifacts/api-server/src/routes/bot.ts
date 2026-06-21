@@ -1,3 +1,4 @@
+/// <reference lib="dom" />
 import { Router } from "express";
 
 const router = Router();

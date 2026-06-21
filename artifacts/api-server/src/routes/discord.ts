@@ -1,3 +1,4 @@
+/// <reference lib="dom" />
 import { Router } from "express";
 import { db, usersTable } from "@workspace/db";
 
