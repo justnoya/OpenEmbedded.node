@@ -686,52 +686,62 @@ export function Builder() {
   const mobileNav = isMobile && (
     <div
       style={{
-        height: 56,
         flexShrink: 0,
-        display: "flex",
-        alignItems: "stretch",
-        background: "rgba(15,15,15,0.92)",
-        backdropFilter: "blur(20px)",
-        WebkitBackdropFilter: "blur(20px)",
-        borderTop: "1px solid rgba(255,255,255,0.06)",
+        padding: "8px 10px",
+        background: "#0f0f0f",
         zIndex: 10,
       }}
     >
-      {(["library", "canvas", "properties", "preview"] as MobilePanel[]).map((panel) => {
-        const meta = {
-          library: { label: "Nodes", icon: <LayoutGrid size={18} /> },
-          canvas: { label: "Canvas", icon: <Settings2 size={18} /> },
-          properties: { label: "Props", icon: <Settings2 size={18} /> },
-          preview: { label: "Preview", icon: <Eye size={18} /> },
-        };
-        const active = mobilePanel === panel;
-        return (
-          <button
-            key={panel}
-            onClick={() => setMobilePanel(panel)}
-            style={{
-              flex: 1,
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: 3,
-              background: "transparent",
-              border: "none",
-              borderTop: active ? "2px solid #5865F2" : "2px solid transparent",
-              color: active ? "#818cf8" : "#555555",
-              cursor: "pointer",
-              fontSize: 10,
-              fontWeight: active ? 600 : 400,
-              padding: "6px 0",
-              transition: "all 0.12s",
-            }}
-          >
-            {meta[panel].icon}
-            {meta[panel].label}
-          </button>
-        );
-      })}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "stretch",
+          background: "rgba(22,22,22,0.93)",
+          backdropFilter: "blur(24px) saturate(180%)",
+          WebkitBackdropFilter: "blur(24px) saturate(180%)",
+          border: "1px solid rgba(255,255,255,0.10)",
+          borderRadius: 14,
+          boxShadow: "0 4px 28px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.07)",
+          padding: 4,
+          gap: 2,
+        }}
+      >
+        {(["library", "canvas", "properties", "preview"] as MobilePanel[]).map((panel) => {
+          const meta = {
+            library: { label: "Nodes", icon: <LayoutGrid size={17} /> },
+            canvas: { label: "Canvas", icon: <Settings2 size={17} /> },
+            properties: { label: "Props", icon: <Settings2 size={17} /> },
+            preview: { label: "Preview", icon: <Eye size={17} /> },
+          };
+          const active = mobilePanel === panel;
+          return (
+            <button
+              key={panel}
+              onClick={() => setMobilePanel(panel)}
+              style={{
+                flex: 1,
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 3,
+                background: active ? "rgba(88,101,242,0.15)" : "transparent",
+                border: "none",
+                borderRadius: 10,
+                color: active ? "#818cf8" : "#4a4a4a",
+                cursor: "pointer",
+                fontSize: 10,
+                fontWeight: active ? 600 : 400,
+                padding: "7px 0",
+                transition: "background 0.15s, color 0.15s",
+              }}
+            >
+              {meta[panel].icon}
+              {meta[panel].label}
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 
