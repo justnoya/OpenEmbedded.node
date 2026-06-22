@@ -7,6 +7,7 @@ import { Home } from "@/pages/Home";
 import NotFound from "@/pages/not-found";
 import { DiscordProvider } from "@/lib/discordContext";
 import { DiscordActivityOverlay } from "@/components/DiscordActivityOverlay";
+import { SpeedInsights } from "@vercel/speed-insights/react";
 
 const Builder = lazy(() => import("@/pages/Builder").then((m) => ({ default: m.Builder })));
 const Docs = lazy(() => import("@/pages/Docs").then((m) => ({ default: m.Docs })));
@@ -60,6 +61,7 @@ function App() {
             <Router />
           </WouterRouter>
           <Toaster />
+          <SpeedInsights />
         </DiscordProvider>
       </TooltipProvider>
     </QueryClientProvider>

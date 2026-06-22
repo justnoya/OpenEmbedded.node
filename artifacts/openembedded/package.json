@@ -76,6 +76,7 @@
   },
   "dependencies": {
     "@discord/embedded-app-sdk": "^2.5.0",
+    "@vercel/speed-insights": "^2.0.0",
     "@xyflow/react": "^12.11.0",
     "zustand": "^5.0.14"
   }
