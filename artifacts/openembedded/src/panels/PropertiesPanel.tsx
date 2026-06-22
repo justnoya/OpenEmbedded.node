@@ -78,6 +78,8 @@ function BotProperties({ nodeId, d, updateNodeData }: {
   updateNodeData: (id: string, data: Record<string, unknown>) => void;
 }) {
   const payload = usePreviewStore((s) => s.payload);
+  const isValid = usePreviewStore((s) => s.isValid);
+  const compileErrors = usePreviewStore((s) => s.errors);
   const [tokenInput, setTokenInput] = useState((d.token as string) ?? "");
   const [sendStatus, setSendStatus] = useState<"idle" | "sending" | "success" | "error">("idle");
   const [sendMsg, setSendMsg] = useState("");
@@ -254,7 +256,17 @@ function BotProperties({ nodeId, d, updateNodeData }: {
 
       {connected && selectedChannelId && (
         <div style={{ marginTop: 4 }}>
-          <button onClick={handleSend} disabled={sendStatus === "sending" || !payload} style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: 7, background: sendStatus === "success" ? "rgba(63,185,80,0.15)" : "linear-gradient(135deg, #5865F2, #7c3aed)", border: sendStatus === "success" ? "1px solid rgba(63,185,80,0.25)" : "none", borderRadius: 8, color: sendStatus === "success" ? "#3fb950" : "#fff", fontSize: 13, fontWeight: 700, padding: "10px 0", cursor: sendStatus === "sending" ? "wait" : "pointer", boxShadow: sendStatus !== "success" ? "0 2px 14px rgba(88,101,242,0.35)" : "none", transition: "all 0.15s" }}>
+          {!isValid && compileErrors.length > 0 && (
+            <div style={{ marginBottom: 8, display: "flex", flexDirection: "column", gap: 4 }}>
+              {compileErrors.map((e, i) => (
+                <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 6 }}>
+                  <AlertCircle size={11} color="#f85149" style={{ marginTop: 1, flexShrink: 0 }} />
+                  <span style={{ color: "#f85149", fontSize: 11, lineHeight: 1.4 }}>{e.message}</span>
+                </div>
+              ))}
+            </div>
+          )}
+          <button onClick={handleSend} disabled={sendStatus === "sending" || !payload || !isValid} style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: 7, background: sendStatus === "success" ? "rgba(63,185,80,0.15)" : "#5865F2", border: sendStatus === "success" ? "1px solid rgba(63,185,80,0.25)" : "none", borderRadius: 8, color: sendStatus === "success" ? "#3fb950" : "#fff", fontSize: 13, fontWeight: 700, padding: "10px 0", cursor: sendStatus === "sending" ? "wait" : "pointer", transition: "opacity 0.15s", opacity: !payload || !isValid || sendStatus === "sending" ? 0.45 : 1 }}>
             {sendStatus === "sending" ? <Loader2 size={14} style={{ animation: "spin 1s linear infinite" }} /> : <Send size={14} />}
             {sendStatus === "sending" ? "Sending…" : sendStatus === "success" ? "Sent ✓" : "Send Message via Bot"}
           </button>

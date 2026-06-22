@@ -63,6 +63,7 @@ export function compileGraph(nodes: AppNode[], edges: Edge[]): CompileResult {
             if (built) builtComponents.push(built);
           }
         }
+        if (builtComponents.length === 0) return null;
         const comp: Record<string, unknown> = { type: 17, components: builtComponents };
         if (d.accent_color != null) comp.accent_color = d.accent_color;
         if (d.spoiler) comp.spoiler = true;
@@ -72,11 +73,11 @@ export function compileGraph(nodes: AppNode[], edges: Edge[]): CompileResult {
         hasV2 = true;
         const thumbnailKid = kids.find((kid) => nodeMap.get(kid)?.data?.componentType === 11);
         const textKids = kids.filter((kid) => nodeMap.get(kid)?.data?.componentType !== 11);
-        const result: Record<string, unknown> = {
-          type: 9,
-          components: textKids.map(buildComponent).filter(Boolean),
-        };
-        if (thumbnailKid) result.accessory = buildComponent(thumbnailKid);
+        const textComponents = textKids.map(buildComponent).filter(Boolean) as Record<string, unknown>[];
+        const accessory = thumbnailKid ? buildComponent(thumbnailKid) : null;
+        if (textComponents.length === 0 && !accessory) return null;
+        const result: Record<string, unknown> = { type: 9, components: textComponents };
+        if (accessory) result.accessory = accessory;
         return result;
       }
       case 10: {
@@ -84,6 +85,7 @@ export function compileGraph(nodes: AppNode[], edges: Edge[]): CompileResult {
         const content = (d.content as string) ?? "";
         if (!content.trim()) {
           errors.push({ nodeId: id, message: "Text block is empty — add some text to display" });
+          return null;
         }
         return { type: 10, content };
       }
@@ -92,6 +94,7 @@ export function compileGraph(nodes: AppNode[], edges: Edge[]): CompileResult {
         const url = ((d.url as string) ?? "").trim();
         if (!url) {
           errors.push({ nodeId: id, message: "Thumbnail/Media needs a valid image URL" });
+          return null;
         }
         const thumb: Record<string, unknown> = { type: 11, media: { url } };
         if (d.description) thumb.description = d.description;

@@ -109,15 +109,34 @@ router.post("/v1/bot/send", async (req, res) => {
     if (!r.ok) {
       const text = await r.text();
       let msg = `Discord rejected the message (HTTP ${r.status})`;
+      let detail: string | null = null;
       try {
-        const json = JSON.parse(text) as { message?: string; code?: number };
+        const json = JSON.parse(text) as { message?: string; code?: number; errors?: unknown };
         if (json.message) msg = `Discord error: ${json.message}`;
         if (json.code) msg += ` (code ${json.code})`;
+        if (json.errors) {
+          // Flatten Discord's nested errors object into readable field paths
+          const flat: string[] = [];
+          function walk(obj: unknown, path: string) {
+            if (!obj || typeof obj !== "object") return;
+            const o = obj as Record<string, unknown>;
+            if (Array.isArray(o._errors)) {
+              const errs = o._errors as Array<{ message?: string }>;
+              flat.push(`${path}: ${errs.map((e) => e.message).join(", ")}`);
+            } else {
+              for (const [k, v] of Object.entries(o)) {
+                walk(v, path ? `${path}.${k}` : k);
+              }
+            }
+          }
+          walk(json.errors, "");
+          if (flat.length > 0) detail = flat.slice(0, 5).join("; ");
+        }
       } catch {
         if (text) msg += `: ${text.slice(0, 200)}`;
       }
       req.log.warn({ status: r.status, body: text }, "Bot send rejected");
-      res.json({ success: false, message: msg });
+      res.json({ success: false, message: msg, detail });
       return;
     }
     res.json({ success: true, message: null });
