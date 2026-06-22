@@ -401,79 +401,81 @@ function OpenEmbeddedProperties({ nodeId, d, updateNodeData }: {
 
   return (
     <div>
-      {/* Platform badge */}
+      {/* Status row */}
       <div style={{
-        marginBottom: 14,
-        background: "linear-gradient(135deg, rgba(99,102,241,0.12), rgba(139,92,246,0.06))",
-        border: "1px solid rgba(99,102,241,0.25)",
-        borderRadius: 10, padding: "10px 12px",
+        padding: "10px 12px", borderRadius: 8, marginBottom: 14,
+        background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)",
         display: "flex", alignItems: "center", gap: 10,
       }}>
         <div style={{
-          width: 32, height: 32, borderRadius: 9,
-          background: "linear-gradient(135deg, rgba(99,102,241,0.3), rgba(139,92,246,0.15))",
-          border: "1px solid rgba(99,102,241,0.3)",
-          display: "flex", alignItems: "center", justifyContent: "center",
-          boxShadow: "0 0 14px rgba(99,102,241,0.2)", flexShrink: 0,
+          width: 28, height: 28, borderRadius: "50%",
+          background: "rgba(129,140,248,0.12)", border: "1px solid rgba(129,140,248,0.18)",
+          display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
         }}>
-          <Sparkles size={15} color="#818cf8" />
+          {guildsQuery.isLoading
+            ? <Loader2 size={13} color="#555" style={{ animation: "spin 1s linear infinite" }} />
+            : <Sparkles size={13} color="#818cf8" />}
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ color: "#c7d2fe", fontSize: 13, fontWeight: 700 }}>OpenEmbedded Bot</div>
-          <div style={{ color: "#6366f1", fontSize: 10 }}>Official Platform · No token needed</div>
-        </div>
-        {guildsQuery.isLoading && (
-          <Loader2 size={13} color="#6366f1" style={{ animation: "spin 1s linear infinite", flexShrink: 0 }} />
-        )}
-        {guildsQuery.isSuccess && !botNotConfigured && (
-          <div style={{ display: "flex", alignItems: "center", gap: 4, background: "rgba(63,185,80,0.1)", border: "1px solid rgba(63,185,80,0.2)", borderRadius: 5, padding: "2px 7px" }}>
-            <CheckCircle2 size={9} color="#3fb950" />
-            <span style={{ color: "#3fb950", fontSize: 9, fontWeight: 700 }}>LIVE</span>
+          <div style={{ color: "#d0d0d0", fontSize: 12, fontWeight: 600 }}>OpenEmbedded Bot</div>
+          <div style={{ color: "#484848", fontSize: 10, marginTop: 1 }}>
+            {guildsQuery.isLoading
+              ? "Connecting…"
+              : botNotConfigured
+                ? "Not available"
+                : guilds.length > 0
+                  ? `${guilds.length} server${guilds.length !== 1 ? "s" : ""} available`
+                  : "No servers yet"}
           </div>
+        </div>
+        {guildsQuery.isSuccess && !botNotConfigured && (
+          <div style={{ width: 7, height: 7, borderRadius: "50%", background: "#3fb950", flexShrink: 0 }} />
         )}
       </div>
 
-      {/* Bot not configured warning */}
+      {/* Not configured */}
       {botNotConfigured && (
-        <div style={{ marginBottom: 14, padding: "10px 12px", borderRadius: 8, background: "rgba(245,158,11,0.07)", border: "1px solid rgba(245,158,11,0.2)" }}>
-          <div style={{ color: "#f59e0b", fontSize: 11, fontWeight: 600, marginBottom: 3, display: "flex", alignItems: "center", gap: 5 }}>
-            <AlertCircle size={11} /> Bot not deployed yet
-          </div>
-          <div style={{ color: "#4a3a00", fontSize: 10, lineHeight: 1.5 }}>
-            {guildsData?.message ?? "The OpenEmbedded Bot has not been set up. Deploy it and set OPENBOT_API_URL + OPENBOT_API_KEY on the server."}
+        <div style={{ marginBottom: 14, display: "flex", alignItems: "flex-start", gap: 7 }}>
+          <AlertCircle size={12} color="#484848" style={{ marginTop: 1, flexShrink: 0 }} />
+          <div style={{ color: "#484848", fontSize: 11, lineHeight: 1.5 }}>
+            Bot not deployed. Set <code style={{ color: "#606060", fontSize: 10 }}>OPENBOT_API_URL</code> and <code style={{ color: "#606060", fontSize: 10 }}>OPENBOT_API_KEY</code> on the server.
           </div>
         </div>
       )}
 
-      {/* Invite link — shown when bot is live but not in any server */}
+      {/* Not in any server yet */}
       {!botNotConfigured && guildsQuery.isSuccess && guilds.length === 0 && (
-        <div style={{ marginBottom: 14, padding: "10px 12px", borderRadius: 8, background: "rgba(99,102,241,0.06)", border: "1px dashed rgba(99,102,241,0.22)" }}>
-          <div style={{ color: "#818cf8", fontSize: 11, fontWeight: 600, marginBottom: 6 }}>Add the bot to your server</div>
-          <div style={{ color: "#40458a", fontSize: 10, lineHeight: 1.5, marginBottom: 8 }}>
-            The OpenEmbedded Bot isn't in any server yet. Invite it to your Discord server, then refresh.
+        <div style={{ marginBottom: 14 }}>
+          <div style={{ color: "#484848", fontSize: 11, marginBottom: 8, lineHeight: 1.5 }}>
+            Add the bot to your Discord server, then refresh.
           </div>
-          {inviteUrl && (
-            <a
-              href={inviteUrl}
-              target="_blank"
-              rel="noreferrer"
+          <div style={{ display: "flex", gap: 6 }}>
+            {inviteUrl && (
+              <a
+                href={inviteUrl}
+                target="_blank"
+                rel="noreferrer"
+                style={{
+                  flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 5,
+                  background: "#5865F2", border: "none", borderRadius: 7, color: "#fff",
+                  fontSize: 11, fontWeight: 600, padding: "7px 0", textDecoration: "none",
+                }}
+              >
+                Add to Server
+              </a>
+            )}
+            <button
+              onClick={() => guildsQuery.refetch()}
               style={{
-                display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
-                background: "linear-gradient(135deg, #5865F2, #6366f1)",
-                border: "none", borderRadius: 7, color: "#fff",
-                fontSize: 11, fontWeight: 700, padding: "7px 0", textDecoration: "none",
-                boxShadow: "0 2px 10px rgba(88,101,242,0.3)",
+                flex: inviteUrl ? "0 0 auto" : 1,
+                display: "flex", alignItems: "center", justifyContent: "center", gap: 5,
+                background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.09)",
+                borderRadius: 7, color: "#606060", fontSize: 11, padding: "7px 10px", cursor: "pointer",
               }}
             >
-              <Sparkles size={11} /> Add OpenEmbedded Bot to Server
-            </a>
-          )}
-          <button
-            onClick={() => guildsQuery.refetch()}
-            style={{ width: "100%", marginTop: 6, display: "flex", alignItems: "center", justifyContent: "center", gap: 5, background: "transparent", border: "1px solid rgba(99,102,241,0.2)", borderRadius: 7, color: "#6366f1", fontSize: 10, padding: "5px 0", cursor: "pointer" }}
-          >
-            <RefreshCw size={10} /> Refresh after adding
-          </button>
+              <RefreshCw size={10} /> Refresh
+            </button>
+          </div>
         </div>
       )}
 
@@ -484,8 +486,8 @@ function OpenEmbeddedProperties({ nodeId, d, updateNodeData }: {
             Server
             <button
               onClick={() => guildsQuery.refetch()}
-              title="Refresh servers"
-              style={{ background: "transparent", border: "none", cursor: "pointer", color: "#555", padding: 0, display: "flex", alignItems: "center" }}
+              title="Refresh"
+              style={{ background: "transparent", border: "none", cursor: "pointer", color: "#444", padding: 0, display: "flex", alignItems: "center" }}
             >
               <RefreshCw size={9} />
             </button>
@@ -505,9 +507,9 @@ function OpenEmbeddedProperties({ nodeId, d, updateNodeData }: {
               href={inviteUrl}
               target="_blank"
               rel="noreferrer"
-              style={{ display: "inline-flex", alignItems: "center", gap: 4, color: "#5865F2", fontSize: 10, marginTop: 4, textDecoration: "none" }}
+              style={{ display: "inline-flex", alignItems: "center", gap: 4, color: "#5865F2", fontSize: 10, marginTop: 5, textDecoration: "none" }}
             >
-              <Sparkles size={9} /> Add to another server
+              + Add to another server
             </a>
           )}
         </div>
@@ -518,12 +520,12 @@ function OpenEmbeddedProperties({ nodeId, d, updateNodeData }: {
         <div style={fieldWrap}>
           <label style={{ ...labelStyle, display: "flex", alignItems: "center", gap: 6 }}>
             Channel
-            {fetchingChannels && <Loader2 size={10} style={{ animation: "spin 1s linear infinite" }} color="#818cf8" />}
+            {fetchingChannels && <Loader2 size={10} style={{ animation: "spin 1s linear infinite" }} color="#555" />}
             {!fetchingChannels && channels.length > 0 && (
               <button
                 onClick={() => handleGuildChange(selectedGuildId)}
-                title="Refresh channels"
-                style={{ background: "transparent", border: "none", cursor: "pointer", color: "#555", padding: 0, display: "flex", alignItems: "center" }}
+                title="Refresh"
+                style={{ background: "transparent", border: "none", cursor: "pointer", color: "#444", padding: 0, display: "flex", alignItems: "center" }}
               >
                 <RefreshCw size={9} />
               </button>
@@ -532,9 +534,13 @@ function OpenEmbeddedProperties({ nodeId, d, updateNodeData }: {
           {channels.length === 0 && !fetchingChannels ? (
             <button
               onClick={() => handleGuildChange(selectedGuildId)}
-              style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: 6, background: "rgba(88,101,242,0.08)", border: "1px dashed rgba(88,101,242,0.25)", borderRadius: 8, color: "#818cf8", fontSize: 12, padding: "8px", cursor: "pointer" }}
+              style={{
+                width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+                background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.09)",
+                borderRadius: 8, color: "#606060", fontSize: 12, padding: "8px", cursor: "pointer",
+              }}
             >
-              <RefreshCw size={12} /> Load Channels
+              <RefreshCw size={11} /> Load Channels
             </button>
           ) : (
             <select
@@ -560,20 +566,19 @@ function OpenEmbeddedProperties({ nodeId, d, updateNodeData }: {
             disabled={sendStatus === "sending" || !payload}
             style={{
               width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: 7,
-              background: sendStatus === "success" ? "rgba(63,185,80,0.15)" : "linear-gradient(135deg, #6366f1, #8b5cf6)",
+              background: sendStatus === "success" ? "rgba(63,185,80,0.15)" : "#5865F2",
               border: sendStatus === "success" ? "1px solid rgba(63,185,80,0.25)" : "none",
               borderRadius: 8, color: sendStatus === "success" ? "#3fb950" : "#fff",
               fontSize: 13, fontWeight: 700, padding: "10px 0",
               cursor: sendStatus === "sending" ? "wait" : "pointer",
-              boxShadow: sendStatus !== "success" ? "0 2px 14px rgba(99,102,241,0.35)" : "none",
-              transition: "all 0.15s",
-              opacity: !payload ? 0.4 : 1,
+              transition: "opacity 0.15s",
+              opacity: !payload || sendStatus === "sending" ? 0.5 : 1,
             }}
           >
             {sendStatus === "sending"
               ? <Loader2 size={14} style={{ animation: "spin 1s linear infinite" }} />
               : <Send size={14} />}
-            {sendStatus === "sending" ? "Sending…" : sendStatus === "success" ? "Sent ✓" : "Send via OpenEmbedded Bot"}
+            {sendStatus === "sending" ? "Sending…" : sendStatus === "success" ? "Sent ✓" : "Send Message"}
           </button>
           {sendStatus !== "idle" && sendMsg && (
             <div style={{
@@ -586,33 +591,24 @@ function OpenEmbeddedProperties({ nodeId, d, updateNodeData }: {
             </div>
           )}
           {!payload && (
-            <div style={{ color: FAINT, fontSize: 10, marginTop: 5, textAlign: "center" }}>
+            <div style={{ color: "#383838", fontSize: 10, marginTop: 5, textAlign: "center" }}>
               Add a Container or Embed to the canvas first
             </div>
           )}
           <div style={{ color: "#383838", fontSize: 10, marginTop: 5, textAlign: "center" }}>
-            Sends your canvas design to #{channels.find((c) => c.id === selectedChannelId)?.name}
+            Sends to #{channels.find((c) => c.id === selectedChannelId)?.name}
           </div>
         </div>
       )}
 
-      {/* Interaction flows overview */}
+      {/* Interaction flows */}
       <div style={fieldWrap}>
         <label style={labelStyle}>
           Interaction Flows ({interactionEdges.length})
         </label>
         {interactionEdges.length === 0 ? (
-          <div style={{
-            background: "rgba(99,102,241,0.05)", border: "1px dashed rgba(99,102,241,0.2)",
-            borderRadius: 8, padding: "12px", textAlign: "center",
-          }}>
-            <Zap size={16} color="#383860" style={{ marginBottom: 6, display: "block", margin: "0 auto 6px" }} />
-            <div style={{ color: "#383860", fontSize: 11, lineHeight: 1.5 }}>
-              No flows yet.<br />
-              <span style={{ color: "#40458a" }}>
-                Drag the amber handle on a Button or Select → a Container to define what happens when it's clicked.
-              </span>
-            </div>
+          <div style={{ color: "#404040", fontSize: 11, lineHeight: 1.6 }}>
+            No flows yet. Drag the amber handle on a Button or Select → a Container to define what happens when it's clicked.
           </div>
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
@@ -621,22 +617,16 @@ function OpenEmbeddedProperties({ nodeId, d, updateNodeData }: {
               const meta = getInteractionModeMeta(mode);
               return (
                 <div key={edge.id} style={{
-                  background: `${meta.color}08`, border: `1px solid ${meta.color}25`,
+                  background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)",
                   borderRadius: 8, padding: "8px 10px",
                   display: "flex", flexDirection: "column", gap: 5,
                 }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                    <Zap size={9} color={meta.color} />
-                    <span style={{ color: meta.color, fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em" }}>
-                      {meta.label}
-                    </span>
-                  </div>
                   <div style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 11 }}>
-                    <span style={{ color: "#888", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: 90 }}>
+                    <span style={{ color: "#606060", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: 90 }}>
                       {getSourceLabel(edge.source)}
                     </span>
-                    <ArrowRight size={10} color="#444" style={{ flexShrink: 0 }} />
-                    <span style={{ color: TEXT, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: 90 }}>
+                    <ArrowRight size={10} color="#3a3a3a" style={{ flexShrink: 0 }} />
+                    <span style={{ color: "#909090", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: 90 }}>
                       {getNodeLabel(edge.target)}
                     </span>
                   </div>
@@ -651,9 +641,12 @@ function OpenEmbeddedProperties({ nodeId, d, updateNodeData }: {
                     }}
                   >
                     {INTERACTION_MODES.map((m) => (
-                      <option key={m.value} value={m.value} style={{ background: BG }}>{m.label}</option>
+                      <option key={m.value} value={m.value} style={{ background: BG }}>
+                        {m.label}
+                      </option>
                     ))}
                   </select>
+                  <div style={{ fontSize: 10, color: meta.color, opacity: 0.7 }}>{meta.description}</div>
                 </div>
               );
             })}
