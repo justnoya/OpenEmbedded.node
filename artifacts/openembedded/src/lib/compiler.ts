@@ -81,7 +81,7 @@ export function compileGraph(nodes: AppNode[], edges: Edge[]): CompileResult {
       }
       case 10: {
         hasV2 = true;
-        if (!d.content) errors.push({ nodeId: id, message: "TextDisplay: content is empty" });
+        if (!d.content) errors.push({ nodeId: id, message: "Text block is empty — add some text to display" });
         return { type: 10, content: d.content ?? "" };
       }
       case 11: {
@@ -117,9 +117,9 @@ export function compileGraph(nodes: AppNode[], edges: Edge[]): CompileResult {
       }
       case 3: {
         hasV2 = true;
-        if (!d.custom_id) errors.push({ nodeId: id, message: "StringSelect: custom_id is required" });
+        if (!d.custom_id) errors.push({ nodeId: id, message: "Dropdown menu needs a unique ID — open this node and fill in the ID field" });
         const options = (d.options as Array<{ label: string; value: string; description?: string; default?: boolean }>) ?? [];
-        if (options.length === 0) errors.push({ nodeId: id, message: "StringSelect: at least one option required" });
+        if (options.length === 0) errors.push({ nodeId: id, message: "Dropdown menu has no choices — add at least one option" });
         const sel: Record<string, unknown> = {
           type: 3, custom_id: d.custom_id ?? `sel_${id}`, options,
         };
@@ -131,8 +131,8 @@ export function compileGraph(nodes: AppNode[], edges: Edge[]): CompileResult {
       }
       case 4: {
         hasV2 = true;
-        if (!d.label) errors.push({ nodeId: id, message: "TextInput: label is required" });
-        if (!d.custom_id) errors.push({ nodeId: id, message: "TextInput: custom_id is required" });
+        if (!d.label) errors.push({ nodeId: id, message: "Text field is missing a label — add one so users know what to type" });
+        if (!d.custom_id) errors.push({ nodeId: id, message: "Text field needs a unique ID — open this node and fill in the ID field" });
         const ti: Record<string, unknown> = {
           type: 4, custom_id: d.custom_id ?? `ti_${id}`, label: d.label ?? "Input",
           style: d.style === "Paragraph" ? 2 : 1,
@@ -149,7 +149,9 @@ export function compileGraph(nodes: AppNode[], edges: Edge[]): CompileResult {
       case 7:
       case 8: {
         hasV2 = true;
-        if (!d.custom_id) errors.push({ nodeId: id, message: `Select (type ${d.componentType}): custom_id is required` });
+        const selectNames: Record<number, string> = { 5: "User Select", 6: "Role Select", 7: "Mentionable Select", 8: "Channel Select" };
+        const selectLabel = selectNames[d.componentType as number] ?? "Select menu";
+        if (!d.custom_id) errors.push({ nodeId: id, message: `${selectLabel} needs a unique ID — open this node and fill in the ID field` });
         const autoSel: Record<string, unknown> = {
           type: d.componentType, custom_id: d.custom_id ?? `sel_${id}`,
         };

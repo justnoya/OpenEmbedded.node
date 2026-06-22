@@ -73,9 +73,9 @@ export function ExportPanel() {
         onSuccess: (result) => {
           const r = result as { success: boolean; message?: string | null };
           if (r.success) { setWebhookStatus("success"); setWebhookMsg("Message sent successfully!"); }
-          else { setWebhookStatus("error"); setWebhookMsg(r.message ?? "Send failed"); }
+          else { setWebhookStatus("error"); setWebhookMsg(r.message ?? "Discord rejected the message — double-check your webhook URL and try again."); }
         },
-        onError: () => { setWebhookStatus("error"); setWebhookMsg("Network error sending webhook"); },
+        onError: () => { setWebhookStatus("error"); setWebhookMsg("Couldn't reach Discord — check your internet connection and try again."); },
       }
     );
   };

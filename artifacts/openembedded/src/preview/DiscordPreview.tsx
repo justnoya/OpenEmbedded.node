@@ -1,6 +1,6 @@
 import { usePreviewStore } from "@/lib/previewStore";
 import { useGraphStore } from "@/lib/graphStore";
-import { AlertTriangle, Hash, ChevronDown, X, Upload, ExternalLink } from "lucide-react";
+import { AlertTriangle, Check, Hash, ChevronDown, X, Upload, ExternalLink } from "lucide-react";
 import { useState, useRef, useCallback } from "react";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -794,6 +794,7 @@ export function DiscordPreview() {
   const [avatarError, setAvatarError] = useState(false);
   const [avatarUploadOpen, setAvatarUploadOpen] = useState(false);
   const [editingName, setEditingName] = useState(false);
+  const [showErrors, setShowErrors] = useState(false);
   const [nameValue, setNameValue] = useState(senderName);
   const nameInputRef = useRef<HTMLInputElement>(null);
 
@@ -842,7 +843,9 @@ export function DiscordPreview() {
           Live preview
         </span>
         {!isValid && errors.length > 0 && (
-          <div
+          <button
+            onClick={() => setShowErrors((v) => !v)}
+            title={showErrors ? "Hide errors" : "Show what needs fixing"}
             style={{
               marginLeft: "auto",
               display: "flex",
@@ -851,13 +854,49 @@ export function DiscordPreview() {
               color: "#f85149",
               fontSize: 11,
               fontFamily: DC_FONT,
+              background: showErrors ? "rgba(248,81,73,0.12)" : "rgba(248,81,73,0.07)",
+              border: "1px solid rgba(248,81,73,0.2)",
+              borderRadius: 5,
+              padding: "3px 7px",
+              cursor: "pointer",
+              transition: "background 0.12s",
             }}
           >
-            <AlertTriangle size={11} />
-            {errors.length} error{errors.length !== 1 ? "s" : ""}
+            <AlertTriangle size={10} />
+            {errors.length} issue{errors.length !== 1 ? "s" : ""} — click to {showErrors ? "hide" : "see"}
+          </button>
+        )}
+        {isValid && (
+          <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 4, color: "#3fb950", fontSize: 11 }}>
+            <Check size={10} />
+            Ready to send
           </div>
         )}
       </div>
+
+      {/* Expandable error list */}
+      {!isValid && showErrors && errors.length > 0 && (
+        <div
+          style={{
+            flexShrink: 0,
+            background: "rgba(248,81,73,0.05)",
+            borderBottom: "1px solid rgba(248,81,73,0.15)",
+            padding: "8px 14px",
+            display: "flex",
+            flexDirection: "column",
+            gap: 5,
+          }}
+        >
+          {errors.map((err, i) => (
+            <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 7 }}>
+              <div style={{ color: "#f85149", flexShrink: 0, marginTop: 1 }}>
+                <AlertTriangle size={10} />
+              </div>
+              <span style={{ color: "#c0948f", fontSize: 11, lineHeight: 1.5 }}>{err.message}</span>
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* Bot connected indicator */}
       {isBotConnected && (

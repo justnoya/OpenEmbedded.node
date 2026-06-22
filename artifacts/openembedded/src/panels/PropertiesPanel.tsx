@@ -162,10 +162,10 @@ function BotProperties({ nodeId, d, updateNodeData }: {
         onSuccess: (res) => {
           const r = res as { success: boolean; message?: string | null };
           if (r.success) { setSendStatus("success"); setSendMsg("Message sent!"); }
-          else { setSendStatus("error"); setSendMsg(r.message ?? "Failed to send"); }
-          setTimeout(() => setSendStatus("idle"), 3000);
+          else { setSendStatus("error"); setSendMsg(r.message ?? "Discord rejected the message — check your bot token, channel selection, and try again."); }
+          setTimeout(() => setSendStatus("idle"), 4000);
         },
-        onError: () => { setSendStatus("error"); setSendMsg("Network error"); setTimeout(() => setSendStatus("idle"), 3000); },
+        onError: () => { setSendStatus("error"); setSendMsg("Couldn't reach Discord — check your internet connection and try again."); setTimeout(() => setSendStatus("idle"), 4000); },
       }
     );
   };

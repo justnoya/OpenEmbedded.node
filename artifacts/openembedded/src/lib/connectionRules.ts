@@ -66,12 +66,28 @@ export function isInteractionConnection(sourceType: string, targetType: string):
   return INTERACTION_SOURCES.has(sourceType) && INTERACTION_TARGETS.has(targetType);
 }
 
+const FRIENDLY_NAMES: Record<string, string> = {
+  container: "Container", section: "Section", textDisplay: "Text block",
+  thumbnail: "Thumbnail", mediaGallery: "Media Gallery", separator: "Separator",
+  actionRow: "Action Row", button: "Button", selectMenu: "Dropdown",
+  textInput: "Text field", userSelect: "User Select", roleSelect: "Role Select",
+  mentionableSelect: "Mentionable Select", channelSelect: "Channel Select",
+  embed: "Embed", bot: "Bot", openembedded: "OpenEmbedded",
+};
+
+function friendly(type: string) {
+  return FRIENDLY_NAMES[type] ?? type;
+}
+
 /** Human-readable explanation of why a structural connection is invalid. */
 export function getConnectionError(sourceType: string, targetType: string): string {
   const allowed = ALLOWED_CHILDREN[sourceType];
-  if (!allowed) return `"${sourceType}" cannot have child nodes.`;
+  if (!allowed) {
+    return `A ${friendly(sourceType)} can't contain child nodes — it's a standalone component.`;
+  }
   if (!allowed.includes(targetType)) {
-    return `"${sourceType}" only accepts: ${allowed.join(", ")}. Got: "${targetType}".`;
+    const allowedLabels = allowed.map(friendly).join(", ");
+    return `A ${friendly(sourceType)} can only contain: ${allowedLabels}. A ${friendly(targetType)} can't go here.`;
   }
   return "";
 }

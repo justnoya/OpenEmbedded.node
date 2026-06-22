@@ -16,7 +16,7 @@ import { nodeTypes } from "@/canvas/nodeTypes";
 import { CustomEdge } from "@/canvas/edges/CustomEdge";
 import { InteractionEdge } from "@/canvas/edges/InteractionEdge";
 import { SendEdge } from "@/canvas/edges/SendEdge";
-import { isValidNodeConnection, isInteractionConnection } from "@/lib/connectionRules";
+import { isValidNodeConnection, isInteractionConnection, isBotSendConnection, getConnectionError } from "@/lib/connectionRules";
 import { NodeLibraryPanel } from "@/panels/NodeLibraryPanel";
 import { PropertiesPanel } from "@/panels/PropertiesPanel";
 import { DiscordPreview } from "@/preview/DiscordPreview";
@@ -95,6 +95,10 @@ export function Builder() {
   const [showProjectList, setShowProjectList] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [hasLoaded, setHasLoaded] = useState(false);
+
+  const [connError, setConnError] = useState<string | null>(null);
+  const connErrorTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const lastAttemptedConn = useRef<{ src: string; tgt: string } | null>(null);
 
   const nameInputRef = useRef<HTMLInputElement>(null);
   const autoSaveTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
@@ -180,10 +184,28 @@ export function Builder() {
       if (!sourceNode || !targetNode) return false;
       const srcType = sourceNode.type ?? "";
       const tgtType = targetNode.type ?? "";
-      return isValidNodeConnection(srcType, tgtType) || isInteractionConnection(srcType, tgtType);
+      const valid = isValidNodeConnection(srcType, tgtType)
+        || isInteractionConnection(srcType, tgtType)
+        || isBotSendConnection(srcType, tgtType);
+      if (!valid) lastAttemptedConn.current = { src: srcType, tgt: tgtType };
+      else lastAttemptedConn.current = null;
+      return valid;
     },
     [nodes]
   );
+
+  const onConnectEnd = useCallback(() => {
+    const attempted = lastAttemptedConn.current;
+    if (!attempted) return;
+    const msg = getConnectionError(attempted.src, attempted.tgt)
+      || (attempted.src === "bot"
+        ? "A Bot can only connect to a Container or Embed — drag its green handle to one of those."
+        : `A ${attempted.src} can't connect to a ${attempted.tgt} — check the node types and try again.`);
+    setConnError(msg);
+    clearTimeout(connErrorTimer.current);
+    connErrorTimer.current = setTimeout(() => setConnError(null), 4500);
+    lastAttemptedConn.current = null;
+  }, []);
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -267,7 +289,7 @@ export function Builder() {
       saved:   { color: "#3fb950", icon: <Check size={11} />,    text: "Saved" },
       saving:  { color: "#d29922", icon: <Loader2 size={11} style={{ animation: "spin 1s linear infinite" }} />, text: "Saving…" },
       unsaved: { color: "#888888", icon: null,                   text: "Unsaved" },
-      error:   { color: "#f85149", icon: <AlertCircle size={11} />, text: "Error" },
+      error:   { color: "#f85149", icon: <AlertCircle size={11} />, text: "Save failed — will retry" },
     };
     const cfg = configs[saveStatus];
     return (
@@ -756,6 +778,7 @@ export function Builder() {
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
         isValidConnection={isValidConnection}
+        onConnectEnd={onConnectEnd}
         onPaneClick={() => setSelectedNode(null)}
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
@@ -821,6 +844,37 @@ export function Builder() {
           </div>
         </Panel>
       </ReactFlow>
+
+      {/* Connection error toast */}
+      {connError && (
+        <div
+          style={{
+            position: "absolute",
+            bottom: 18,
+            left: "50%",
+            transform: "translateX(-50%)",
+            zIndex: 1000,
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+            background: "#1a0f0f",
+            border: "1px solid rgba(248,81,73,0.35)",
+            borderRadius: 10,
+            padding: "9px 14px",
+            color: "#f0a0a0",
+            fontSize: 12,
+            fontWeight: 500,
+            maxWidth: 420,
+            boxShadow: "0 4px 24px rgba(0,0,0,0.6), 0 0 0 1px rgba(248,81,73,0.1)",
+            pointerEvents: "none",
+            backdropFilter: "blur(8px)",
+            animation: "slideUp 0.18s ease-out",
+          }}
+        >
+          <AlertCircle size={13} color="#f85149" style={{ flexShrink: 0 }} />
+          <span>{connError}</span>
+        </div>
+      )}
     </div>
   );
 
