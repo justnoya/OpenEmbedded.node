@@ -15,7 +15,7 @@ interface NodeData {
   spacing?: string;
   divider?: boolean;
   imageUrl?: string;
-  items?: Array<{ url: string; description?: string }>;
+  items?: Array<{ url: string; description?: string; spoiler?: boolean }>;
   description?: string;
   title?: string;
   color?: number;
@@ -33,7 +33,10 @@ interface FlowEdge {
   id: string;
   source: string;
   target: string;
+  type?: string;
 }
+
+const UTILITY_TYPES = new Set(["bot", "openembedded"]);
 
 function compileGraph(
   nodes: FlowNode[],
@@ -49,13 +52,20 @@ function compileGraph(
   const childOf = new Map<string, string[]>();
   const parentOf = new Map<string, string>();
 
-  for (const edge of edges) {
+  // Only structural edges define hierarchy — exclude interaction and send edges
+  const structuralEdges = edges.filter((e) => e.type !== "interaction" && e.type !== "send");
+
+  for (const edge of structuralEdges) {
     if (!childOf.has(edge.source)) childOf.set(edge.source, []);
     childOf.get(edge.source)!.push(edge.target);
     parentOf.set(edge.target, edge.source);
   }
 
-  const rootNodeIds = nodes.filter((n) => !parentOf.has(n.id)).map((n) => n.id);
+  // Root nodes: no incoming structural edges, exclude utility nodes
+  const rootNodeIds = nodes
+    .filter((n) => !parentOf.has(n.id) && !UTILITY_TYPES.has(n.type ?? ""))
+    .map((n) => n.id);
+
   let hasV2 = false;
 
   function buildComponent(nodeId: string): Record<string, unknown> | null {
@@ -67,10 +77,18 @@ function compileGraph(
     switch (data.componentType) {
       case 17: {
         hasV2 = true;
-        const comp: Record<string, unknown> = {
-          type: 17,
-          components: children.map(buildComponent).filter(Boolean),
-        };
+        const builtComponents: Record<string, unknown>[] = [];
+        for (const kid of children) {
+          const kidNode = nodeMap.get(kid);
+          if (kidNode?.data?.componentType === 11) {
+            const thumbBuilt = buildComponent(kid);
+            if (thumbBuilt) builtComponents.push({ type: 9, components: [], accessory: thumbBuilt });
+          } else {
+            const built = buildComponent(kid);
+            if (built) builtComponents.push(built);
+          }
+        }
+        const comp: Record<string, unknown> = { type: 17, components: builtComponents };
         if (data.accent_color != null) comp.accent_color = data.accent_color;
         if (data.spoiler) comp.spoiler = true;
         return comp;
@@ -88,19 +106,36 @@ function compileGraph(
       }
       case 10: {
         hasV2 = true;
+        const content = (data.content ?? "").trim();
+        if (!content) errors.push(`Text Display (${nodeId}): content is empty`);
         return { type: 10, content: data.content ?? "" };
       }
       case 11: {
         hasV2 = true;
-        return { type: 11, media: { url: data.url ?? "" }, description: data.description };
+        const url = (data.url ?? "").trim();
+        if (!url) errors.push(`Thumbnail (${nodeId}): missing image URL`);
+        const thumb: Record<string, unknown> = { type: 11, media: { url } };
+        if (data.description) thumb.description = data.description;
+        return thumb;
       }
       case 12: {
         hasV2 = true;
-        return { type: 12, items: data.items ?? [] };
+        const rawItems = data.items ?? [];
+        const items = rawItems
+          .filter((item) => item.url && item.url.trim())
+          .map((item) => {
+            const galleryItem: Record<string, unknown> = { media: { url: item.url.trim() } };
+            if (item.description) galleryItem.description = item.description;
+            if (item.spoiler) galleryItem.spoiler = item.spoiler;
+            return galleryItem;
+          });
+        if (items.length === 0) errors.push(`Media Gallery (${nodeId}): needs at least one image URL`);
+        return { type: 12, items };
       }
       case 14: {
         hasV2 = true;
-        const spacing = data.spacing === "lg" ? 2 : data.spacing === "sm" ? 0 : 1;
+        // Discord Separator spacing: 1 = SMALL, 2 = LARGE (0 is not a valid value)
+        const spacing = data.spacing === "lg" ? 2 : 1;
         return { type: 14, spacing, divider: data.divider ?? false };
       }
       case 1: {
@@ -110,7 +145,7 @@ function compileGraph(
       case 2: {
         hasV2 = true;
         const styleMap: Record<string, number> = {
-          Primary: 1, Secondary: 2, Success: 3, Danger: 4, Link: 5,
+          Primary: 1, Secondary: 2, Success: 3, Danger: 4, Link: 5, Premium: 6,
         };
         const style = styleMap[data.style ?? "Primary"] ?? 1;
         const btn: Record<string, unknown> = {
@@ -118,8 +153,15 @@ function compileGraph(
           style,
           label: data.label ?? "Button",
         };
-        if (style === 5 && data.url) btn.url = data.url;
-        else btn.custom_id = data.custom_id ?? `btn_${nodeId}`;
+        if (style === 5) {
+          const url = (data.url ?? "").trim();
+          if (!url) errors.push(`Button (${nodeId}): Link style requires a URL`);
+          btn.url = url || "https://example.com";
+        } else if (style === 6) {
+          btn.sku_id = data.custom_id ?? "";
+        } else {
+          btn.custom_id = data.custom_id ?? `btn_${nodeId}`;
+        }
         return btn;
       }
       default: {
@@ -130,6 +172,7 @@ function compileGraph(
           if (data.color != null) embed.color = data.color;
           if (data.author) embed.author = { name: data.author };
           if (data.footer) embed.footer = { text: data.footer };
+          if (data.imageUrl) embed.image = { url: data.imageUrl };
           return embed;
         }
         return null;
@@ -159,7 +202,7 @@ function compileGraph(
 
 function generateDiscordJsCode(payload: Record<string, unknown>): string {
   const lines: string[] = [
-    `const { ContainerBuilder, TextDisplayBuilder, SeparatorBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');`,
+    `const { ContainerBuilder, SectionBuilder, TextDisplayBuilder, SeparatorBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, MediaGalleryBuilder, MediaGalleryItemBuilder } = require('discord.js');`,
     ``,
   ];
 
@@ -193,6 +236,15 @@ function generateDiscordJsCode(payload: Record<string, unknown>): string {
       case 10:
         out.push(`const ${varName} = new TextDisplayBuilder().setContent(${JSON.stringify(comp.content ?? "")});`);
         break;
+      case 12: {
+        const items = (comp.items as Record<string, unknown>[]) ?? [];
+        items.forEach((item, i) => {
+          const media = item.media as Record<string, unknown>;
+          out.push(`const ${varName}_item${i} = new MediaGalleryItemBuilder().setURL(${JSON.stringify(media?.url ?? "")})${item.description ? `.setDescription(${JSON.stringify(item.description)})` : ""};`);
+        });
+        out.push(`const ${varName} = new MediaGalleryBuilder().addItems(${items.map((_, i) => `${varName}_item${i}`).join(", ")});`);
+        break;
+      }
       case 14:
         out.push(`const ${varName} = new SeparatorBuilder().setSpacing(${comp.spacing ?? 1}).setDivider(${comp.divider ?? false});`);
         break;
@@ -207,7 +259,7 @@ function generateDiscordJsCode(payload: Record<string, unknown>): string {
       case 2: {
         const styleNames: Record<number, string> = {
           1: "ButtonStyle.Primary", 2: "ButtonStyle.Secondary",
-          3: "ButtonStyle.Success", 4: "ButtonStyle.Danger", 5: "ButtonStyle.Link",
+          3: "ButtonStyle.Success", 4: "ButtonStyle.Danger", 5: "ButtonStyle.Link", 6: "ButtonStyle.Premium",
         };
         const style = styleNames[comp.style as number] ?? "ButtonStyle.Primary";
         out.push(

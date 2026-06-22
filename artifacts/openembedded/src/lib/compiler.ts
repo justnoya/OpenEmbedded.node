@@ -81,20 +81,42 @@ export function compileGraph(nodes: AppNode[], edges: Edge[]): CompileResult {
       }
       case 10: {
         hasV2 = true;
-        if (!d.content) errors.push({ nodeId: id, message: "Text block is empty — add some text to display" });
-        return { type: 10, content: d.content ?? "" };
+        const content = (d.content as string) ?? "";
+        if (!content.trim()) {
+          errors.push({ nodeId: id, message: "Text block is empty — add some text to display" });
+        }
+        return { type: 10, content };
       }
       case 11: {
         hasV2 = true;
-        return { type: 11, media: { url: d.url ?? "" }, description: d.description };
+        const url = ((d.url as string) ?? "").trim();
+        if (!url) {
+          errors.push({ nodeId: id, message: "Thumbnail/Media needs a valid image URL" });
+        }
+        const thumb: Record<string, unknown> = { type: 11, media: { url } };
+        if (d.description) thumb.description = d.description;
+        return thumb;
       }
       case 12: {
         hasV2 = true;
-        return { type: 12, items: d.items ?? [] };
+        const rawItems = (d.items as { url: string; description?: string; spoiler?: boolean }[]) ?? [];
+        const items = rawItems
+          .filter((item) => item.url && item.url.trim())
+          .map((item) => {
+            const galleryItem: Record<string, unknown> = { media: { url: item.url.trim() } };
+            if (item.description) galleryItem.description = item.description;
+            if (item.spoiler) galleryItem.spoiler = item.spoiler;
+            return galleryItem;
+          });
+        if (items.length === 0) {
+          errors.push({ nodeId: id, message: "Media Gallery needs at least one image URL" });
+        }
+        return { type: 12, items };
       }
       case 14: {
         hasV2 = true;
-        const spacingMap: Record<string, number> = { sm: 0, md: 1, lg: 2 };
+        // Discord Separator spacing: 1 = SMALL, 2 = LARGE (0 is not valid)
+        const spacingMap: Record<string, number> = { sm: 1, md: 1, lg: 2 };
         return { type: 14, spacing: spacingMap[d.spacing as string] ?? 1, divider: d.divider ?? false };
       }
       case 1: {
@@ -108,9 +130,15 @@ export function compileGraph(nodes: AppNode[], edges: Edge[]): CompileResult {
         };
         const style = styleMap[d.style as string] ?? 1;
         const btn: Record<string, unknown> = { type: 2, style, label: d.label ?? "Button" };
-        if (style === 5) btn.url = d.url ?? "";
-        else if (style === 6) btn.sku_id = d.sku_id ?? "";
-        else btn.custom_id = d.custom_id ?? `btn_${id}`;
+        if (style === 5) {
+          const url = ((d.url as string) ?? "").trim();
+          if (!url) errors.push({ nodeId: id, message: "Link button needs a URL — open this node and fill in the URL field" });
+          btn.url = url || "https://example.com";
+        } else if (style === 6) {
+          btn.sku_id = d.sku_id ?? "";
+        } else {
+          btn.custom_id = d.custom_id ?? `btn_${id}`;
+        }
         if (d.disabled) btn.disabled = true;
         if (d.emoji) btn.emoji = { name: d.emoji };
         return btn;
