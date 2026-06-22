@@ -31,15 +31,11 @@ export function CustomEdge({
     setEdges((eds) => eds.filter((edge) => edge.id !== id));
   };
 
-  const strokeColor = selected ? "#818cf8" : "#5865F2";
-  const strokeWidth = selected ? 2.5 : 1.5;
-  const glowFilter = selected
-    ? "drop-shadow(0 0 6px rgba(129,140,248,0.5))"
-    : "drop-shadow(0 0 3px rgba(88,101,242,0.25))";
+  const strokeColor = selected ? "#666666" : "#3a3a3a";
+  const strokeWidth = selected ? 2 : 1.5;
 
   return (
     <>
-      {/* Wide invisible hit-area */}
       <path d={edgePath} fill="none" stroke="transparent" strokeWidth={18} style={{ cursor: "pointer" }} />
 
       <BaseEdge
@@ -49,7 +45,7 @@ export function CustomEdge({
         style={{
           stroke: strokeColor,
           strokeWidth,
-          filter: glowFilter,
+          strokeDasharray: "6 4",
           transition: "stroke 0.12s, stroke-width 0.12s",
         }}
       />
@@ -77,11 +73,11 @@ export function CustomEdge({
                 height: 22,
                 borderRadius: "50%",
                 background: "#1e1e1e",
-                border: "1.5px solid #818cf8",
-                color: "#818cf8",
+                border: "1.5px solid #555555",
+                color: "#888888",
                 cursor: "pointer",
                 padding: 0,
-                boxShadow: "0 2px 12px rgba(0,0,0,0.7), 0 0 8px rgba(129,140,248,0.2)",
+                boxShadow: "0 2px 12px rgba(0,0,0,0.7)",
                 transition: "all 0.12s",
               }}
               onMouseEnter={(e) => {
@@ -93,8 +89,8 @@ export function CustomEdge({
               onMouseLeave={(e) => {
                 const el = e.currentTarget as HTMLElement;
                 el.style.background = "#1e1e1e";
-                el.style.borderColor = "#818cf8";
-                el.style.color = "#818cf8";
+                el.style.borderColor = "#555555";
+                el.style.color = "#888888";
               }}
             >
               <X size={10} strokeWidth={2.5} />

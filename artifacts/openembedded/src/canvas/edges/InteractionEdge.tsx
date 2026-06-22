@@ -28,14 +28,10 @@ export function InteractionEdge({
     setEdges((eds) => eds.filter((edge) => edge.id !== id));
   };
 
-  const strokeColor = selected ? "#fbbf24" : meta.color;
-  const glowFilter = selected
-    ? `drop-shadow(0 0 7px ${meta.color}90)`
-    : `drop-shadow(0 0 4px ${meta.color}50)`;
+  const strokeColor = selected ? "#666666" : "#3a3a3a";
 
   return (
     <>
-      {/* Wide invisible hit area */}
       <path d={edgePath} fill="none" stroke="transparent" strokeWidth={18} style={{ cursor: "pointer" }} />
 
       <BaseEdge
@@ -44,13 +40,11 @@ export function InteractionEdge({
         style={{
           stroke: strokeColor,
           strokeWidth: selected ? 2 : 1.5,
-          strokeDasharray: "7 3",
-          filter: glowFilter,
+          strokeDasharray: "6 4",
           transition: "stroke 0.12s, stroke-width 0.12s",
         }}
       />
 
-      {/* Mode label badge at midpoint */}
       <EdgeLabelRenderer>
         <div
           style={{
@@ -68,20 +62,20 @@ export function InteractionEdge({
           <div
             style={{
               background: "#141414",
-              border: `1px solid ${meta.color}50`,
+              border: "1px solid rgba(255,255,255,0.08)",
               borderRadius: 7,
               padding: "3px 8px",
               display: "flex",
               alignItems: "center",
               gap: 5,
-              boxShadow: `0 0 10px ${meta.color}20, 0 2px 8px rgba(0,0,0,0.5)`,
+              boxShadow: "0 2px 8px rgba(0,0,0,0.5)",
               backdropFilter: "blur(4px)",
             }}
           >
-            <Zap size={9} color={meta.color} />
+            <Zap size={9} color="#555555" />
             <span
               style={{
-                color: meta.color,
+                color: "#555555",
                 fontSize: 10,
                 fontWeight: 700,
                 letterSpacing: "0.06em",
@@ -100,8 +94,8 @@ export function InteractionEdge({
                 display: "flex", alignItems: "center", justifyContent: "center",
                 width: 20, height: 20, borderRadius: "50%",
                 background: "#1e1e1e",
-                border: `1.5px solid ${meta.color}`,
-                color: meta.color, cursor: "pointer", padding: 0,
+                border: "1.5px solid #555555",
+                color: "#888888", cursor: "pointer", padding: 0,
                 boxShadow: "0 2px 10px rgba(0,0,0,0.7)",
                 transition: "all 0.12s",
               }}
@@ -114,8 +108,8 @@ export function InteractionEdge({
               onMouseLeave={(e) => {
                 const el = e.currentTarget as HTMLElement;
                 el.style.background = "#1e1e1e";
-                el.style.borderColor = meta.color;
-                el.style.color = meta.color;
+                el.style.borderColor = "#555555";
+                el.style.color = "#888888";
               }}
             >
               <X size={10} strokeWidth={2.5} />
