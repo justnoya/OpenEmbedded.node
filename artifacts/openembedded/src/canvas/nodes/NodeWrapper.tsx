@@ -10,7 +10,6 @@ interface NodeWrapperProps {
   icon: ReactNode;
   accentColor: string;
   nodeClass?: NodeClass;
-  /** When true, the right (source) handle is NOT hidden — used for interactive nodes that emit interaction edges. */
   showInteractionHandle?: boolean;
 }
 
@@ -30,14 +29,14 @@ export function NodeWrapper({
   let shadowVal: string;
 
   if (isConnectionTarget) {
-    borderColor = "rgba(255,255,255,0.3)";
-    shadowVal = "0 0 0 2px rgba(255,255,255,0.08), 0 4px 16px rgba(0,0,0,0.5)";
+    borderColor = "rgba(255,255,255,0.22)";
+    shadowVal = "0 0 0 1px rgba(255,255,255,0.06)";
   } else if (isSelected) {
-    borderColor = accentColor + "90";
-    shadowVal = `0 0 0 2px ${accentColor}20, 0 4px 16px rgba(0,0,0,0.5)`;
+    borderColor = "rgba(255,255,255,0.18)";
+    shadowVal = `0 0 0 1px ${accentColor}18`;
   } else {
-    borderColor = "rgba(255,255,255,0.08)";
-    shadowVal = "0 1px 4px rgba(0,0,0,0.4)";
+    borderColor = "rgba(255,255,255,0.07)";
+    shadowVal = "0 1px 3px rgba(0,0,0,0.35)";
   }
 
   return (
@@ -52,7 +51,7 @@ export function NodeWrapper({
         cursor: "pointer",
         position: "relative",
         boxShadow: shadowVal,
-        transition: "border-color 0.15s ease, box-shadow 0.15s ease",
+        transition: "border-color 0.12s, box-shadow 0.12s",
         overflow: "hidden",
         display: "flex",
         flexDirection: "column",
@@ -63,27 +62,26 @@ export function NodeWrapper({
         style={{
           position: "absolute",
           top: 0, left: 0, bottom: 0,
-          width: 3,
+          width: 2,
           background: accentColor,
-          borderRadius: "8px 0 0 8px",
-          opacity: isSelected ? 1 : 0.6,
-          transition: "opacity 0.15s ease",
+          opacity: isSelected ? 1 : 0.55,
+          transition: "opacity 0.12s",
         }}
       />
 
-      {/* Connection target pulse ring */}
+      {/* Connection target ring */}
       {isConnectionTarget && (
         <div
           style={{
-            position: "absolute", inset: -5, borderRadius: 13,
-            border: "1.5px solid rgba(255,255,255,0.2)",
+            position: "absolute", inset: -4, borderRadius: 12,
+            border: "1px solid rgba(255,255,255,0.14)",
             pointerEvents: "none",
             animation: "pulseRing 0.65s ease-in-out infinite alternate",
           }}
         />
       )}
 
-      {/* Handle visibility overrides */}
+      {/* Handle visibility */}
       {nodeClass === "sub" && (
         <style>{`[data-testid="node-${id}"] .react-flow__handle-right{opacity:0!important;pointer-events:none!important}`}</style>
       )}
@@ -97,19 +95,16 @@ export function NodeWrapper({
       {/* ── Header ── */}
       <div
         style={{
-          padding: "9px 12px 9px 18px",
-          borderBottom: "1px solid rgba(255,255,255,0.06)",
-          display: "flex", alignItems: "center", gap: 8,
-          background: "rgba(255,255,255,0.025)",
+          padding: "8px 10px 8px 14px",
+          borderBottom: "1px solid rgba(255,255,255,0.05)",
+          display: "flex", alignItems: "center", gap: 7,
         }}
       >
         <div
           style={{
-            width: 24, height: 24, borderRadius: 6,
-            background: accentColor + "1a",
-            border: `1px solid ${accentColor}30`,
+            color: accentColor,
             display: "flex", alignItems: "center", justifyContent: "center",
-            color: accentColor, flexShrink: 0,
+            flexShrink: 0, opacity: 0.9,
           }}
         >
           {icon}
@@ -117,8 +112,8 @@ export function NodeWrapper({
 
         <span
           style={{
-            color: "rgba(255,255,255,0.45)", fontSize: 10, fontWeight: 600,
-            textTransform: "uppercase", letterSpacing: "0.08em",
+            color: "rgba(255,255,255,0.55)", fontSize: 10, fontWeight: 600,
+            textTransform: "uppercase", letterSpacing: "0.09em",
             userSelect: "none", flex: 1,
           }}
         >
@@ -127,12 +122,10 @@ export function NodeWrapper({
 
         <span
           style={{
-            background: badgeColor + "15",
-            border: `1px solid ${badgeColor}22`,
             color: badgeColor,
             fontSize: 8, fontWeight: 700, letterSpacing: "0.07em",
-            padding: "1px 5px", borderRadius: 3,
-            textTransform: "uppercase", userSelect: "none", opacity: 0.8,
+            opacity: 0.5,
+            textTransform: "uppercase", userSelect: "none",
           }}
         >
           {badgeLabel}
@@ -141,7 +134,7 @@ export function NodeWrapper({
         {isSelected && (
           <div
             style={{
-              width: 5, height: 5, borderRadius: "50%",
+              width: 4, height: 4, borderRadius: "50%",
               background: accentColor, flexShrink: 0,
             }}
           />
@@ -149,7 +142,7 @@ export function NodeWrapper({
       </div>
 
       {/* ── Body ── */}
-      <div style={{ padding: "10px 12px 12px 18px" }}>{children}</div>
+      <div style={{ padding: "10px 10px 11px 14px" }}>{children}</div>
     </div>
   );
 }

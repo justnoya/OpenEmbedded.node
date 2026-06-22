@@ -34,7 +34,8 @@ import {
 import { useQueryClient } from "@tanstack/react-query";
 import {
   Undo2, Redo2, Save, Upload, Plus, FolderOpen, ChevronDown,
-  Eye, Settings2, Trash2, Loader2, Check, AlertCircle, LayoutGrid,
+  Eye, Settings2, Trash2, Loader2, Check, AlertCircle,
+  Boxes, Workflow, SlidersHorizontal, Smartphone,
 } from "lucide-react";
 
 const edgeTypes = { default: CustomEdge, interaction: InteractionEdge };
@@ -708,10 +709,10 @@ export function Builder() {
       >
         {(["library", "canvas", "properties", "preview"] as MobilePanel[]).map((panel) => {
           const meta = {
-            library: { label: "Nodes", icon: <LayoutGrid size={17} /> },
-            canvas: { label: "Canvas", icon: <Settings2 size={17} /> },
-            properties: { label: "Props", icon: <Settings2 size={17} /> },
-            preview: { label: "Preview", icon: <Eye size={17} /> },
+            library: { label: "Nodes", icon: <Boxes size={17} /> },
+            canvas: { label: "Canvas", icon: <Workflow size={17} /> },
+            properties: { label: "Props", icon: <SlidersHorizontal size={17} /> },
+            preview: { label: "Preview", icon: <Smartphone size={17} /> },
           };
           const active = mobilePanel === panel;
           return (
