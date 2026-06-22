@@ -1,7 +1,7 @@
 import { memo } from "react";
-import { NodeProps } from "@xyflow/react";
+import { Handle, Position, NodeProps } from "@xyflow/react";
 import { NodeWrapper } from "./NodeWrapper";
-import { Bot, CheckCircle2, AlertCircle } from "lucide-react";
+import { Bot, CheckCircle2, AlertCircle, Send } from "lucide-react";
 
 function BotNodeComponent({ id, data }: NodeProps) {
   const connected = !!data.connected;
@@ -15,7 +15,7 @@ function BotNodeComponent({ id, data }: NodeProps) {
   const channelName = channels.find((c) => c.id === selectedChannelId)?.name;
 
   return (
-    <NodeWrapper id={id} typeName="Bot · Advanced" icon={<Bot size={18} />} accentColor="#5865F2" nodeClass="root">
+    <NodeWrapper id={id} typeName="Bot · Advanced" icon={<Bot size={18} />} accentColor="#5865F2" nodeClass="root" showSendHandle>
       <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
         {connected ? (
           <>
@@ -48,7 +48,22 @@ function BotNodeComponent({ id, data }: NodeProps) {
             <span style={{ color: "#484848", fontSize: 11 }}>Token not set</span>
           </div>
         )}
+
+        {/* Send hint */}
+        <div style={{ display: "flex", alignItems: "center", gap: 5, marginTop: 2, paddingTop: 6, borderTop: "1px solid rgba(255,255,255,0.04)" }}>
+          <Send size={9} color="#3fb950" />
+          <span style={{ color: "#2e4a32", fontSize: 10 }}>
+            Drag right handle → Container or Embed
+          </span>
+        </div>
       </div>
+
+      {/* Send source handle (right) — no target handle */}
+      <Handle
+        type="source"
+        position={Position.Right}
+        style={{ background: "#3fb950", border: "2px solid #252525", width: 12, height: 12 }}
+      />
     </NodeWrapper>
   );
 }

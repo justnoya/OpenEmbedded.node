@@ -11,10 +11,12 @@ interface NodeWrapperProps {
   accentColor: string;
   nodeClass?: NodeClass;
   showInteractionHandle?: boolean;
+  /** When true (bot nodes), show the right (source) handle but hide the left (target) handle. */
+  showSendHandle?: boolean;
 }
 
 export function NodeWrapper({
-  id, children, typeName, icon, accentColor, nodeClass = "sub", showInteractionHandle = false,
+  id, children, typeName, icon, accentColor, nodeClass = "sub", showInteractionHandle = false, showSendHandle = false,
 }: NodeWrapperProps) {
   const selectedNodeId = useGraphStore((s) => s.selectedNodeId);
   const setSelectedNode = useGraphStore((s) => s.setSelectedNode);
@@ -81,8 +83,11 @@ export function NodeWrapper({
       {nodeClass === "interactive" && !showInteractionHandle && (
         <style>{`[data-testid="node-${id}"] .react-flow__handle-right{opacity:0!important;pointer-events:none!important}`}</style>
       )}
-      {nodeClass === "root" && (
+      {nodeClass === "root" && !showSendHandle && (
         <style>{`[data-testid="node-${id}"] .react-flow__handle{opacity:0!important;pointer-events:none!important}`}</style>
+      )}
+      {nodeClass === "root" && showSendHandle && (
+        <style>{`[data-testid="node-${id}"] .react-flow__handle-left{opacity:0!important;pointer-events:none!important}`}</style>
       )}
 
       {/* ── Header ── */}

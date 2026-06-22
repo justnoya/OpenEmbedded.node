@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { Node, Edge, Connection, addEdge, applyNodeChanges, applyEdgeChanges, NodeChange, EdgeChange } from '@xyflow/react';
-import { isValidNodeConnection, isInteractionConnection, InteractionMode } from './connectionRules';
+import { isValidNodeConnection, isInteractionConnection, isBotSendConnection, InteractionMode } from './connectionRules';
 
 export type DiscordComponentType = 'container' | 'section' | 'text' | 'thumbnail' | 'media' | 'separator' | 'actionRow' | 'button' | 'embed';
 
@@ -118,6 +118,27 @@ export const useGraphStore = create<GraphState>((set, get) => ({
 
     const srcType = sourceNode.type ?? "";
     const tgtType = targetNode.type ?? "";
+
+    // ── Bot send edge (bot → container/embed) ────────────────────────────────
+    if (isBotSendConnection(srcType, tgtType)) {
+      // Only one send connection allowed per bot node
+      const alreadySending = edges.some((e) => e.type === "send" && e.source === connection.source);
+      if (alreadySending) return;
+      const sendEdge: Edge = {
+        id: `send_${edgeIdCounter++}`,
+        source: connection.source,
+        target: connection.target,
+        sourceHandle: connection.sourceHandle ?? undefined,
+        targetHandle: connection.targetHandle ?? undefined,
+        type: "send",
+      };
+      set({
+        past: [...past.slice(-MAX_HISTORY + 1), snap(nodes, edges)],
+        future: [],
+        edges: [...edges, sendEdge],
+      });
+      return;
+    }
 
     // ── Interaction edge (button/select → container/embed) ───────────────────
     if (isInteractionConnection(srcType, tgtType)) {

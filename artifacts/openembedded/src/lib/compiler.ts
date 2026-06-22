@@ -26,8 +26,8 @@ export function compileGraph(nodes: AppNode[], edges: Edge[]): CompileResult {
   const parentOf = new Map<string, string>();
 
   // Only structural edges (type "default" or undefined) define the message hierarchy.
-  // Interaction edges (type "interaction") represent flows, not structure.
-  const structuralEdges = edges.filter((e) => e.type !== "interaction");
+  // Interaction edges (type "interaction") and send edges (type "send") are not structural.
+  const structuralEdges = edges.filter((e) => e.type !== "interaction" && e.type !== "send");
 
   for (const edge of structuralEdges) {
     if (!childrenOf.has(edge.source)) childrenOf.set(edge.source, []);

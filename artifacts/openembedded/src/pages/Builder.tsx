@@ -15,6 +15,7 @@ import { usePreviewStore } from "@/lib/previewStore";
 import { nodeTypes } from "@/canvas/nodeTypes";
 import { CustomEdge } from "@/canvas/edges/CustomEdge";
 import { InteractionEdge } from "@/canvas/edges/InteractionEdge";
+import { SendEdge } from "@/canvas/edges/SendEdge";
 import { isValidNodeConnection, isInteractionConnection } from "@/lib/connectionRules";
 import { NodeLibraryPanel } from "@/panels/NodeLibraryPanel";
 import { PropertiesPanel } from "@/panels/PropertiesPanel";
@@ -38,7 +39,7 @@ import {
   Boxes, Workflow, SlidersHorizontal, Smartphone,
 } from "lucide-react";
 
-const edgeTypes = { default: CustomEdge, interaction: InteractionEdge };
+const edgeTypes = { default: CustomEdge, interaction: InteractionEdge, send: SendEdge };
 
 type RightTab = "properties" | "preview";
 type MobilePanel = "library" | "canvas" | "properties" | "preview";
