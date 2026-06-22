@@ -18,6 +18,8 @@ tags:
     description: Discord webhook proxy
   - name: bot
     description: Discord bot operations
+  - name: openbot
+    description: OpenEmbedded official bot operations
 paths:
   /healthz:
     get:
@@ -251,6 +253,57 @@ paths:
               schema:
                 $ref: "#/components/schemas/BotSendResult"
 
+  /v1/openbot/guilds:
+    get:
+      operationId: openBotGuilds
+      tags: [openbot]
+      summary: List servers the OpenEmbedded Bot is in (with invite URL)
+      responses:
+        "200":
+          description: Guilds and invite URL
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OpenBotGuildsResult"
+
+  /v1/openbot/channels:
+    post:
+      operationId: openBotChannels
+      tags: [openbot]
+      summary: Get text channels for a guild via the OpenEmbedded Bot
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OpenBotChannelsInput"
+      responses:
+        "200":
+          description: List of text channels
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OpenBotChannelsResult"
+
+  /v1/openbot/send:
+    post:
+      operationId: openBotSend
+      tags: [openbot]
+      summary: Send a message via the OpenEmbedded Bot (with optional interaction flows)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OpenBotSendInput"
+      responses:
+        "200":
+          description: Send result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OpenBotSendResult"
+
 components:
   schemas:
     HealthStatus:
@@ -443,6 +496,85 @@ components:
           type: object
 
     BotSendResult:
+      type: object
+      required: [success]
+      properties:
+        success:
+          type: boolean
+        message:
+          type: ["string", "null"]
+
+    OpenBotGuild:
+      type: object
+      required: [id, name]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        icon:
+          type: ["string", "null"]
+
+    OpenBotGuildsResult:
+      type: object
+      required: [success]
+      properties:
+        success:
+          type: boolean
+        guilds:
+          type: array
+          items:
+            $ref: "#/components/schemas/OpenBotGuild"
+        inviteUrl:
+          type: ["string", "null"]
+        message:
+          type: ["string", "null"]
+
+    OpenBotChannelsInput:
+      type: object
+      required: [guildId]
+      properties:
+        guildId:
+          type: string
+
+    OpenBotChannelsResult:
+      type: object
+      required: [success]
+      properties:
+        success:
+          type: boolean
+        channels:
+          type: array
+          items:
+            $ref: "#/components/schemas/BotChannel"
+        message:
+          type: ["string", "null"]
+
+    OpenBotFlow:
+      type: object
+      required: [customId, mode, responsePayload]
+      properties:
+        customId:
+          type: string
+        mode:
+          type: string
+        responsePayload:
+          type: object
+
+    OpenBotSendInput:
+      type: object
+      required: [channelId, payload]
+      properties:
+        channelId:
+          type: string
+        payload:
+          type: object
+        flows:
+          type: array
+          items:
+            $ref: "#/components/schemas/OpenBotFlow"
+
+    OpenBotSendResult:
       type: object
       required: [success]
       properties:

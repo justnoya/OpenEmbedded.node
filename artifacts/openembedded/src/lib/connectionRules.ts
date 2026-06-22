@@ -55,10 +55,14 @@ export function isValidNodeConnection(sourceType: string, targetType: string): b
   return !!ALLOWED_CHILDREN[sourceType]?.includes(targetType);
 }
 
-/** Returns true if a bot "send" connection is valid (Bot → Container or Embed). */
+/**
+ * Target node types that a bot/openembedded node can send to.
+ */
 const BOT_SEND_TARGETS = new Set(["container", "embed"]);
+
+/** Returns true if a bot "send" connection is valid (Bot or OpenEmbedded → Container or Embed). */
 export function isBotSendConnection(sourceType: string, targetType: string): boolean {
-  return sourceType === "bot" && BOT_SEND_TARGETS.has(targetType);
+  return (sourceType === "bot" || sourceType === "openembedded") && BOT_SEND_TARGETS.has(targetType);
 }
 
 /** Returns true if an interaction (on-click flow) connection is valid. */

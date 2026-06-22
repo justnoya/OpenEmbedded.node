@@ -2,7 +2,8 @@ import { useState } from "react";
 import { useGraphStore } from "@/lib/graphStore";
 import { usePreviewStore } from "@/lib/previewStore";
 import { ALLOWED_CHILDREN, INTERACTION_MODES, getInteractionModeMeta, type InteractionMode } from "@/lib/connectionRules";
-import { useBotValidate, useBotGetChannels, useBotSend } from "@workspace/api-client-react";
+import { useBotValidate, useBotGetChannels, useBotSend, useOpenBotGuilds, useOpenBotChannels, useOpenBotSend } from "@workspace/api-client-react";
+import { compileGraph } from "@/lib/compiler";
 import {
   Package, LayoutTemplate, FileText, ImageIcon, GalleryHorizontalEnd,
   Minus, Rows3, PointerIcon, ListFilter, UserRound, ShieldCheck,
@@ -283,9 +284,28 @@ function OpenEmbeddedProperties({ nodeId, d, updateNodeData }: {
   const nodes = useGraphStore((s) => s.nodes);
   const edges = useGraphStore((s) => s.edges);
   const updateEdgeData = useGraphStore((s) => s.updateEdgeData);
+  const payload = usePreviewStore((s) => s.payload);
 
-  const containers = nodes.filter((n) => n.type === "container" || n.type === "embed");
-  const initialNodeId = d.initialNodeId as string | null;
+  const [sendStatus, setSendStatus] = useState<"idle" | "sending" | "success" | "error">("idle");
+  const [sendMsg, setSendMsg] = useState("");
+  const [fetchingChannels, setFetchingChannels] = useState(false);
+
+  const guildsQuery = useOpenBotGuilds();
+  const openBotChannelsMutation = useOpenBotChannels();
+  const openBotSendMutation = useOpenBotSend();
+
+  type GuildEntry = { id: string; name: string; icon?: string | null };
+  type ChannelEntry = { id: string; name: string };
+
+  const guildsData = guildsQuery.data as { success?: boolean; guilds?: GuildEntry[]; inviteUrl?: string | null; message?: string | null } | undefined;
+  const guilds: GuildEntry[] = guildsData?.guilds ?? [];
+  const inviteUrl: string | null = guildsData?.inviteUrl ?? null;
+  const botNotConfigured = guildsQuery.isSuccess && guildsData?.success === false;
+
+  const selectedGuildId = d.selectedGuildId as string | null;
+  const selectedChannelId = d.selectedChannelId as string | null;
+  const channels: ChannelEntry[] = (d.channels as ChannelEntry[]) ?? [];
+
   const interactionEdges = edges.filter((e) => e.type === "interaction");
 
   const getNodeLabel = (id: string) => {
@@ -304,11 +324,86 @@ function OpenEmbeddedProperties({ nodeId, d, updateNodeData }: {
     return label ? `${typeName}: ${label}` : typeName;
   };
 
+  const handleGuildChange = (guildId: string) => {
+    updateNodeData(nodeId, { selectedGuildId: guildId, selectedChannelId: null, channels: [] });
+    if (!guildId) return;
+    setFetchingChannels(true);
+    openBotChannelsMutation.mutate(
+      { data: { guildId } },
+      {
+        onSuccess: (res) => {
+          const r = res as { success: boolean; channels?: ChannelEntry[] };
+          updateNodeData(nodeId, { channels: r.channels ?? [] });
+          setFetchingChannels(false);
+        },
+        onError: () => setFetchingChannels(false),
+      }
+    );
+  };
+
+  /** Compile interaction flows to register with the bot on send. */
+  function buildFlows() {
+    const structuralEdges = edges.filter((e) => e.type !== "interaction" && e.type !== "send");
+    return interactionEdges.map((edge) => {
+      const sourceNode = nodes.find((n) => n.id === edge.source);
+      const customId = (sourceNode?.data?.custom_id as string) ?? `btn_${edge.source}`;
+      const mode = ((edge.data as Record<string, unknown>)?.mode as string) ?? "send_new";
+      // Collect the subtree rooted at the interaction target
+      const visited = new Set<string>();
+      const queue = [edge.target];
+      while (queue.length) {
+        const id = queue.shift()!;
+        if (visited.has(id)) continue;
+        visited.add(id);
+        for (const e of structuralEdges) {
+          if (e.source === id) queue.push(e.target);
+        }
+      }
+      const subNodes = nodes.filter((n) => visited.has(n.id));
+      const subEdges = structuralEdges.filter((e) => visited.has(e.source) && visited.has(e.target));
+      const { payload: responsePayload } = compileGraph(subNodes, subEdges);
+      return { customId, mode, responsePayload: responsePayload as Record<string, unknown> };
+    });
+  }
+
+  const handleSend = () => {
+    if (!selectedChannelId || !payload) return;
+    setSendStatus("sending");
+    const flows = buildFlows();
+    openBotSendMutation.mutate(
+      { data: { channelId: selectedChannelId, payload: payload as Record<string, unknown>, flows } },
+      {
+        onSuccess: (res) => {
+          const r = res as { success: boolean; message?: string | null };
+          if (r.success) {
+            setSendStatus("success");
+            setSendMsg("Message sent via OpenEmbedded Bot!");
+          } else {
+            setSendStatus("error");
+            setSendMsg(r.message ?? "Discord rejected the message — check the channel selection.");
+          }
+          setTimeout(() => setSendStatus("idle"), 4000);
+        },
+        onError: () => {
+          setSendStatus("error");
+          setSendMsg("Couldn't reach the OpenEmbedded Bot — check your connection.");
+          setTimeout(() => setSendStatus("idle"), 4000);
+        },
+      }
+    );
+  };
+
+  const selectStyle: React.CSSProperties = {
+    ...inputStyle, appearance: "none",
+    backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748B' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")`,
+    backgroundRepeat: "no-repeat", backgroundPosition: "right 8px center", paddingRight: 28, cursor: "pointer",
+  };
+
   return (
     <div>
       {/* Platform badge */}
       <div style={{
-        marginBottom: 16,
+        marginBottom: 14,
         background: "linear-gradient(135deg, rgba(99,102,241,0.12), rgba(139,92,246,0.06))",
         border: "1px solid rgba(99,102,241,0.25)",
         borderRadius: 10, padding: "10px 12px",
@@ -319,50 +414,187 @@ function OpenEmbeddedProperties({ nodeId, d, updateNodeData }: {
           background: "linear-gradient(135deg, rgba(99,102,241,0.3), rgba(139,92,246,0.15))",
           border: "1px solid rgba(99,102,241,0.3)",
           display: "flex", alignItems: "center", justifyContent: "center",
-          boxShadow: "0 0 14px rgba(99,102,241,0.2)",
-          flexShrink: 0,
+          boxShadow: "0 0 14px rgba(99,102,241,0.2)", flexShrink: 0,
         }}>
           <Sparkles size={15} color="#818cf8" />
         </div>
-        <div>
+        <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ color: "#c7d2fe", fontSize: 13, fontWeight: 700 }}>OpenEmbedded Bot</div>
-          <div style={{ color: "#6366f1", fontSize: 10 }}>Official Platform · Interaction Flows</div>
+          <div style={{ color: "#6366f1", fontSize: 10 }}>Official Platform · No token needed</div>
         </div>
+        {guildsQuery.isLoading && (
+          <Loader2 size={13} color="#6366f1" style={{ animation: "spin 1s linear infinite", flexShrink: 0 }} />
+        )}
+        {guildsQuery.isSuccess && !botNotConfigured && (
+          <div style={{ display: "flex", alignItems: "center", gap: 4, background: "rgba(63,185,80,0.1)", border: "1px solid rgba(63,185,80,0.2)", borderRadius: 5, padding: "2px 7px" }}>
+            <CheckCircle2 size={9} color="#3fb950" />
+            <span style={{ color: "#3fb950", fontSize: 9, fontWeight: 700 }}>LIVE</span>
+          </div>
+        )}
       </div>
 
-      {/* Initial message selector */}
-      <div style={fieldWrap}>
-        <label style={labelStyle}>Initial Message</label>
-        <div style={{ color: MUTED, fontSize: 10, marginBottom: 6 }}>
-          Which container/embed is sent first when the flow starts?
+      {/* Bot not configured warning */}
+      {botNotConfigured && (
+        <div style={{ marginBottom: 14, padding: "10px 12px", borderRadius: 8, background: "rgba(245,158,11,0.07)", border: "1px solid rgba(245,158,11,0.2)" }}>
+          <div style={{ color: "#f59e0b", fontSize: 11, fontWeight: 600, marginBottom: 3, display: "flex", alignItems: "center", gap: 5 }}>
+            <AlertCircle size={11} /> Bot not deployed yet
+          </div>
+          <div style={{ color: "#4a3a00", fontSize: 10, lineHeight: 1.5 }}>
+            {guildsData?.message ?? "The OpenEmbedded Bot has not been set up. Deploy it and set OPENBOT_API_URL + OPENBOT_API_KEY on the server."}
+          </div>
         </div>
-        <select
-          value={initialNodeId ?? ""}
-          onChange={(e) => updateNodeData(nodeId, { initialNodeId: e.target.value || null })}
-          style={{
-            ...inputStyle, appearance: "none",
-            backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748B' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")`,
-            backgroundRepeat: "no-repeat", backgroundPosition: "right 8px center", paddingRight: 28, cursor: "pointer",
-          }}
-        >
-          <option value="" style={{ background: BG }}>— None selected —</option>
-          {containers.map((n) => {
-            const ct = n.data.componentType as number;
-            const label = TYPE_META[ct]?.label ?? n.type ?? "Node";
-            return <option key={n.id} value={n.id} style={{ background: BG }}>{label} ({n.id.slice(-6)})</option>;
-          })}
-        </select>
-        {initialNodeId && (
-          <div style={{ color: "#6366f1", fontSize: 10, marginTop: 4, display: "flex", alignItems: "center", gap: 4 }}>
-            <CheckCircle2 size={10} /> Initial message linked
+      )}
+
+      {/* Invite link — shown when bot is live but not in any server */}
+      {!botNotConfigured && guildsQuery.isSuccess && guilds.length === 0 && (
+        <div style={{ marginBottom: 14, padding: "10px 12px", borderRadius: 8, background: "rgba(99,102,241,0.06)", border: "1px dashed rgba(99,102,241,0.22)" }}>
+          <div style={{ color: "#818cf8", fontSize: 11, fontWeight: 600, marginBottom: 6 }}>Add the bot to your server</div>
+          <div style={{ color: "#40458a", fontSize: 10, lineHeight: 1.5, marginBottom: 8 }}>
+            The OpenEmbedded Bot isn't in any server yet. Invite it to your Discord server, then refresh.
           </div>
-        )}
-        {containers.length === 0 && (
-          <div style={{ color: FAINT, fontSize: 10, marginTop: 4, display: "flex", alignItems: "center", gap: 4 }}>
-            <Info size={10} /> Add a Container or Embed to the canvas first
+          {inviteUrl && (
+            <a
+              href={inviteUrl}
+              target="_blank"
+              rel="noreferrer"
+              style={{
+                display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+                background: "linear-gradient(135deg, #5865F2, #6366f1)",
+                border: "none", borderRadius: 7, color: "#fff",
+                fontSize: 11, fontWeight: 700, padding: "7px 0", textDecoration: "none",
+                boxShadow: "0 2px 10px rgba(88,101,242,0.3)",
+              }}
+            >
+              <Sparkles size={11} /> Add OpenEmbedded Bot to Server
+            </a>
+          )}
+          <button
+            onClick={() => guildsQuery.refetch()}
+            style={{ width: "100%", marginTop: 6, display: "flex", alignItems: "center", justifyContent: "center", gap: 5, background: "transparent", border: "1px solid rgba(99,102,241,0.2)", borderRadius: 7, color: "#6366f1", fontSize: 10, padding: "5px 0", cursor: "pointer" }}
+          >
+            <RefreshCw size={10} /> Refresh after adding
+          </button>
+        </div>
+      )}
+
+      {/* Server picker */}
+      {guilds.length > 0 && (
+        <div style={fieldWrap}>
+          <label style={{ ...labelStyle, display: "flex", alignItems: "center", gap: 6 }}>
+            Server
+            <button
+              onClick={() => guildsQuery.refetch()}
+              title="Refresh servers"
+              style={{ background: "transparent", border: "none", cursor: "pointer", color: "#555", padding: 0, display: "flex", alignItems: "center" }}
+            >
+              <RefreshCw size={9} />
+            </button>
+          </label>
+          <select
+            value={selectedGuildId ?? ""}
+            onChange={(e) => handleGuildChange(e.target.value)}
+            style={selectStyle}
+          >
+            <option value="" disabled style={{ background: BG }}>Select a server…</option>
+            {guilds.map((g) => (
+              <option key={g.id} value={g.id} style={{ background: BG }}>{g.name}</option>
+            ))}
+          </select>
+          {inviteUrl && (
+            <a
+              href={inviteUrl}
+              target="_blank"
+              rel="noreferrer"
+              style={{ display: "inline-flex", alignItems: "center", gap: 4, color: "#5865F2", fontSize: 10, marginTop: 4, textDecoration: "none" }}
+            >
+              <Sparkles size={9} /> Add to another server
+            </a>
+          )}
+        </div>
+      )}
+
+      {/* Channel picker */}
+      {selectedGuildId && (
+        <div style={fieldWrap}>
+          <label style={{ ...labelStyle, display: "flex", alignItems: "center", gap: 6 }}>
+            Channel
+            {fetchingChannels && <Loader2 size={10} style={{ animation: "spin 1s linear infinite" }} color="#818cf8" />}
+            {!fetchingChannels && channels.length > 0 && (
+              <button
+                onClick={() => handleGuildChange(selectedGuildId)}
+                title="Refresh channels"
+                style={{ background: "transparent", border: "none", cursor: "pointer", color: "#555", padding: 0, display: "flex", alignItems: "center" }}
+              >
+                <RefreshCw size={9} />
+              </button>
+            )}
+          </label>
+          {channels.length === 0 && !fetchingChannels ? (
+            <button
+              onClick={() => handleGuildChange(selectedGuildId)}
+              style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: 6, background: "rgba(88,101,242,0.08)", border: "1px dashed rgba(88,101,242,0.25)", borderRadius: 8, color: "#818cf8", fontSize: 12, padding: "8px", cursor: "pointer" }}
+            >
+              <RefreshCw size={12} /> Load Channels
+            </button>
+          ) : (
+            <select
+              value={selectedChannelId ?? ""}
+              onChange={(e) => updateNodeData(nodeId, { selectedChannelId: e.target.value })}
+              disabled={fetchingChannels}
+              style={selectStyle}
+            >
+              <option value="" disabled style={{ background: BG }}>Select a channel…</option>
+              {channels.map((c) => (
+                <option key={c.id} value={c.id} style={{ background: BG }}>#{c.name}</option>
+              ))}
+            </select>
+          )}
+        </div>
+      )}
+
+      {/* Send button */}
+      {selectedChannelId && (
+        <div style={{ marginBottom: 14 }}>
+          <button
+            onClick={handleSend}
+            disabled={sendStatus === "sending" || !payload}
+            style={{
+              width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: 7,
+              background: sendStatus === "success" ? "rgba(63,185,80,0.15)" : "linear-gradient(135deg, #6366f1, #8b5cf6)",
+              border: sendStatus === "success" ? "1px solid rgba(63,185,80,0.25)" : "none",
+              borderRadius: 8, color: sendStatus === "success" ? "#3fb950" : "#fff",
+              fontSize: 13, fontWeight: 700, padding: "10px 0",
+              cursor: sendStatus === "sending" ? "wait" : "pointer",
+              boxShadow: sendStatus !== "success" ? "0 2px 14px rgba(99,102,241,0.35)" : "none",
+              transition: "all 0.15s",
+              opacity: !payload ? 0.4 : 1,
+            }}
+          >
+            {sendStatus === "sending"
+              ? <Loader2 size={14} style={{ animation: "spin 1s linear infinite" }} />
+              : <Send size={14} />}
+            {sendStatus === "sending" ? "Sending…" : sendStatus === "success" ? "Sent ✓" : "Send via OpenEmbedded Bot"}
+          </button>
+          {sendStatus !== "idle" && sendMsg && (
+            <div style={{
+              marginTop: 8, padding: "7px 10px", borderRadius: 7,
+              background: sendStatus === "success" ? "rgba(63,185,80,0.08)" : "rgba(248,81,73,0.08)",
+              border: sendStatus === "success" ? "1px solid rgba(63,185,80,0.18)" : "1px solid rgba(248,81,73,0.18)",
+              color: sendStatus === "success" ? "#3fb950" : "#f85149", fontSize: 12,
+            }}>
+              {sendMsg}
+            </div>
+          )}
+          {!payload && (
+            <div style={{ color: FAINT, fontSize: 10, marginTop: 5, textAlign: "center" }}>
+              Add a Container or Embed to the canvas first
+            </div>
+          )}
+          <div style={{ color: "#383838", fontSize: 10, marginTop: 5, textAlign: "center" }}>
+            Sends your canvas design to #{channels.find((c) => c.id === selectedChannelId)?.name}
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* Interaction flows overview */}
       <div style={fieldWrap}>
@@ -389,8 +621,7 @@ function OpenEmbeddedProperties({ nodeId, d, updateNodeData }: {
               const meta = getInteractionModeMeta(mode);
               return (
                 <div key={edge.id} style={{
-                  background: `${meta.color}08`,
-                  border: `1px solid ${meta.color}25`,
+                  background: `${meta.color}08`, border: `1px solid ${meta.color}25`,
                   borderRadius: 8, padding: "8px 10px",
                   display: "flex", flexDirection: "column", gap: 5,
                 }}>
@@ -429,43 +660,7 @@ function OpenEmbeddedProperties({ nodeId, d, updateNodeData }: {
           </div>
         )}
       </div>
-
-      {/* Deploy section */}
-      <div style={{
-        background: "rgba(99,102,241,0.06)",
-        border: "1px solid rgba(99,102,241,0.15)",
-        borderRadius: 10, padding: "12px",
-        marginTop: 4,
-      }}>
-        <div style={{ color: "#818cf8", fontSize: 11, fontWeight: 700, marginBottom: 6, display: "flex", alignItems: "center", gap: 5 }}>
-          <Zap size={11} /> Deploy Flow
-        </div>
-        <div style={{ color: "#40458a", fontSize: 11, lineHeight: 1.5, marginBottom: 10 }}>
-          Deploy your interactive flow to the OpenEmbedded platform. Our bot handles all Discord interactions automatically.
-        </div>
-        <button
-          style={{
-            width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: 7,
-            background: "linear-gradient(135deg, #6366f1, #8b5cf6)",
-            border: "none", borderRadius: 8, color: "#fff",
-            fontSize: 12, fontWeight: 700, padding: "9px 0",
-            cursor: "pointer", boxShadow: "0 2px 14px rgba(99,102,241,0.3)",
-            opacity: !initialNodeId ? 0.4 : 1,
-          }}
-          disabled={!initialNodeId}
-          title={!initialNodeId ? "Select an initial message first" : ""}
-          onClick={() => {
-            alert("Deploy coming soon! Your flow definition will be hosted by the OpenEmbedded platform.");
-          }}
-        >
-          <Sparkles size={13} /> Deploy to OpenEmbedded
-        </button>
-        {!initialNodeId && (
-          <div style={{ color: "#40458a", fontSize: 10, marginTop: 5, textAlign: "center" }}>
-            Select an initial message above to enable deploy
-          </div>
-        )}
-      </div>
+      <style>{`@keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }`}</style>
     </div>
   );
 }

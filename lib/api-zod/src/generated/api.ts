@@ -249,3 +249,58 @@ export const BotSendResponse = zod.object({
 })
 
 
+/**
+ * @summary List servers the OpenEmbedded Bot is in (with invite URL)
+ */
+export const OpenBotGuildsResponse = zod.object({
+  "success": zod.boolean(),
+  "guilds": zod.array(zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "icon": zod.string().nullish()
+})).optional(),
+  "inviteUrl": zod.string().nullish(),
+  "message": zod.string().nullish()
+})
+
+
+/**
+ * @summary Get text channels for a guild via the OpenEmbedded Bot
+ */
+export const OpenBotChannelsBody = zod.object({
+  "guildId": zod.string()
+})
+
+export const OpenBotChannelsResponse = zod.object({
+  "success": zod.boolean(),
+  "channels": zod.array(zod.object({
+  "id": zod.string(),
+  "name": zod.string()
+})).optional(),
+  "message": zod.string().nullish()
+})
+
+
+/**
+ * @summary Send a message via the OpenEmbedded Bot (with optional interaction flows)
+ */
+export const OpenBotSendBody = zod.object({
+  "channelId": zod.string(),
+  "payload": zod.object({
+
+}).passthrough(),
+  "flows": zod.array(zod.object({
+  "customId": zod.string(),
+  "mode": zod.string(),
+  "responsePayload": zod.object({
+
+}).passthrough()
+})).optional()
+})
+
+export const OpenBotSendResponse = zod.object({
+  "success": zod.boolean(),
+  "message": zod.string().nullish()
+})
+
+

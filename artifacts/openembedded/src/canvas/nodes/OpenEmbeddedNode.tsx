@@ -1,7 +1,7 @@
 import { memo } from "react";
-import { NodeProps } from "@xyflow/react";
+import { Handle, Position, NodeProps } from "@xyflow/react";
 import { useGraphStore } from "@/lib/graphStore";
-import { Sparkles, Zap, CheckCircle2, Circle } from "lucide-react";
+import { Sparkles, Zap, CheckCircle2, Circle, Hash, Server, Send } from "lucide-react";
 
 function OpenEmbeddedNodeComponent({ id, data }: NodeProps) {
   const nodes = useGraphStore((s) => s.nodes);
@@ -15,6 +15,16 @@ function OpenEmbeddedNodeComponent({ id, data }: NodeProps) {
 
   const initialNodeId = data.initialNodeId as string | undefined;
   const initialNode = nodes.find((n) => n.id === initialNodeId);
+
+  const selectedGuildId = data.selectedGuildId as string | undefined;
+  const selectedChannelId = data.selectedChannelId as string | undefined;
+  const guilds = (data.guilds as Array<{ id: string; name: string }>) ?? [];
+  const channels = (data.channels as Array<{ id: string; name: string }>) ?? [];
+
+  const guildName = guilds.find((g) => g.id === selectedGuildId)?.name;
+  const channelName = channels.find((c) => c.id === selectedChannelId)?.name;
+
+  const isReady = !!selectedChannelId;
 
   const borderColor = isSelected ? "rgba(99,102,241,0.65)" : "rgba(99,102,241,0.28)";
   const shadowVal = isSelected
@@ -40,6 +50,25 @@ function OpenEmbeddedNodeComponent({ id, data }: NodeProps) {
         overflow: "hidden",
       }}
     >
+      {/* Send handle — drag to Container or Embed */}
+      <Handle
+        type="source"
+        position={Position.Right}
+        id="send"
+        style={{
+          width: 14,
+          height: 14,
+          background: isReady ? "#3fb950" : "#2a2a2a",
+          border: `2px solid ${isReady ? "#3fb950" : "#3a3a3a"}`,
+          borderRadius: "50%",
+          right: -7,
+          cursor: "crosshair",
+          transition: "background 0.2s, border-color 0.2s",
+          boxShadow: isReady ? "0 0 8px rgba(63,185,80,0.4)" : "none",
+        }}
+        title="Drag to a Container or Embed to send"
+      />
+
       {/* Animated top gradient bar */}
       <div
         style={{
@@ -104,7 +133,7 @@ function OpenEmbeddedNodeComponent({ id, data }: NodeProps) {
       {/* ── Body ── */}
       <div style={{ padding: "11px 14px 14px" }}>
         {/* Initial message row */}
-        <div style={{ marginBottom: 10 }}>
+        <div style={{ marginBottom: 8 }}>
           <div
             style={{
               color: "#40458a", fontSize: 9, fontWeight: 700,
@@ -139,6 +168,28 @@ function OpenEmbeddedNodeComponent({ id, data }: NodeProps) {
             )}
           </div>
         </div>
+
+        {/* Server / Channel summary */}
+        {(guildName || channelName) && (
+          <div style={{ marginBottom: 8, display: "flex", flexDirection: "column", gap: 3 }}>
+            {guildName && (
+              <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                <Server size={9} color="#40458a" />
+                <span style={{ color: "#40458a", fontSize: 10, fontWeight: 500, maxWidth: 200, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                  {guildName}
+                </span>
+              </div>
+            )}
+            {channelName && (
+              <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                <Hash size={9} color="#6366f1" />
+                <span style={{ color: "#6366f1", fontSize: 10, fontWeight: 600, maxWidth: 200, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                  {channelName}
+                </span>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Flow stats grid */}
         <div style={{ display: "flex", gap: 6, marginBottom: interactionCount > 0 ? 8 : 0 }}>
@@ -175,13 +226,24 @@ function OpenEmbeddedNodeComponent({ id, data }: NodeProps) {
           <div
             style={{
               display: "flex", alignItems: "center", gap: 5,
-              color: "#6366f1", fontSize: 10,
+              color: "#6366f1", fontSize: 10, marginBottom: 8,
             }}
           >
             <Zap size={9} />
             <span>{interactionCount} interaction flow{interactionCount !== 1 ? "s" : ""} ready</span>
           </div>
         )}
+
+        {/* Send hint */}
+        <div style={{
+          display: "flex", alignItems: "center", gap: 5,
+          paddingTop: 6, borderTop: "1px solid rgba(255,255,255,0.04)",
+        }}>
+          <Send size={9} color={isReady ? "#3fb950" : "#35386a"} />
+          <span style={{ color: isReady ? "#2e4a32" : "#35386a", fontSize: 10 }}>
+            {isReady ? `Drag right → Container or Embed to send` : "Pick a server & channel first"}
+          </span>
+        </div>
       </div>
     </div>
   );

@@ -142,3 +142,52 @@ export interface BotSendResult {
   message?: string | null;
 }
 
+export interface OpenBotGuild {
+  id: string;
+  name: string;
+  /** @nullable */
+  icon?: string | null;
+}
+
+export interface OpenBotGuildsResult {
+  success: boolean;
+  guilds?: OpenBotGuild[];
+  /** @nullable */
+  inviteUrl?: string | null;
+  /** @nullable */
+  message?: string | null;
+}
+
+export interface OpenBotChannelsInput {
+  guildId: string;
+}
+
+export interface OpenBotChannelsResult {
+  success: boolean;
+  channels?: BotChannel[];
+  /** @nullable */
+  message?: string | null;
+}
+
+export type OpenBotFlowResponsePayload = { [key: string]: unknown };
+
+export interface OpenBotFlow {
+  customId: string;
+  mode: string;
+  responsePayload: OpenBotFlowResponsePayload;
+}
+
+export type OpenBotSendInputPayload = { [key: string]: unknown };
+
+export interface OpenBotSendInput {
+  channelId: string;
+  payload: OpenBotSendInputPayload;
+  flows?: OpenBotFlow[];
+}
+
+export interface OpenBotSendResult {
+  success: boolean;
+  /** @nullable */
+  message?: string | null;
+}
+

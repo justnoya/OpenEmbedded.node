@@ -31,6 +31,11 @@ import type {
   ExportResult,
   GraphInput,
   HealthStatus,
+  OpenBotChannelsInput,
+  OpenBotChannelsResult,
+  OpenBotGuildsResult,
+  OpenBotSendInput,
+  OpenBotSendResult,
   Project,
   ProjectInput,
   ProjectUpdate,
@@ -918,5 +923,224 @@ export const useBotSend = <TError = ErrorType<unknown>,
         TContext
       > => {
       return useMutation(getBotSendMutationOptions(options));
+    }
+
+export const getOpenBotGuildsUrl = () => {
+
+
+
+
+  return `/api/v1/openbot/guilds`
+}
+
+/**
+ * @summary List servers the OpenEmbedded Bot is in (with invite URL)
+ */
+export const openBotGuilds = async ( options?: RequestInit): Promise<OpenBotGuildsResult> => {
+
+  return customFetch<OpenBotGuildsResult>(getOpenBotGuildsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getOpenBotGuildsQueryKey = () => {
+    return [
+    `/api/v1/openbot/guilds`
+    ] as const;
+    }
+
+
+export const getOpenBotGuildsQueryOptions = <TData = Awaited<ReturnType<typeof openBotGuilds>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof openBotGuilds>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getOpenBotGuildsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof openBotGuilds>>> = ({ signal }) => openBotGuilds({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof openBotGuilds>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type OpenBotGuildsQueryResult = NonNullable<Awaited<ReturnType<typeof openBotGuilds>>>
+export type OpenBotGuildsQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary List servers the OpenEmbedded Bot is in (with invite URL)
+ */
+
+export function useOpenBotGuilds<TData = Awaited<ReturnType<typeof openBotGuilds>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof openBotGuilds>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getOpenBotGuildsQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getOpenBotChannelsUrl = () => {
+
+
+
+
+  return `/api/v1/openbot/channels`
+}
+
+/**
+ * @summary Get text channels for a guild via the OpenEmbedded Bot
+ */
+export const openBotChannels = async (openBotChannelsInput: OpenBotChannelsInput, options?: RequestInit): Promise<OpenBotChannelsResult> => {
+
+  return customFetch<OpenBotChannelsResult>(getOpenBotChannelsUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      openBotChannelsInput,)
+  }
+);}
+
+
+
+
+export const getOpenBotChannelsMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof openBotChannels>>, TError,{data: BodyType<OpenBotChannelsInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof openBotChannels>>, TError,{data: BodyType<OpenBotChannelsInput>}, TContext> => {
+
+const mutationKey = ['openBotChannels'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof openBotChannels>>, {data: BodyType<OpenBotChannelsInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  openBotChannels(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type OpenBotChannelsMutationResult = NonNullable<Awaited<ReturnType<typeof openBotChannels>>>
+    export type OpenBotChannelsMutationBody = BodyType<OpenBotChannelsInput>
+    export type OpenBotChannelsMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Get text channels for a guild via the OpenEmbedded Bot
+ */
+export const useOpenBotChannels = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof openBotChannels>>, TError,{data: BodyType<OpenBotChannelsInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof openBotChannels>>,
+        TError,
+        {data: BodyType<OpenBotChannelsInput>},
+        TContext
+      > => {
+      return useMutation(getOpenBotChannelsMutationOptions(options));
+    }
+
+export const getOpenBotSendUrl = () => {
+
+
+
+
+  return `/api/v1/openbot/send`
+}
+
+/**
+ * @summary Send a message via the OpenEmbedded Bot (with optional interaction flows)
+ */
+export const openBotSend = async (openBotSendInput: OpenBotSendInput, options?: RequestInit): Promise<OpenBotSendResult> => {
+
+  return customFetch<OpenBotSendResult>(getOpenBotSendUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      openBotSendInput,)
+  }
+);}
+
+
+
+
+export const getOpenBotSendMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof openBotSend>>, TError,{data: BodyType<OpenBotSendInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof openBotSend>>, TError,{data: BodyType<OpenBotSendInput>}, TContext> => {
+
+const mutationKey = ['openBotSend'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof openBotSend>>, {data: BodyType<OpenBotSendInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  openBotSend(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type OpenBotSendMutationResult = NonNullable<Awaited<ReturnType<typeof openBotSend>>>
+    export type OpenBotSendMutationBody = BodyType<OpenBotSendInput>
+    export type OpenBotSendMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Send a message via the OpenEmbedded Bot (with optional interaction flows)
+ */
+export const useOpenBotSend = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof openBotSend>>, TError,{data: BodyType<OpenBotSendInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof openBotSend>>,
+        TError,
+        {data: BodyType<OpenBotSendInput>},
+        TContext
+      > => {
+      return useMutation(getOpenBotSendMutationOptions(options));
     }
 
