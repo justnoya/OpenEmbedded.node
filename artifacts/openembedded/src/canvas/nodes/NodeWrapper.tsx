@@ -96,10 +96,10 @@ export function NodeWrapper({
         <div
           style={{
             width: 36, height: 36, borderRadius: 9,
-            background: accentColor + "18",
-            border: `1px solid ${accentColor}28`,
+            background: accentColor + "22",
+            border: `1px solid ${accentColor}35`,
             display: "flex", alignItems: "center", justifyContent: "center",
-            color: accentColor, flexShrink: 0,
+            color: "rgba(255,255,255,0.88)", flexShrink: 0,
           }}
         >
           {icon}
