@@ -576,12 +576,25 @@ export function PropertiesPanel() {
 
   if (!node) {
     return (
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 10, padding: 24 }}>
-        <div style={{ width: 44, height: 44, borderRadius: 12, background: "rgba(88,101,242,0.08)", border: "1px solid rgba(88,101,242,0.15)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <Hash size={20} color="#5865F2" strokeWidth={1.5} />
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
+        {/* Header — matches Preview panel */}
+        <div style={{ height: 44, flexShrink: 0, display: "flex", alignItems: "center", gap: 8, padding: "0 14px", background: "#2b2d31", boxShadow: "0 1px 0 rgba(0,0,0,0.35)" }}>
+          <Hash size={18} color="#7d8590" strokeWidth={2.5} />
+          <span style={{ color: "#f2f3f5", fontSize: 15, fontWeight: 700 }}>properties</span>
+          <div style={{ width: 1, height: 18, background: "rgba(255,255,255,0.08)", margin: "0 2px" }} />
+          <span style={{ color: "#a3a6aa", fontSize: 13 }}>Node editor</span>
         </div>
-        <div style={{ color: MUTED, fontSize: 12, textAlign: "center", lineHeight: 1.6 }}>
-          Select a node on the canvas<br />to edit its properties
+        {/* Empty state */}
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 12, padding: 24 }}>
+          <div style={{ width: 52, height: 52, borderRadius: 14, background: "rgba(88,101,242,0.07)", border: "1px solid rgba(88,101,242,0.14)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <Hash size={22} color="#5865F2" strokeWidth={1.5} />
+          </div>
+          <div style={{ textAlign: "center" }}>
+            <div style={{ color: "#d0d0d0", fontSize: 13, fontWeight: 600, marginBottom: 4 }}>No node selected</div>
+            <div style={{ color: MUTED, fontSize: 12, lineHeight: 1.6 }}>
+              Click a node on the canvas<br />to edit its properties here
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -844,46 +857,105 @@ export function PropertiesPanel() {
 
   const isInteractiveNode = INTERACTIVE_TYPES.has(d.componentType as number);
 
+  const accentColor = meta?.color ?? "#5865F2";
+
   return (
     <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
-      {/* Node header */}
+
+      {/* Header bar — mirrors Preview panel */}
       <div style={{
-        padding: "12px 14px 10px",
-        borderBottom: `1px solid rgba(255,255,255,0.05)`,
-        flexShrink: 0,
-        background: `linear-gradient(90deg, ${meta?.color ?? "#5865F2"}08 0%, transparent 100%)`,
+        height: 44, flexShrink: 0,
+        display: "flex", alignItems: "center", gap: 8,
+        padding: "0 14px",
+        background: "#2b2d31",
+        boxShadow: "0 1px 0 rgba(0,0,0,0.35)",
       }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
-          <div style={{ width: 28, height: 28, borderRadius: 8, background: `linear-gradient(135deg, ${meta?.color ?? "#5865F2"}25, ${meta?.color ?? "#5865F2"}10)`, border: `1px solid ${meta?.color ?? "#5865F2"}20`, display: "flex", alignItems: "center", justifyContent: "center", color: meta?.color ?? "#5865F2", flexShrink: 0 }}>
-            {meta?.icon ?? <Hash size={14} />}
+        <div style={{ color: accentColor, display: "flex", alignItems: "center" }}>
+          {meta?.icon ?? <Hash size={18} />}
+        </div>
+        <span style={{ color: "#f2f3f5", fontSize: 15, fontWeight: 700 }}>
+          {meta?.label ?? "Node"}
+        </span>
+        <div style={{ width: 1, height: 18, background: "rgba(255,255,255,0.08)", margin: "0 2px" }} />
+        <span style={{ color: "#a3a6aa", fontSize: 13 }}>
+          {d.componentType === -1 ? "Bot config" : d.componentType === -2 ? "Flow config" : "Properties"}
+        </span>
+        <div style={{ flex: 1 }} />
+        <button
+          onClick={() => removeNode(node.id)}
+          title="Delete node"
+          style={{
+            background: "rgba(248,81,73,0.1)", border: "1px solid rgba(248,81,73,0.18)",
+            borderRadius: 6, color: "#f85149", cursor: "pointer",
+            padding: "5px 6px", display: "flex", alignItems: "center",
+            transition: "background 0.12s",
+          }}
+          onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "rgba(248,81,73,0.22)"; }}
+          onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "rgba(248,81,73,0.1)"; }}
+        >
+          <Trash2 size={13} />
+        </button>
+      </div>
+
+      {/* Scrollable card content */}
+      <div style={{ flex: 1, overflowY: "auto", padding: "10px 10px 24px", display: "flex", flexDirection: "column", gap: 8 }}>
+
+        {/* Node identity card */}
+        <div style={{
+          background: `linear-gradient(120deg, ${accentColor}0c 0%, rgba(255,255,255,0.02) 100%)`,
+          border: `1px solid ${accentColor}20`,
+          borderRadius: 10, padding: "10px 12px",
+          display: "flex", alignItems: "center", gap: 10,
+        }}>
+          <div style={{
+            width: 34, height: 34, borderRadius: 9, flexShrink: 0,
+            background: `linear-gradient(135deg, ${accentColor}30, ${accentColor}12)`,
+            border: `1px solid ${accentColor}28`,
+            display: "flex", alignItems: "center", justifyContent: "center",
+            color: accentColor,
+          }}>
+            {meta?.icon ?? <Hash size={16} />}
           </div>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ color: TEXT, fontSize: 13, fontWeight: 600 }}>
+            <div style={{ color: TEXT, fontSize: 13, fontWeight: 600, marginBottom: 2 }}>
               {meta?.label ?? "Node"}
             </div>
             <div style={{ color: "#484848", fontSize: 10 }}>
-              {d.componentType === -1 ? "Advanced · Bot" : d.componentType === -2 ? "Platform · Interactive Flows" : `Component type ${d.componentType}`}
+              {d.componentType === -1 ? "Advanced · Bot" : d.componentType === -2 ? "Platform · Interactive" : `Component type ${d.componentType}`}
             </div>
           </div>
-          <button onClick={() => removeNode(node.id)} title="Delete node" style={{ background: "rgba(248,81,73,0.08)", border: "1px solid rgba(248,81,73,0.15)", borderRadius: 6, color: "#f85149", cursor: "pointer", padding: "5px 6px", display: "flex", alignItems: "center", transition: "background 0.12s" }} onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "rgba(248,81,73,0.15)"; }} onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "rgba(248,81,73,0.08)"; }}>
-            <Trash2 size={13} />
-          </button>
         </div>
+
+        {/* Hints */}
         {PARENT_COMPONENT_TYPES.has(d.componentType as number) && (
-          <div style={{ color: "#383838", fontSize: 10, marginTop: 2 }}>
-            {ALLOWED_CHILDREN[node.type ?? ""]?.join(", ")} children allowed
+          <div style={{
+            background: "rgba(168,85,247,0.05)", border: "1px solid rgba(168,85,247,0.15)",
+            borderRadius: 8, padding: "7px 10px",
+            color: "#7c5fa8", fontSize: 10, display: "flex", alignItems: "center", gap: 6,
+          }}>
+            <Info size={10} style={{ flexShrink: 0 }} />
+            Can contain: {ALLOWED_CHILDREN[node.type ?? ""]?.join(", ")}
           </div>
         )}
         {isInteractiveNode && (
-          <div style={{ color: "#4a3a00", fontSize: 10, marginTop: 2, display: "flex", alignItems: "center", gap: 4 }}>
-            <Zap size={9} color="#f59e0b" /> Drag amber handle → to define interaction response
+          <div style={{
+            background: "rgba(245,158,11,0.05)", border: "1px solid rgba(245,158,11,0.15)",
+            borderRadius: 8, padding: "7px 10px",
+            color: "#a07020", fontSize: 10, display: "flex", alignItems: "center", gap: 6,
+          }}>
+            <Zap size={10} color="#f59e0b" style={{ flexShrink: 0 }} />
+            Drag the amber handle → a Container or Embed to set what happens on click
           </div>
         )}
-      </div>
 
-      {/* Fields */}
-      <div style={{ flex: 1, overflowY: "auto", padding: "14px 14px 20px" }}>
-        {renderFields()}
+        {/* Fields card */}
+        <div style={{
+          background: "rgba(255,255,255,0.025)",
+          border: "1px solid rgba(255,255,255,0.07)",
+          borderRadius: 10, padding: "14px 12px",
+        }}>
+          {renderFields()}
+        </div>
       </div>
     </div>
   );
