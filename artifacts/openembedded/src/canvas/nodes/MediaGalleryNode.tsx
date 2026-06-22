@@ -8,10 +8,7 @@ function MediaGalleryNodeComponent({ id, data }: NodeProps) {
   const preview = items.slice(0, 4);
 
   return (
-    <NodeWrapper id={id} typeName="Media Gallery · 12" icon={<LayoutGrid size={13} />} accentColor="#ec4899">
-      <div style={{ color: "#e8e8e8", fontSize: 13, fontWeight: 600, marginBottom: 6 }}>
-        Media Gallery
-      </div>
+    <NodeWrapper id={id} typeName="Media Gallery · 12" icon={<LayoutGrid size={18} />} accentColor="#ec4899">
       {preview.length > 0 ? (
         <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
           {preview.map((item, i) =>
@@ -24,7 +21,7 @@ function MediaGalleryNodeComponent({ id, data }: NodeProps) {
                 onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
               />
             ) : (
-              <div key={i} style={{ width: 28, height: 28, background: "rgba(236,72,153,0.08)", borderRadius: 4, border: "1px dashed rgba(236,72,153,0.25)" }} />
+              <div key={i} style={{ width: 28, height: 28, background: "rgba(236,72,153,0.08)", borderRadius: 4, border: "1px dashed rgba(236,72,153,0.2)" }} />
             )
           )}
           {items.length > 4 && (
@@ -34,10 +31,10 @@ function MediaGalleryNodeComponent({ id, data }: NodeProps) {
           )}
         </div>
       ) : (
-        <div style={{ color: "#555555", fontSize: 11 }}>0 images</div>
+        <div style={{ color: "#404040", fontSize: 11 }}>0 images</div>
       )}
-      <Handle type="target" position={Position.Left} style={{ background: "#3fb950", border: "2px solid #1b1b1b", width: 10, height: 10 }} />
-      <Handle type="source" position={Position.Right} style={{ background: "#ec4899", border: "2px solid #1b1b1b", width: 10, height: 10 }} />
+      <Handle type="target" position={Position.Left} style={{ background: "#3fb950", border: "2px solid #252525", width: 12, height: 12 }} />
+      <Handle type="source" position={Position.Right} style={{ background: "#ec4899", border: "2px solid #252525", width: 12, height: 12 }} />
     </NodeWrapper>
   );
 }

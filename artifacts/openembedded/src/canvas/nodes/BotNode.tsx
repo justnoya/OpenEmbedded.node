@@ -15,10 +15,7 @@ function BotNodeComponent({ id, data }: NodeProps) {
   const channelName = channels.find((c) => c.id === selectedChannelId)?.name;
 
   return (
-    <NodeWrapper id={id} typeName="Bot · Advanced" icon={<Bot size={13} />} accentColor="#5865F2" nodeClass="root">
-      <div style={{ color: "#e8e8e8", fontSize: 13, fontWeight: 600, marginBottom: 6 }}>
-        Discord Bot
-      </div>
+    <NodeWrapper id={id} typeName="Bot · Advanced" icon={<Bot size={18} />} accentColor="#5865F2" nodeClass="root">
       <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
         {connected ? (
           <>
@@ -29,25 +26,26 @@ function BotNodeComponent({ id, data }: NodeProps) {
               </span>
             </div>
             {guildName && (
-              <span style={{ color: "#888", fontSize: 11 }}>
-                Server: <span style={{ color: "#b0b0b0" }}>{guildName}</span>
-              </span>
+              <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                <span style={{ color: "#404040", fontSize: 10 }}>Server:</span>
+                <span style={{ color: "#808080", fontSize: 10, fontWeight: 500, maxWidth: 140, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                  {guildName}
+                </span>
+              </div>
             )}
             {channelName && (
-              <span style={{ color: "#888", fontSize: 11 }}>
-                Channel: <span style={{ color: "#b0b0b0" }}>#{channelName}</span>
-              </span>
-            )}
-            {!selectedChannelId && (
-              <span style={{ color: "#f59e0b", fontSize: 11 }}>Select a channel →</span>
+              <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                <span style={{ color: "#404040", fontSize: 10 }}>#</span>
+                <span style={{ color: "#808080", fontSize: 10, fontWeight: 500, maxWidth: 140, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                  {channelName}
+                </span>
+              </div>
             )}
           </>
         ) : (
           <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-            <AlertCircle size={12} color="#f59e0b" />
-            <span style={{ color: "#888888", fontSize: 11 }}>
-              Enter token to connect
-            </span>
+            <AlertCircle size={12} color="#484848" />
+            <span style={{ color: "#484848", fontSize: 11 }}>Token not set</span>
           </div>
         )}
       </div>

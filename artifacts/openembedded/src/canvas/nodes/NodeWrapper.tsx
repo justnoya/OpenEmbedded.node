@@ -25,18 +25,23 @@ export function NodeWrapper({
   const badgeColor = NODE_CLASS_COLORS[nodeClass];
   const badgeLabel = NODE_CLASS_LABELS[nodeClass];
 
+  /* Parse "Action Row · 1" → label="Action Row", subtitle="1" */
+  const dotIdx = typeName.indexOf(" · ");
+  const label = dotIdx >= 0 ? typeName.slice(0, dotIdx) : typeName;
+  const subtitle = dotIdx >= 0 ? typeName.slice(dotIdx + 3) : null;
+
   let borderColor: string;
-  let shadowVal: string;
+  let shadow: string;
 
   if (isConnectionTarget) {
     borderColor = "rgba(255,255,255,0.22)";
-    shadowVal = "0 0 0 1px rgba(255,255,255,0.06)";
+    shadow = `0 0 0 2px rgba(255,255,255,0.05)`;
   } else if (isSelected) {
-    borderColor = "rgba(255,255,255,0.18)";
-    shadowVal = `0 0 0 1px ${accentColor}18`;
+    borderColor = accentColor + "80";
+    shadow = `0 0 0 2px ${accentColor}18, 0 4px 24px rgba(0,0,0,0.55)`;
   } else {
-    borderColor = "rgba(255,255,255,0.07)";
-    shadowVal = "0 1px 3px rgba(0,0,0,0.35)";
+    borderColor = "rgba(255,255,255,0.08)";
+    shadow = "0 2px 10px rgba(0,0,0,0.45)";
   }
 
   return (
@@ -44,36 +49,24 @@ export function NodeWrapper({
       data-testid={`node-${id}`}
       onClick={() => setSelectedNode(id)}
       style={{
-        background: "#161616",
+        background: "#252525",
         border: `1px solid ${borderColor}`,
-        borderRadius: 8,
-        minWidth: 220,
+        borderRadius: 12,
+        minWidth: 210,
         cursor: "pointer",
         position: "relative",
-        boxShadow: shadowVal,
+        boxShadow: shadow,
         transition: "border-color 0.12s, box-shadow 0.12s",
         overflow: "hidden",
         display: "flex",
         flexDirection: "column",
       }}
     >
-      {/* Left accent strip */}
-      <div
-        style={{
-          position: "absolute",
-          top: 0, left: 0, bottom: 0,
-          width: 2,
-          background: accentColor,
-          opacity: isSelected ? 1 : 0.55,
-          transition: "opacity 0.12s",
-        }}
-      />
-
-      {/* Connection target ring */}
+      {/* Connection target pulse ring */}
       {isConnectionTarget && (
         <div
           style={{
-            position: "absolute", inset: -4, borderRadius: 12,
+            position: "absolute", inset: -4, borderRadius: 16,
             border: "1px solid rgba(255,255,255,0.14)",
             pointerEvents: "none",
             animation: "pulseRing 0.65s ease-in-out infinite alternate",
@@ -81,7 +74,7 @@ export function NodeWrapper({
         />
       )}
 
-      {/* Handle visibility */}
+      {/* Handle visibility overrides */}
       {nodeClass === "sub" && (
         <style>{`[data-testid="node-${id}"] .react-flow__handle-right{opacity:0!important;pointer-events:none!important}`}</style>
       )}
@@ -95,54 +88,73 @@ export function NodeWrapper({
       {/* ── Header ── */}
       <div
         style={{
-          padding: "8px 10px 8px 14px",
-          borderBottom: "1px solid rgba(255,255,255,0.05)",
-          display: "flex", alignItems: "center", gap: 7,
+          padding: "12px 13px 11px",
+          display: "flex", alignItems: "center", gap: 11,
         }}
       >
+        {/* Large icon box */}
         <div
           style={{
-            color: accentColor,
+            width: 36, height: 36, borderRadius: 9,
+            background: accentColor + "18",
+            border: `1px solid ${accentColor}28`,
             display: "flex", alignItems: "center", justifyContent: "center",
-            flexShrink: 0, opacity: 0.9,
+            color: accentColor, flexShrink: 0,
           }}
         >
           {icon}
         </div>
 
-        <span
-          style={{
-            color: "rgba(255,255,255,0.55)", fontSize: 10, fontWeight: 600,
-            textTransform: "uppercase", letterSpacing: "0.09em",
-            userSelect: "none", flex: 1,
-          }}
-        >
-          {typeName}
-        </span>
+        {/* Label + subtitle */}
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div
+            style={{
+              color: "#e2e2e2", fontSize: 13, fontWeight: 600,
+              lineHeight: 1.25, letterSpacing: "-0.01em",
+              overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+            }}
+          >
+            {label}
+          </div>
+          {subtitle && (
+            <div
+              style={{
+                color: "#3d3d3d", fontSize: 10, fontWeight: 500,
+                marginTop: 2, letterSpacing: "0.02em",
+              }}
+            >
+              {isNaN(Number(subtitle)) ? subtitle : `Component ${subtitle}`}
+            </div>
+          )}
+        </div>
 
+        {/* Node class badge */}
         <span
           style={{
-            color: badgeColor,
-            fontSize: 8, fontWeight: 700, letterSpacing: "0.07em",
-            opacity: 0.5,
-            textTransform: "uppercase", userSelect: "none",
+            color: badgeColor, fontSize: 8, fontWeight: 700,
+            opacity: 0.45, textTransform: "uppercase",
+            letterSpacing: "0.07em", flexShrink: 0,
           }}
         >
           {badgeLabel}
         </span>
 
+        {/* Selected indicator dot */}
         {isSelected && (
           <div
             style={{
-              width: 4, height: 4, borderRadius: "50%",
+              width: 5, height: 5, borderRadius: "50%",
               background: accentColor, flexShrink: 0,
+              boxShadow: `0 0 6px ${accentColor}`,
             }}
           />
         )}
       </div>
 
       {/* ── Body ── */}
-      <div style={{ padding: "10px 10px 11px 14px" }}>{children}</div>
+      <div style={{ padding: "0 13px 12px" }}>
+        {children}
+      </div>
     </div>
   );
 }

@@ -6,24 +6,19 @@ import { Type } from "lucide-react";
 function TextDisplayNodeComponent({ id, data }: NodeProps) {
   const content = (data.content as string) ?? "";
   return (
-    <NodeWrapper id={id} typeName="Text Display · 10" icon={<Type size={13} />} accentColor="#3b82f6">
+    <NodeWrapper id={id} typeName="Text Display · 10" icon={<Type size={18} />} accentColor="#3b82f6">
       <div
         style={{
-          color: "#e8e8e8",
-          fontSize: 12,
-          lineHeight: 1.55,
-          maxWidth: 220,
-          overflow: "hidden",
-          display: "-webkit-box",
-          WebkitLineClamp: 2,
-          WebkitBoxOrient: "vertical",
+          color: "#c0c0c0", fontSize: 12, lineHeight: 1.55,
+          maxWidth: 220, overflow: "hidden",
+          display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical",
           wordBreak: "break-word",
         }}
       >
-        {content || <span style={{ color: "#555555", fontStyle: "italic" }}>Empty text…</span>}
+        {content || <span style={{ color: "#404040", fontStyle: "italic" }}>Empty text…</span>}
       </div>
-      <Handle type="target" position={Position.Left} style={{ background: "#3fb950", border: "2px solid #1b1b1b", width: 10, height: 10 }} />
-      <Handle type="source" position={Position.Right} style={{ background: "#3b82f6", border: "2px solid #1b1b1b", width: 10, height: 10 }} />
+      <Handle type="target" position={Position.Left} style={{ background: "#3fb950", border: "2px solid #252525", width: 12, height: 12 }} />
+      <Handle type="source" position={Position.Right} style={{ background: "#3b82f6", border: "2px solid #252525", width: 12, height: 12 }} />
     </NodeWrapper>
   );
 }

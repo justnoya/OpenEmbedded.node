@@ -5,15 +5,12 @@ import { AlignJustify } from "lucide-react";
 
 function ActionRowNodeComponent({ id }: NodeProps) {
   return (
-    <NodeWrapper id={id} typeName="Action Row · 1" icon={<AlignJustify size={13} />} accentColor="#14b8a6" nodeClass="main">
-      <div style={{ color: "#e8e8e8", fontSize: 13, fontWeight: 600, marginBottom: 3 }}>
-        Action Row
-      </div>
-      <div style={{ color: "#888888", fontSize: 11 }}>
+    <NodeWrapper id={id} typeName="Action Row · 1" icon={<AlignJustify size={18} />} accentColor="#14b8a6" nodeClass="main">
+      <div style={{ color: "#505050", fontSize: 11 }}>
         Buttons &amp; select menus
       </div>
-      <Handle type="target" position={Position.Left} style={{ background: "#248046", border: "2px solid #161616", width: 10, height: 10 }} />
-      <Handle type="source" position={Position.Right} style={{ background: "#14b8a6", border: "2px solid #161616", width: 10, height: 10 }} />
+      <Handle type="target" position={Position.Left} style={{ background: "#248046", border: "2px solid #252525", width: 12, height: 12 }} />
+      <Handle type="source" position={Position.Right} style={{ background: "#14b8a6", border: "2px solid #252525", width: 12, height: 12 }} />
     </NodeWrapper>
   );
 }

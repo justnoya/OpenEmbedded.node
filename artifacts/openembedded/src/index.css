@@ -272,3 +272,16 @@
 .react-flow__minimap-svg { background: var(--panel-bg) !important; }
 .react-flow__edge-path { stroke-width: 2px; }
 .react-flow__attribution { display: none !important; }
+
+/* ── Node handles — circular connector dots ── */
+.react-flow__handle {
+  border-radius: 50% !important;
+  width: 12px !important;
+  height: 12px !important;
+  border-width: 2px !important;
+  transition: transform 0.12s, box-shadow 0.12s !important;
+}
+.react-flow__handle:hover {
+  transform: scale(1.25) !important;
+  box-shadow: 0 0 0 3px rgba(255,255,255,0.08) !important;
+}
