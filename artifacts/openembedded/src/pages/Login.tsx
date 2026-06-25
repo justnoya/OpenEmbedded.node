@@ -92,7 +92,7 @@ export function Login() {
       <div
         style={{
           minHeight: "100dvh",
-          background: "#0e0e0e",
+          background: "#1a1a1a",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -108,7 +108,7 @@ export function Login() {
     <div
       style={{
         minHeight: "100dvh",
-        background: "#0e0e0e",
+        background: "#1a1a1a",
         fontFamily: `"DM Sans", system-ui, sans-serif`,
         display: "flex",
         flexDirection: "column",
