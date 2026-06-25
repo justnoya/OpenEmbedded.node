@@ -288,7 +288,9 @@ router.post("/v1/auth/login", authLimiter, async (req, res) => {
       avatar: profile.avatar ?? null,
     });
   } catch (err) {
-    req.log.error({ err }, "Auth login: unexpected error");
+    const message = err instanceof Error ? err.message : String(err);
+    const type = err instanceof Error ? err.constructor?.name : typeof err;
+    req.log.error({ type, message, stack: err instanceof Error ? err.stack : undefined }, "Auth login: unexpected error");
     res.status(500).json({ error: "Internal authentication error" });
   }
 });

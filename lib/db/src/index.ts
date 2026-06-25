@@ -14,7 +14,14 @@ function init() {
       "DATABASE_URL must be set. Did you forget to provision a database?",
     );
   }
-  _pool = new Pool({ connectionString: process.env.DATABASE_URL });
+  // SSL: required for Replit-hosted Postgres accessed from external environments
+  // (e.g. Vercel). If the URL explicitly disables SSL we respect that; otherwise
+  // rejectUnauthorized:false handles self-signed or hostname-mismatched certs.
+  const sslDisabled = process.env.DATABASE_URL?.includes("sslmode=disable");
+  _pool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    ssl: sslDisabled ? false : { rejectUnauthorized: false },
+  });
   _db = drizzle(_pool, { schema });
 }
 
