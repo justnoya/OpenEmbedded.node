@@ -35,8 +35,9 @@ export function compileGraph(nodes: AppNode[], edges: Edge[]): CompileResult {
     parentOf.set(edge.target, edge.source);
   }
 
-  // Root nodes: no incoming structural edges, and not a utility node (bot, openembedded)
-  const UTILITY_TYPES = new Set(["bot", "openembedded"]);
+  // Root nodes: no incoming structural edges, and not a utility node (bot, openembedded, modal)
+  // Message nodes are handled separately below.
+  const UTILITY_TYPES = new Set(["bot", "openembedded", "modal", "message"]);
   const rootIds = nodes
     .filter((n) => !parentOf.has(n.id) && !UTILITY_TYPES.has(n.type ?? ""))
     .map((n) => n.id);
@@ -225,6 +226,14 @@ export function compileGraph(nodes: AppNode[], edges: Edge[]): CompileResult {
     payload.components = components;
   }
   if (embeds.length > 0) payload.embeds = embeds;
+
+  // Extract content from standalone Message nodes (top-level, no parent)
+  const messageNode = nodes.find((n) => n.type === "message" && !parentOf.has(n.id));
+  if (messageNode) {
+    const content = ((messageNode.data.content as string) ?? "").trim();
+    if (content) payload.content = content;
+    else errors.push({ nodeId: messageNode.id, message: "Message node is empty — add some content text" });
+  }
 
   return { payload, isValid: errors.length === 0, errors };
 }

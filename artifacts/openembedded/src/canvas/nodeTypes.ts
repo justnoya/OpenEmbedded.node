@@ -12,6 +12,8 @@ import { AutoSelectNode } from "./nodes/AutoSelectNode";
 import { TextInputNode } from "./nodes/TextInputNode";
 import { BotNode } from "./nodes/BotNode";
 import { OpenEmbeddedNode } from "./nodes/OpenEmbeddedNode";
+import { MessageNode } from "./nodes/MessageNode";
+import { ModalNode } from "./nodes/ModalNode";
 
 export const nodeTypes = {
   container: ContainerNode,
@@ -31,4 +33,6 @@ export const nodeTypes = {
   textInput: TextInputNode,
   bot: BotNode,
   openembedded: OpenEmbeddedNode,
+  message: MessageNode,
+  modal: ModalNode,
 };

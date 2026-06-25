@@ -10,7 +10,7 @@ import {
   AtSign, Hash, FormInput, MessageSquareCode, Trash2,
   Plus, X, ChevronUp, ChevronDown, Bot, Sparkles,
   CheckCircle2, AlertCircle, Loader2, Send, RefreshCw, Zap, Circle,
-  ArrowRight, Info,
+  ArrowRight, Info, MessageCircle, PanelTop,
 } from "lucide-react";
 import { ReactNode } from "react";
 
@@ -32,6 +32,8 @@ const TYPE_META: Record<number, { label: string; icon: ReactNode; color: string 
   0:    { label: "Embed (V1)",         icon: <MessageSquareCode size={14} />,    color: "#f59e0b" },
   [-1]: { label: "Bot",               icon: <Bot size={14} />,                  color: "#5865F2" },
   [-2]: { label: "OpenEmbedded",       icon: <Sparkles size={14} />,             color: "#6366f1" },
+  [-3]: { label: "Message",            icon: <MessageCircle size={14} />,        color: "#10b981" },
+  [-4]: { label: "Modal",              icon: <PanelTop size={14} />,             color: "#3b82f6" },
 };
 
 const BG = "#161616";
@@ -1002,6 +1004,37 @@ export function PropertiesPanel() {
     }
     if (d.componentType === -2) {
       return <OpenEmbeddedProperties nodeId={node.id} d={d as Record<string, unknown>} updateNodeData={updateNodeData as (id: string, data: Record<string, unknown>) => void} />;
+    }
+    if (d.componentType === -3) {
+      return (
+        <>
+          {textareaField("Content", "content", "Your message text… (supports markdown)", 4)}
+          {textField("Username Override", "username", "Custom display name")}
+          {textField("Avatar URL Override", "avatar_url", "https://example.com/avatar.png")}
+          {checkboxField("Text-to-Speech (TTS)", "tts")}
+          <div style={{ marginTop: 6, padding: "8px 10px", borderRadius: 7, background: "rgba(16,185,129,0.05)", border: "1px solid rgba(16,185,129,0.12)" }}>
+            <div style={{ color: "#10b981", fontSize: 10, fontWeight: 700, marginBottom: 3, textTransform: "uppercase", letterSpacing: "0.06em" }}>How to use</div>
+            <div style={{ color: "#404040", fontSize: 11, lineHeight: 1.55 }}>
+              Connect a <strong style={{ color: "#888" }}>Bot</strong> node's green handle to this node's left handle to send this message via your bot.
+            </div>
+          </div>
+        </>
+      );
+    }
+    if (d.componentType === -4) {
+      return (
+        <>
+          {textField("Modal Title", "title", "Enter a title…")}
+          {textField("Custom ID", "custom_id", "my_modal_id")}
+          {childOrder()}
+          <div style={{ marginTop: 6, padding: "8px 10px", borderRadius: 7, background: "rgba(59,130,246,0.05)", border: "1px solid rgba(59,130,246,0.12)" }}>
+            <div style={{ color: "#3b82f6", fontSize: 10, fontWeight: 700, marginBottom: 3, textTransform: "uppercase", letterSpacing: "0.06em" }}>How to use</div>
+            <div style={{ color: "#404040", fontSize: 11, lineHeight: 1.55 }}>
+              Draw an amber edge from a <strong style={{ color: "#888" }}>Button</strong> to this node, then set the mode to <strong style={{ color: "#888" }}>Open Modal</strong>. Add <strong style={{ color: "#888" }}>Action Row → Text Input</strong> children for form fields.
+            </div>
+          </div>
+        </>
+      );
     }
     switch (d.componentType) {
       case 17:

@@ -13,9 +13,11 @@ export const NODE_CLASSES: Record<string, NodeClass> = {
   container:         "main",
   section:           "main",
   actionRow:         "main",
+  modal:             "main",
   embed:             "root",
   bot:               "root",
   openembedded:      "root",
+  message:           "root",
   textDisplay:       "sub",
   thumbnail:         "sub",
   mediaGallery:      "sub",
@@ -36,6 +38,7 @@ export const ALLOWED_CHILDREN: Record<string, string[]> = {
   container: ["section", "textDisplay", "thumbnail", "mediaGallery", "separator", "actionRow"],
   section:   ["textDisplay", "thumbnail"],
   actionRow: ["button", "selectMenu", "textInput", "userSelect", "roleSelect", "mentionableSelect", "channelSelect"],
+  modal:     ["actionRow"],
 };
 
 /**
@@ -48,7 +51,7 @@ const INTERACTION_SOURCES = new Set([
 /**
  * Target node types that can receive interaction edges (the "response" panels).
  */
-const INTERACTION_TARGETS = new Set(["container", "embed", "section"]);
+const INTERACTION_TARGETS = new Set(["container", "embed", "section", "modal", "message"]);
 
 /** Returns true if a structural (parent-child) connection is valid. */
 export function isValidNodeConnection(sourceType: string, targetType: string): boolean {
@@ -58,7 +61,7 @@ export function isValidNodeConnection(sourceType: string, targetType: string): b
 /**
  * Target node types that a bot/openembedded node can send to.
  */
-const BOT_SEND_TARGETS = new Set(["container", "embed"]);
+const BOT_SEND_TARGETS = new Set(["container", "embed", "message"]);
 
 /** Returns true if a bot "send" connection is valid (Bot or OpenEmbedded → Container or Embed). */
 export function isBotSendConnection(sourceType: string, targetType: string): boolean {
@@ -77,6 +80,7 @@ const FRIENDLY_NAMES: Record<string, string> = {
   textInput: "Text field", userSelect: "User Select", roleSelect: "Role Select",
   mentionableSelect: "Mentionable Select", channelSelect: "Channel Select",
   embed: "Embed", bot: "Bot", openembedded: "OpenEmbedded",
+  message: "Message", modal: "Modal",
 };
 
 function friendly(type: string) {

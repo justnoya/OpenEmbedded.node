@@ -4,7 +4,7 @@ import {
   Box, AlignJustify, AlignLeft, Image, LayoutGrid, Minus,
   LayoutList, MousePointerClick, ListFilter, User, Shield,
   AtSign, Hash, TextCursorInput, Layers, Bot, Workflow,
-  Search, Zap,
+  Search, Zap, MessageCircle, PanelTop,
 } from "lucide-react";
 
 interface NodeDef {
@@ -126,6 +126,18 @@ const NODE_DEFS: NodeDef[] = [
     comingSoon: true,
   },
   {
+    type: "message", label: "Message", alias: "Plain text message",
+    description: "A plain Discord message with text content. Connect a Bot to send it.",
+    icon: <IC color="#10b981"><MessageCircle size={15} /></IC>, componentType: null,
+    defaultData: { componentType: -3, content: "", username: "", avatar_url: "", tts: false },
+  },
+  {
+    type: "modal", label: "Modal", alias: "Dialog popup",
+    description: "A popup dialog with text inputs. Connect a Button → Open Modal.",
+    icon: <IC color="#3b82f6"><PanelTop size={15} /></IC>, componentType: null,
+    defaultData: { componentType: -4, title: "", custom_id: "" },
+  },
+  {
     type: "bot", label: "Bot", alias: "Your bot token",
     description: "⚠️ Requires a Discord bot token. Send messages via your own bot.",
     icon: <IC><Bot size={15} /></IC>, componentType: null,
@@ -146,6 +158,7 @@ const GROUPS = [
   { label: "Interactive",     types: ["actionRow", "button", "selectMenu", "userSelect", "roleSelect", "mentionableSelect", "channelSelect"], hint: null },
   { label: "Modals",          types: ["textInput"],                                                                     hint: "For modal dialogs" },
   { label: "Legacy",          types: ["embed"],                                                                         hint: "V1 only" },
+  { label: "Message & Modal",  types: ["message", "modal"],                                                             hint: "Standalone" },
   { label: "Bot Integration", types: ["bot", "openembedded"],                                                           hint: "Send to Discord" },
 ];
 
