@@ -5,85 +5,49 @@ import type { IncomingMessage, ServerResponse } from "http";
 import router from "./routes";
 import { logger } from "./lib/logger";
 import { helmetMiddleware, generalLimiter } from "./middleware/security";
-import { sessionMiddleware, ensureSessionTable } from "./middleware/auth";
-
-/* ── Session table bootstrap ────────────────────────────────────────────────
- *  Runs once at module load time (cold start in serverless environments).
- *  Creates user_sessions if it doesn't exist yet using inline SQL — no disk
- *  reads, compatible with esbuild bundles and Vercel serverless.
- * ─────────────────────────────────────────────────────────────────────────── */
-await ensureSessionTable().catch((err: unknown) => {
-  logger.error({ err }, "Failed to ensure session table on startup");
-});
+import { cookieMiddleware } from "./middleware/auth";
 
 /* ── App ────────────────────────────────────────────────────────────────── */
 const app = express();
 
 /* ── Proxy trust ─────────────────────────────────────────────────────────
- *  Vercel, Replit, and most cloud platforms sit behind a reverse proxy that
- *  sets X-Forwarded-For. Without this, express-rate-limit throws
- *  ERR_ERL_UNEXPECTED_X_FORWARDED_FOR and cannot identify real client IPs.
- *  "1" means trust the first hop (the platform's own load-balancer only).
+ *  Vercel and Replit sit behind a reverse proxy that sets X-Forwarded-For.
+ *  "1" means trust the first hop (the platform load-balancer only).
  * ─────────────────────────────────────────────────────────────────────── */
 app.set("trust proxy", 1);
 
-/* ── Fingerprint removal ─────────────────────────────────────────────────
- *  Stops attackers from trivially identifying the framework.
- *  OWASP A05 — Security Misconfiguration
- * ─────────────────────────────────────────────────────────────────────── */
 app.disable("x-powered-by");
 
-/* ── Security headers (Helmet) ───────────────────────────────────────────
- *  CSP, HSTS, X-Frame-Options, X-Content-Type-Options, etc.
- *  CIS Control 9 / OWASP A05
- * ─────────────────────────────────────────────────────────────────────── */
+/* ── Security headers (Helmet) ─────────────────────────────────────────── */
 app.use(helmetMiddleware);
 
-/* ── Request logging ─────────────────────────────────────────────────────
- *  Serializers strip query params and env from logs.
- *  MITRE T1552 — Credentials in Files
- * ─────────────────────────────────────────────────────────────────────── */
+/* ── Request logging ───────────────────────────────────────────────────── */
 app.use(
   pinoHttp({
     logger,
     serializers: {
       req(req: IncomingMessage & { id?: unknown }) {
-        return {
-          id: req.id,
-          method: req.method,
-          url: req.url?.split("?")[0],
-        };
+        return { id: req.id, method: req.method, url: req.url?.split("?")[0] };
       },
       res(res: ServerResponse) {
         return { statusCode: res.statusCode };
       },
       err(err: Error) {
-        return {
-          type: err.constructor?.name ?? "Error",
-          message: err.message,
-        };
+        return { type: err.constructor?.name ?? "Error", message: err.message };
       },
     },
   }),
 );
 
-/* ── CORS ────────────────────────────────────────────────────────────────
- *  Restricts which origins can make credentialed requests.
- *  OWASP A05 / MITRE T1550
+/* ── CORS ─────────────────────────────────────────────────────────────────
+ *  Restricts credentialed cross-origin requests to known origins.
  * ─────────────────────────────────────────────────────────────────────── */
-const allowedOrigins: (string | RegExp)[] = process.env["NODE_ENV"] === "production"
-  ? [
-      /^https:\/\/.*\.replit\.app$/,
-      /^https:\/\/.*\.repl\.co$/,
-    ]
-  : ["http://localhost:5000", "http://localhost:5173"];
+const allowedOrigins: (string | RegExp)[] =
+  process.env["NODE_ENV"] === "production"
+    ? [/^https:\/\/.*\.replit\.app$/, /^https:\/\/.*\.repl\.co$/]
+    : ["http://localhost:5000", "http://localhost:5173"];
 
-// FRONTEND_ORIGIN: single trusted origin (e.g. https://openembedded.xyz)
-if (process.env["FRONTEND_ORIGIN"]) {
-  allowedOrigins.push(process.env["FRONTEND_ORIGIN"]);
-}
-
-// ALLOWED_ORIGINS: comma-separated list of additional trusted origins
+if (process.env["FRONTEND_ORIGIN"]) allowedOrigins.push(process.env["FRONTEND_ORIGIN"]);
 (process.env["ALLOWED_ORIGINS"] ?? "")
   .split(",")
   .map((o) => o.trim())
@@ -99,32 +63,20 @@ app.use(
   }),
 );
 
-/* ── Body parsers — payload limits ───────────────────────────────────────
- *  Prevents multi-MB payload attacks against Node process memory.
- *  MITRE T1499 — Endpoint Denial of Service
- * ─────────────────────────────────────────────────────────────────────── */
+/* ── Body parsers ──────────────────────────────────────────────────────── */
 app.use(express.json({ limit: "512kb" }));
 app.use(express.urlencoded({ extended: true, limit: "256kb" }));
 
-/* ── Session ─────────────────────────────────────────────────────────────
- *  PostgreSQL-backed, httpOnly cookie. Must come before routes.
- *  OWASP A07 — Identification & Authentication Failures
- * ─────────────────────────────────────────────────────────────────────── */
-app.use(sessionMiddleware);
+/* ── Cookie parser ─────────────────────────────────────────────────────── */
+app.use(cookieMiddleware);
 
-/* ── Global rate limit ───────────────────────────────────────────────────
- *  Broad throttle before any route logic runs.
- *  MITRE T1499
- * ─────────────────────────────────────────────────────────────────────── */
+/* ── Global rate limit ─────────────────────────────────────────────────── */
 app.use(generalLimiter);
 
-/* ── Routes ──────────────────────────────────────────────────────────── */
+/* ── Routes ──────────────────────────────────────────────────────────────*/
 app.use("/api", router);
 
-/* ── Global error handler ────────────────────────────────────────────────
- *  Catches all unhandled errors. Never leaks stack traces to the client.
- *  MITRE T1552 — Credentials in Files / OWASP A05
- * ─────────────────────────────────────────────────────────────────────── */
+/* ── Global error handler ──────────────────────────────────────────────── */
 app.use(
   (
     err: Error,

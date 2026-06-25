@@ -3,55 +3,43 @@ import { Router } from "express";
 import { db, usersTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 import { authLimiter } from "../middleware/security";
+import {
+  setAuthCookie,
+  clearAuthCookie,
+  verifyToken,
+  COOKIE_NAME,
+  type TokenUser,
+} from "../middleware/auth";
 
 const router = Router();
 
 /* ── Allowed redirect URIs ───────────────────────────────────────────────────
  *  Only accept redirect URIs from our own origins.
  *  Prevents open-redirect abuse in the OAuth2 authorization-code flow.
- *  OWASP A01 — Broken Access Control, CWE-601
  * ─────────────────────────────────────────────────────────────────────────── */
 function isAllowedRedirectUri(uri: string): boolean {
   try {
     const url = new URL(uri);
     if (url.pathname !== "/auth/callback") return false;
-
     if (url.hostname === "localhost" || url.hostname === "127.0.0.1") return true;
 
-    // FRONTEND_URL: single canonical frontend origin (e.g. https://openembedded.xyz)
-    if (process.env["FRONTEND_URL"]) {
+    for (const envKey of ["FRONTEND_URL", "FRONTEND_ORIGIN"]) {
+      const raw = process.env[envKey];
+      if (!raw) continue;
       try {
-        const allowed = new URL(process.env["FRONTEND_URL"]);
-        if (url.hostname === allowed.hostname) return true;
-      } catch { /* ignore bad FRONTEND_URL */ }
+        if (url.hostname === new URL(raw).hostname) return true;
+      } catch { /* ignore bad value */ }
     }
 
-    // FRONTEND_ORIGIN: alias for FRONTEND_URL (either is accepted)
-    if (process.env["FRONTEND_ORIGIN"]) {
+    for (const origin of (process.env["ALLOWED_ORIGINS"] ?? "").split(",").map((o) => o.trim()).filter(Boolean)) {
       try {
-        const allowed = new URL(process.env["FRONTEND_ORIGIN"]);
-        if (url.hostname === allowed.hostname) return true;
-      } catch { /* ignore bad FRONTEND_ORIGIN */ }
+        if (url.hostname === new URL(origin).hostname) return true;
+      } catch { /* skip */ }
     }
 
-    // ALLOWED_ORIGINS: comma-separated list of additional trusted origins
-    const extraOrigins = (process.env["ALLOWED_ORIGINS"] ?? "")
-      .split(",")
-      .map((o) => o.trim())
-      .filter(Boolean);
-    for (const origin of extraOrigins) {
-      try {
-        const allowed = new URL(origin);
-        if (url.hostname === allowed.hostname) return true;
-      } catch { /* skip bad entry */ }
+    for (const d of (process.env["REPLIT_DOMAINS"] ?? "").split(",").map((d) => d.trim()).filter(Boolean)) {
+      if (url.hostname === d) return true;
     }
-
-    // Replit-managed domains (REPLIT_DOMAINS env is set automatically)
-    const replitDomains = (process.env["REPLIT_DOMAINS"] ?? "")
-      .split(",")
-      .map((d) => d.trim())
-      .filter(Boolean);
-    if (replitDomains.some((d) => url.hostname === d)) return true;
 
     if (url.hostname.endsWith(".replit.app") || url.hostname.endsWith(".repl.co")) return true;
 
@@ -61,10 +49,15 @@ function isAllowedRedirectUri(uri: string): boolean {
   }
 }
 
+/* ── GET /v1/discord/config ──────────────────────────────────────────────── */
+router.get("/v1/discord/config", (_req, res) => {
+  const clientId = process.env["DISCORD_CLIENT_ID"] ?? "";
+  res.json({ clientId, configured: clientId.length > 0 });
+});
+
 /* ── POST /v1/discord/token ──────────────────────────────────────────────────
  *  Exchange a Discord Activity auth code for an access_token.
  *  Used ONLY by the embedded Discord Activity SDK — not the web OAuth flow.
- *  Rate-limited: 10 req / 15 min per IP.
  * ─────────────────────────────────────────────────────────────────────────── */
 router.post("/v1/discord/token", authLimiter, async (req, res) => {
   const { code } = req.body as { code?: string };
@@ -109,16 +102,9 @@ router.post("/v1/discord/token", authLimiter, async (req, res) => {
   }
 });
 
-/* ── GET /v1/discord/config ──────────────────────────────────────────────── */
-router.get("/v1/discord/config", (_req, res) => {
-  const clientId = process.env["DISCORD_CLIENT_ID"] ?? "";
-  res.json({ clientId, configured: clientId.length > 0 });
-});
-
 /* ── POST /v1/discord/me ─────────────────────────────────────────────────────
- *  Fetch Discord profile, upsert to DB, and establish a server-side session.
+ *  Fetch Discord profile, upsert to DB, and set a JWT auth cookie.
  *  Used by the Discord Activity SDK overlay flow (embedded in Discord).
- *  OWASP A07 — after this call, req.session.userId is set for all routes.
  * ─────────────────────────────────────────────────────────────────────────── */
 router.post("/v1/discord/me", authLimiter, async (req, res) => {
   const { access_token } = req.body as { access_token?: string };
@@ -168,7 +154,15 @@ router.post("/v1/discord/me", authLimiter, async (req, res) => {
         },
       });
 
-    req.session.userId = profile.id;
+    const tokenUser: TokenUser = {
+      sub: profile.id,
+      username: profile.username,
+      globalName: profile.global_name ?? null,
+      discriminator: profile.discriminator ?? "0",
+      avatar: profile.avatar ?? null,
+    };
+
+    setAuthCookie(res, tokenUser);
     req.log.info({ discordId: profile.id }, "Discord Activity user authenticated");
 
     res.json({
@@ -185,17 +179,14 @@ router.post("/v1/discord/me", authLimiter, async (req, res) => {
 });
 
 /* ── POST /v1/auth/login ─────────────────────────────────────────────────────
- *  Web OAuth2 login: exchange a Discord authorization code for a session.
+ *  Web OAuth2 login: exchange a Discord authorization code for a JWT cookie.
  *
- *  Security model (OWASP A07, CWE-287, CWE-384):
- *    ✓ Rate-limited: 10 req / 15 min per IP (brute-force & replay protection)
+ *  Security model:
+ *    ✓ Rate-limited (brute-force & replay protection)
  *    ✓ redirect_uri validated server-side against allowed origins (CWE-601)
- *    ✓ code length/format validated before touching external services
  *    ✓ Code exchange is fully server-side — client_secret never exposed
- *    ✓ Session regenerated after auth (session fixation prevention, CWE-384)
- *    ✓ Session saved before responding (atomicity guarantee)
+ *    ✓ JWT signed with HS256, httpOnly cookie — client JS cannot read it
  *    ✓ access_token NEVER returned to the client or stored
- *    ✓ All auth events logged with structured context
  * ─────────────────────────────────────────────────────────────────────────── */
 router.post("/v1/auth/login", authLimiter, async (req, res) => {
   const { code, redirectUri } = req.body as { code?: unknown; redirectUri?: unknown };
@@ -217,12 +208,12 @@ router.post("/v1/auth/login", authLimiter, async (req, res) => {
 
   if (!clientId || !clientSecret) {
     req.log.warn("Auth login: Discord credentials not configured");
-    res.status(503).json({ error: "Discord integration not configured. Contact the administrator." });
+    res.status(503).json({ error: "Discord integration not configured." });
     return;
   }
 
   try {
-    // 1. Exchange code server-side (client_secret never reaches the browser)
+    // 1. Exchange code server-side — client_secret never reaches the browser
     const tokenRes = await fetch("https://discord.com/api/oauth2/token", {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -237,7 +228,10 @@ router.post("/v1/auth/login", authLimiter, async (req, res) => {
 
     if (!tokenRes.ok) {
       const errText = await tokenRes.text().catch(() => "");
-      req.log.warn({ status: tokenRes.status, body: errText.slice(0, 200) }, "Auth login: Discord rejected code exchange");
+      req.log.warn(
+        { status: tokenRes.status, body: errText.slice(0, 200) },
+        "Auth login: Discord rejected code exchange"
+      );
       res.status(401).json({
         error: "Discord rejected the authorization code. It may have expired — please try signing in again.",
       });
@@ -287,21 +281,18 @@ router.post("/v1/auth/login", authLimiter, async (req, res) => {
         },
       });
 
-    // 4. Session fixation prevention — regenerate session ID before writing userId (CWE-384)
-    await new Promise<void>((resolve, reject) => {
-      req.session.regenerate((err) => (err ? reject(err) : resolve()));
-    });
+    // 4. Sign JWT and set httpOnly cookie — access_token intentionally NOT stored
+    const tokenUser: TokenUser = {
+      sub: profile.id,
+      username: profile.username,
+      globalName: profile.global_name ?? null,
+      discriminator: profile.discriminator ?? "0",
+      avatar: profile.avatar ?? null,
+    };
 
-    req.session.userId = profile.id;
-
-    // 5. Explicit save ensures session is persisted before we respond
-    await new Promise<void>((resolve, reject) => {
-      req.session.save((err) => (err ? reject(err) : resolve()));
-    });
-
+    setAuthCookie(res, tokenUser);
     req.log.info({ discordId: profile.id, username: profile.username }, "Web OAuth login successful");
 
-    // 6. Return sanitized profile — access_token intentionally NOT included
     res.json({
       id: profile.id,
       username: profile.username,
@@ -311,17 +302,18 @@ router.post("/v1/auth/login", authLimiter, async (req, res) => {
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
-    const type = err instanceof Error ? err.constructor?.name : typeof err;
-    req.log.error({ type, message, stack: err instanceof Error ? err.stack : undefined }, "Auth login: unexpected error");
+    req.log.error(
+      { type: err instanceof Error ? err.constructor?.name : typeof err, message },
+      "Auth login: unexpected error"
+    );
 
-    // Surface actionable errors for known misconfiguration cases
-    if (message.includes("DATABASE_URL") || message.includes("ECONNREFUSED") || message.includes("ENOTFOUND") || message.includes("connect ETIMEDOUT")) {
-      res.status(503).json({ error: "Database is not reachable. Please ensure DATABASE_URL is set in your deployment environment." });
-      return;
-    }
-
-    if (message.includes("SESSION_SECRET")) {
-      res.status(503).json({ error: "Session secret is not configured. Please set SESSION_SECRET in your deployment environment." });
+    if (
+      message.includes("DATABASE_URL") ||
+      message.includes("ECONNREFUSED") ||
+      message.includes("ENOTFOUND") ||
+      message.includes("connect ETIMEDOUT")
+    ) {
+      res.status(503).json({ error: "Database is not reachable. Please check DATABASE_URL." });
       return;
     }
 
@@ -330,15 +322,25 @@ router.post("/v1/auth/login", authLimiter, async (req, res) => {
 });
 
 /* ── GET /v1/auth/session ────────────────────────────────────────────────────
- *  Returns current session state with full user profile from the database.
+ *  Validates the JWT cookie and returns user info.
  *  Frontend calls this on startup to restore auth without re-logging in.
  * ─────────────────────────────────────────────────────────────────────────── */
 router.get("/v1/auth/session", async (req, res) => {
-  if (!req.session?.userId) {
+  const token: string | undefined = req.cookies?.[COOKIE_NAME];
+
+  if (!token) {
     res.json({ authenticated: false, user: null });
     return;
   }
 
+  const payload = verifyToken(token);
+  if (!payload) {
+    clearAuthCookie(res);
+    res.json({ authenticated: false, user: null });
+    return;
+  }
+
+  // Optionally re-fetch from DB to confirm user still exists
   try {
     const [user] = await db
       .select({
@@ -349,12 +351,11 @@ router.get("/v1/auth/session", async (req, res) => {
         avatar: usersTable.avatar,
       })
       .from(usersTable)
-      .where(eq(usersTable.discordId, req.session.userId))
+      .where(eq(usersTable.discordId, payload.sub))
       .limit(1);
 
     if (!user) {
-      // Session references a deleted user — destroy it
-      req.session.destroy(() => {});
+      clearAuthCookie(res);
       res.json({ authenticated: false, user: null });
       return;
     }
@@ -367,20 +368,12 @@ router.get("/v1/auth/session", async (req, res) => {
 });
 
 /* ── POST /v1/auth/logout ────────────────────────────────────────────────────
- *  Destroys the server-side session and clears the cookie.
+ *  Clears the JWT cookie.
  * ─────────────────────────────────────────────────────────────────────────── */
 router.post("/v1/auth/logout", (req, res) => {
-  const userId = req.session?.userId;
-  req.session.destroy((err) => {
-    if (err) {
-      req.log.error({ type: (err as Error).constructor?.name }, "Session destroy failed");
-      res.status(500).json({ error: "Logout failed" });
-      return;
-    }
-    req.log.info({ discordId: userId }, "User logged out");
-    res.clearCookie("oe.sid");
-    res.json({ success: true });
-  });
+  clearAuthCookie(res);
+  req.log.info("User logged out");
+  res.json({ success: true });
 });
 
 export default router;

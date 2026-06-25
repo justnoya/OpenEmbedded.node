@@ -15,12 +15,12 @@ const router = Router();
 
 /* ── All project routes require authentication ───────────────────────────────
  *  OWASP A01 — Broken Access Control
- *  Every query is scoped to req.session.userId (the authenticated Discord ID).
+ *  Every query is scoped to req.tokenUser.sub (the authenticated Discord ID).
  * ─────────────────────────────────────────────────────────────────────────── */
 
 /* ── GET /v1/projects ─────────────────────────────────────────────────────── */
 router.get("/v1/projects", requireAuth, async (req, res) => {
-  const userId = req.session.userId!;
+  const userId = req.tokenUser!.sub;
   try {
     const projects = await db
       .select()
@@ -47,7 +47,7 @@ router.get("/v1/projects", requireAuth, async (req, res) => {
 
 /* ── POST /v1/projects ────────────────────────────────────────────────────── */
 router.post("/v1/projects", requireAuth, async (req, res) => {
-  const userId = req.session.userId!;
+  const userId = req.tokenUser!.sub;
   const parsed = CreateProjectBody.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ error: "Invalid request body" });
@@ -78,7 +78,7 @@ router.post("/v1/projects", requireAuth, async (req, res) => {
 
 /* ── GET /v1/projects/:id ─────────────────────────────────────────────────── */
 router.get("/v1/projects/:id", requireAuth, async (req, res) => {
-  const userId = req.session.userId!;
+  const userId = req.tokenUser!.sub;
   const params = GetProjectParams.safeParse(req.params);
   if (!params.success) {
     res.status(400).json({ error: "Invalid project id" });
@@ -116,7 +116,7 @@ router.get("/v1/projects/:id", requireAuth, async (req, res) => {
 
 /* ── PUT /v1/projects/:id ─────────────────────────────────────────────────── */
 router.put("/v1/projects/:id", requireAuth, async (req, res) => {
-  const userId = req.session.userId!;
+  const userId = req.tokenUser!.sub;
   const params = UpdateProjectParams.safeParse(req.params);
   if (!params.success) {
     res.status(400).json({ error: "Invalid project id" });
@@ -164,7 +164,7 @@ router.put("/v1/projects/:id", requireAuth, async (req, res) => {
 
 /* ── DELETE /v1/projects/:id ──────────────────────────────────────────────── */
 router.delete("/v1/projects/:id", requireAuth, async (req, res) => {
-  const userId = req.session.userId!;
+  const userId = req.tokenUser!.sub;
   const params = DeleteProjectParams.safeParse(req.params);
   if (!params.success) {
     res.status(400).json({ error: "Invalid project id" });
