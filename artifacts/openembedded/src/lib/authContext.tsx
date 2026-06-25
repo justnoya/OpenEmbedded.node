@@ -79,6 +79,36 @@ function generateState(): string {
 const OAUTH_STATE_KEY = "oe_oauth_state";
 const OAUTH_RETURN_KEY = "oe_oauth_return";
 
+// ── Cookie helpers ─────────────────────────────────────────────────────────
+// sessionStorage is tab-scoped and gets wiped on mobile redirects/new tabs.
+// We use a short-lived cookie for the CSRF state so it survives the
+// Discord OAuth round-trip regardless of how the browser handles the redirect.
+
+function setStateCookie(value: string): void {
+  const isSecure = window.location.protocol === "https:";
+  const maxAge = 300; // 5 minutes — plenty for OAuth flow
+  document.cookie = [
+    `${OAUTH_STATE_KEY}=${encodeURIComponent(value)}`,
+    `max-age=${maxAge}`,
+    "path=/",
+    "SameSite=Lax",
+    ...(isSecure ? ["Secure"] : []),
+  ].join("; ");
+}
+
+function getStateCookie(): string | null {
+  const prefix = `${OAUTH_STATE_KEY}=`;
+  const match = document.cookie
+    .split(";")
+    .map((c) => c.trim())
+    .find((c) => c.startsWith(prefix));
+  return match ? decodeURIComponent(match.slice(prefix.length)) : null;
+}
+
+function clearStateCookie(): void {
+  document.cookie = `${OAUTH_STATE_KEY}=; max-age=0; path=/; SameSite=Lax`;
+}
+
 // ── Provider ───────────────────────────────────────────────────────────────
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -120,9 +150,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const state = generateState();
         const redirectUri = `${window.location.origin}/auth/callback`;
 
-        // Store CSRF state (single-use, cleared in completeAuth)
-        sessionStorage.setItem(OAUTH_STATE_KEY, state);
-        // Remember where to return after login
+        // Store CSRF state in a cookie — survives mobile redirects & new tabs
+        // (sessionStorage is tab-scoped and gets wiped on OAuth round-trips)
+        setStateCookie(state);
+        // Remember where to return after login (sessionStorage is fine here —
+        // it's non-security-critical and falls back to "/" if missing)
         const returnTo = window.location.pathname;
         sessionStorage.setItem(OAUTH_RETURN_KEY, returnTo === "/login" ? "/" : returnTo);
 
@@ -147,14 +179,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   /** Complete the OAuth2 callback: validate CSRF state, exchange code for session. */
   const completeAuth = useCallback(
     async (code: string, state: string, redirectUri: string): Promise<void> => {
-      // Validate CSRF state (single-use nonce from sessionStorage)
-      const storedState = sessionStorage.getItem(OAUTH_STATE_KEY);
+      // Validate CSRF state — read from cookie (set before OAuth redirect)
+      const storedState = getStateCookie();
+      clearStateCookie(); // single-use: clear immediately regardless of outcome
       if (!storedState || storedState !== state) {
         throw new Error(
-          "Invalid state parameter — possible CSRF attack detected. Please try signing in again."
+          "Sign-in session expired or was opened in a different tab. Please try signing in again."
         );
       }
-      sessionStorage.removeItem(OAUTH_STATE_KEY);
 
       const returnPath = sessionStorage.getItem(OAUTH_RETURN_KEY) ?? "/";
       sessionStorage.removeItem(OAUTH_RETURN_KEY);
