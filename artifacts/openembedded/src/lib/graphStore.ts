@@ -103,7 +103,17 @@ export const useGraphStore = create<GraphState>((set, get) => ({
   setSelectedNode: (id) => set({ selectedNodeId: id }),
 
   onNodesChange: (changes) => {
-    set({ nodes: applyNodeChanges(changes, get().nodes) });
+    const hasRemovals = changes.some((c) => c.type === "remove");
+    if (hasRemovals) {
+      const { nodes, edges, past } = get();
+      set({
+        past: [...past.slice(-MAX_HISTORY + 1), snap(nodes, edges)],
+        future: [],
+        nodes: applyNodeChanges(changes, nodes),
+      });
+    } else {
+      set({ nodes: applyNodeChanges(changes, get().nodes) });
+    }
   },
 
   onEdgesChange: (changes) => {

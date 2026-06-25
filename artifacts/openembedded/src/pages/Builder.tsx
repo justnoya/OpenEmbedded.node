@@ -34,9 +34,9 @@ import {
 } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import {
-  Undo2, Redo2, Save, Upload, Plus, FolderOpen, ChevronDown,
+  Undo2, Redo2, Save, Upload, Plus, FolderOpen, ChevronDown, ChevronLeft,
   Eye, Settings2, Trash2, Loader2, Check, AlertCircle,
-  Boxes, Workflow, SlidersHorizontal, Smartphone,
+  Boxes, Workflow, SlidersHorizontal, Smartphone, Zap, MousePointerClick,
 } from "lucide-react";
 
 const edgeTypes = { default: CustomEdge, interaction: InteractionEdge, send: SendEdge };
@@ -78,6 +78,8 @@ export function Builder() {
 
   const compile = usePreviewStore((s) => s.compile);
   const previewPayload = usePreviewStore((s) => s.payload);
+  const previewErrors = usePreviewStore((s) => s.errors);
+  const previewIsValid = usePreviewStore((s) => s.isValid);
 
   const { isDiscord } = useDiscord();
   const [, builderParams] = useRoute("/builder/:id");
@@ -95,6 +97,9 @@ export function Builder() {
   const [showProjectList, setShowProjectList] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [hasLoaded, setHasLoaded] = useState(false);
+  const [deletionToast, setDeletionToast] = useState(false);
+  const deletionToastTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  useEffect(() => () => { clearTimeout(deletionToastTimer.current); }, []);
 
   const [connError, setConnError] = useState<string | null>(null);
   const connErrorTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
@@ -206,6 +211,36 @@ export function Builder() {
     connErrorTimer.current = setTimeout(() => setConnError(null), 4500);
     lastAttemptedConn.current = null;
   }, []);
+
+  const handleNodesChange = useCallback(
+    (changes: Parameters<typeof onNodesChange>[0]) => {
+      const removals = changes.filter((c) => c.type === "remove");
+      if (removals.length > 0) {
+        setDeletionToast(true);
+        clearTimeout(deletionToastTimer.current);
+        deletionToastTimer.current = setTimeout(() => setDeletionToast(false), 3500);
+      }
+      onNodesChange(changes);
+    },
+    [onNodesChange]
+  );
+
+  const handleQuickStart = useCallback(() => {
+    const t = Date.now();
+    setGraph(
+      [
+        { id: `qs_${t}_1`, type: "container",   position: { x: 220, y: 90  }, data: { componentType: 17, accent_color: null, spoiler: false } },
+        { id: `qs_${t}_2`, type: "textDisplay", position: { x: 500, y: 60  }, data: { componentType: 10, content: "👋 **Hello, World!**\n\nThis is your first Discord message. Click me to edit this text in the **Properties** panel on the right." } },
+        { id: `qs_${t}_3`, type: "actionRow",   position: { x: 500, y: 210 }, data: { componentType: 1 } },
+        { id: `qs_${t}_4`, type: "button",      position: { x: 500, y: 360 }, data: { componentType: 2, label: "Click me!", style: "Primary", custom_id: "hello_btn", emoji: "", disabled: false } },
+      ] as never,
+      [
+        { id: `qse_${t}_1`, source: `qs_${t}_1`, target: `qs_${t}_2`, type: "default", style: { stroke: "#5865F2", strokeWidth: 2 } },
+        { id: `qse_${t}_2`, source: `qs_${t}_1`, target: `qs_${t}_3`, type: "default", style: { stroke: "#5865F2", strokeWidth: 2 } },
+        { id: `qse_${t}_3`, source: `qs_${t}_3`, target: `qs_${t}_4`, type: "default", style: { stroke: "#5865F2", strokeWidth: 2 } },
+      ] as never
+    );
+  }, [setGraph]);
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -349,8 +384,9 @@ export function Builder() {
           style={{ width: 28, height: 28, borderRadius: 7, flexShrink: 0, objectFit: "cover" }}
         />
         {!isMobile && (
-          <span style={{ color: "#e8e8e8", fontSize: 13, fontWeight: 700, letterSpacing: "-0.02em" }}>
-            OpenEmbedded
+          <span style={{ color: "#777", fontSize: 12, fontWeight: 600, letterSpacing: "-0.01em", display: "flex", alignItems: "center", gap: 2 }}>
+            <ChevronLeft size={13} strokeWidth={2.5} />
+            Projects
           </span>
         )}
       </button>
@@ -732,9 +768,9 @@ export function Builder() {
       >
         {(["library", "canvas", "properties", "preview"] as MobilePanel[]).map((panel) => {
           const meta = {
-            library: { label: "Nodes", icon: <Boxes size={17} /> },
+            library: { label: "Add", icon: <Boxes size={17} /> },
             canvas: { label: "Canvas", icon: <Workflow size={17} /> },
-            properties: { label: "Props", icon: <SlidersHorizontal size={17} /> },
+            properties: { label: "Edit", icon: <SlidersHorizontal size={17} /> },
             preview: { label: "Preview", icon: <Smartphone size={17} /> },
           };
           const active = mobilePanel === panel;
@@ -774,7 +810,7 @@ export function Builder() {
       <ReactFlow
         nodes={nodes}
         edges={edges}
-        onNodesChange={onNodesChange}
+        onNodesChange={handleNodesChange}
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
         isValidConnection={isValidConnection}
@@ -838,14 +874,95 @@ export function Builder() {
               letterSpacing: "-0.01em",
             }}
           >
-            {nodes.length === 0
-              ? "← Click a component to add it to the canvas"
-              : `${nodes.length} node${nodes.length !== 1 ? "s" : ""} · ${edges.length} edge${edges.length !== 1 ? "s" : ""}`}
+            {nodes.length === 0 ? (
+              "← Add a component from the left panel to get started"
+            ) : (
+              <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <span>{nodes.length} node{nodes.length !== 1 ? "s" : ""} · {edges.length} edge{edges.length !== 1 ? "s" : ""}</span>
+                {!previewIsValid && previewErrors.length > 0 && (
+                  <span style={{ color: "#f85149", display: "flex", alignItems: "center", gap: 4 }}>
+                    <span style={{ width: 1, height: 12, background: "rgba(255,255,255,0.15)", display: "inline-block", marginTop: 1 }} />
+                    ⚠ {previewErrors.length} issue{previewErrors.length !== 1 ? "s" : ""}
+                  </span>
+                )}
+              </span>
+            )}
           </div>
         </Panel>
       </ReactFlow>
 
-      {/* Connection error toast */}
+      {/* ── Empty canvas guide ── */}
+      {hasLoaded && nodes.length === 0 && (
+        <div style={{
+          position: "absolute", inset: 0,
+          display: "flex", alignItems: "center", justifyContent: "center",
+          pointerEvents: "none", zIndex: 4,
+        }}>
+          <div style={{
+            pointerEvents: "auto",
+            background: "rgba(18,18,18,0.97)",
+            border: "1px solid rgba(255,255,255,0.09)",
+            borderRadius: 18, padding: "28px 28px 24px",
+            maxWidth: 360, width: "calc(100% - 48px)",
+            textAlign: "center",
+            backdropFilter: "blur(24px)",
+            boxShadow: "0 24px 64px rgba(0,0,0,0.75), 0 0 0 1px rgba(255,255,255,0.05)",
+          }}>
+            <div style={{ fontSize: 30, marginBottom: 10 }}>🎨</div>
+            <div style={{ color: "#e0e0e0", fontSize: 15, fontWeight: 700, marginBottom: 5, letterSpacing: "-0.02em" }}>
+              Start building your message
+            </div>
+            <div style={{ color: "#505050", fontSize: 12, lineHeight: 1.7, marginBottom: 20 }}>
+              Add components from the left panel, connect them with edges, then export or send to Discord.
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 7, marginBottom: 20, textAlign: "left" }}>
+              {([
+                { n: "1", color: "#5865F2", label: "Add a Container",      hint: "Click it in the left panel ←" },
+                { n: "2", color: "#10b981", label: "Add Text or a Button", hint: "Connect them to the Container" },
+                { n: "3", color: "#f59e0b", label: "Export or Send",       hint: "Use the Export button ↑" },
+              ] as const).map(({ n, color, label, hint }) => (
+                <div key={n} style={{
+                  display: "flex", alignItems: "center", gap: 12,
+                  background: "rgba(255,255,255,0.03)",
+                  border: "1px solid rgba(255,255,255,0.06)",
+                  borderRadius: 10, padding: "9px 12px",
+                }}>
+                  <div style={{
+                    width: 24, height: 24, borderRadius: "50%", flexShrink: 0,
+                    background: `${color}22`, border: `1px solid ${color}40`,
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    color, fontSize: 11, fontWeight: 700,
+                  }}>{n}</div>
+                  <div>
+                    <div style={{ color: "#d0d0d0", fontSize: 12, fontWeight: 600 }}>{label}</div>
+                    <div style={{ color: "#484848", fontSize: 11, marginTop: 1 }}>{hint}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <button
+              onClick={handleQuickStart}
+              style={{
+                width: "100%",
+                background: "linear-gradient(135deg, #5865F2, #7c3aed)",
+                border: "none", borderRadius: 10, color: "#fff",
+                fontSize: 13, fontWeight: 700, padding: "10px",
+                cursor: "pointer",
+                boxShadow: "0 4px 18px rgba(88,101,242,0.4)",
+                display: "flex", alignItems: "center", justifyContent: "center", gap: 7,
+                transition: "opacity 0.15s",
+              }}
+              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.opacity = "0.88"; }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.opacity = "1"; }}
+            >
+              <Zap size={14} />
+              Quick Start — Hello World message
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ── Connection error toast ── */}
       {connError && (
         <div
           style={{
@@ -873,6 +990,35 @@ export function Builder() {
         >
           <AlertCircle size={13} color="#f85149" style={{ flexShrink: 0 }} />
           <span>{connError}</span>
+        </div>
+      )}
+
+      {/* ── Deletion undo toast ── */}
+      {deletionToast && (
+        <div style={{
+          position: "absolute",
+          bottom: connError ? 60 : 18,
+          left: "50%",
+          transform: "translateX(-50%)",
+          zIndex: 999,
+          display: "flex", alignItems: "center", gap: 8,
+          background: "rgba(18,18,30,0.96)",
+          border: "1px solid rgba(88,101,242,0.25)",
+          borderRadius: 10, padding: "9px 14px",
+          color: "#9090c0", fontSize: 12, fontWeight: 500,
+          whiteSpace: "nowrap",
+          boxShadow: "0 4px 24px rgba(0,0,0,0.6), 0 0 0 1px rgba(88,101,242,0.08)",
+          backdropFilter: "blur(8px)",
+          animation: "slideUp 0.18s ease-out",
+          pointerEvents: "none",
+        }}>
+          <MousePointerClick size={13} color="#818cf8" style={{ flexShrink: 0 }} />
+          <span>Node deleted —</span>
+          <kbd style={{
+            background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.12)",
+            borderRadius: 4, padding: "1px 6px", fontSize: 10, fontFamily: "monospace", color: "#c0c0e0",
+          }}>Ctrl+Z</kbd>
+          <span>to undo</span>
         </div>
       )}
     </div>

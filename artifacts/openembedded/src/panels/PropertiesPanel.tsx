@@ -785,15 +785,32 @@ export function PropertiesPanel() {
           <span style={{ color: "#a3a6aa", fontSize: 13 }}>Node editor</span>
         </div>
         {/* Empty state */}
-        <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 12, padding: 24 }}>
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 16, padding: 24 }}>
           <div style={{ width: 52, height: 52, borderRadius: 14, background: "rgba(88,101,242,0.07)", border: "1px solid rgba(88,101,242,0.14)", display: "flex", alignItems: "center", justifyContent: "center" }}>
             <Hash size={22} color="#5865F2" strokeWidth={1.5} />
           </div>
           <div style={{ textAlign: "center" }}>
-            <div style={{ color: "#d0d0d0", fontSize: 13, fontWeight: 600, marginBottom: 4 }}>No node selected</div>
-            <div style={{ color: MUTED, fontSize: 12, lineHeight: 1.6 }}>
-              Click a node on the canvas<br />to edit its properties here
+            <div style={{ color: "#d0d0d0", fontSize: 13, fontWeight: 600, marginBottom: 6 }}>No node selected</div>
+            <div style={{ color: "#606060", fontSize: 12, lineHeight: 1.7 }}>
+              Click any node on the canvas<br />to edit its properties here.
             </div>
+          </div>
+          <div style={{ width: "100%", display: "flex", flexDirection: "column", gap: 6, marginTop: 4 }}>
+            {[
+              { icon: "🖱️", text: "Click a node to select it" },
+              { icon: "↔️", text: "Drag handles to connect nodes" },
+              { icon: "⌨️", text: "Delete key removes selected node" },
+            ].map(({ icon, text }) => (
+              <div key={text} style={{
+                display: "flex", alignItems: "center", gap: 10,
+                padding: "8px 12px", borderRadius: 8,
+                background: "rgba(255,255,255,0.02)",
+                border: "1px solid rgba(255,255,255,0.05)",
+              }}>
+                <span style={{ fontSize: 14, flexShrink: 0 }}>{icon}</span>
+                <span style={{ color: "#505050", fontSize: 11 }}>{text}</span>
+              </div>
+            ))}
           </div>
         </div>
       </div>

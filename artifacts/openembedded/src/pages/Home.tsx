@@ -115,6 +115,73 @@ const MiniCanvasPreview = ({ nodeCount }: { nodeCount: number }) => (
   </div>
 );
 
+type TemplateId = "blank" | "welcome" | "poll" | "announcement";
+
+const TEMPLATES: { id: TemplateId; emoji: string; label: string; description: string }[] = [
+  { id: "blank",        emoji: "✨", label: "Blank",          description: "Start from scratch" },
+  { id: "welcome",      emoji: "👋", label: "Welcome",        description: "Text + button" },
+  { id: "announcement", emoji: "📢", label: "Announcement",   description: "Image + text" },
+  { id: "poll",         emoji: "🗳️", label: "Poll",           description: "Select menu" },
+];
+
+function buildTemplateGraph(id: TemplateId): { nodes: object[]; edges: object[] } {
+  if (id === "blank") return { nodes: [], edges: [] };
+  const t = Date.now();
+  if (id === "welcome") {
+    const cId = `tpl_${t}_c`, txtId = `tpl_${t}_tx`, arId = `tpl_${t}_ar`, btnId = `tpl_${t}_b`;
+    return {
+      nodes: [
+        { id: cId,   type: "container",   position: { x: 220, y: 100 }, data: { componentType: 17, accent_color: null, spoiler: false } },
+        { id: txtId, type: "textDisplay", position: { x: 500, y: 60  }, data: { componentType: 10, content: "👋 **Welcome to our server!**\n\nWe're glad to have you here. Explore our channels and get started!" } },
+        { id: arId,  type: "actionRow",   position: { x: 500, y: 210 }, data: { componentType: 1 } },
+        { id: btnId, type: "button",      position: { x: 500, y: 360 }, data: { componentType: 2, label: "Get Roles", style: "Primary", custom_id: "welcome_roles", emoji: "", disabled: false } },
+      ],
+      edges: [
+        { id: `e${t}1`, source: cId,  target: txtId, type: "default", style: { stroke: "#5865F2", strokeWidth: 2 } },
+        { id: `e${t}2`, source: cId,  target: arId,  type: "default", style: { stroke: "#5865F2", strokeWidth: 2 } },
+        { id: `e${t}3`, source: arId, target: btnId, type: "default", style: { stroke: "#5865F2", strokeWidth: 2 } },
+      ],
+    };
+  }
+  if (id === "announcement") {
+    const cId = `tpl_${t}_c`, secId = `tpl_${t}_s`, txtId = `tpl_${t}_tx`, thumbId = `tpl_${t}_th`, sepId = `tpl_${t}_sp`, txt2Id = `tpl_${t}_t2`;
+    return {
+      nodes: [
+        { id: cId,     type: "container",   position: { x: 200, y: 100 }, data: { componentType: 17, accent_color: 0x5865f2, spoiler: false } },
+        { id: secId,   type: "section",     position: { x: 480, y: 60  }, data: { componentType: 9 } },
+        { id: txtId,   type: "textDisplay", position: { x: 760, y: 40  }, data: { componentType: 10, content: "📢 **New Announcement**\n\nSomething exciting is happening! Stay tuned for more details." } },
+        { id: thumbId, type: "thumbnail",   position: { x: 760, y: 200 }, data: { componentType: 11, url: "https://cdn.discordapp.com/embed/avatars/0.png", description: "" } },
+        { id: sepId,   type: "separator",   position: { x: 480, y: 250 }, data: { componentType: 14, spacing: "md", divider: true } },
+        { id: txt2Id,  type: "textDisplay", position: { x: 480, y: 390 }, data: { componentType: 10, content: "-# Posted by @Admin · Today" } },
+      ],
+      edges: [
+        { id: `e${t}1`, source: cId,   target: secId,   type: "default", style: { stroke: "#5865F2", strokeWidth: 2 } },
+        { id: `e${t}2`, source: secId, target: txtId,   type: "default", style: { stroke: "#5865F2", strokeWidth: 2 } },
+        { id: `e${t}3`, source: secId, target: thumbId, type: "default", style: { stroke: "#5865F2", strokeWidth: 2 } },
+        { id: `e${t}4`, source: cId,   target: sepId,   type: "default", style: { stroke: "#5865F2", strokeWidth: 2 } },
+        { id: `e${t}5`, source: cId,   target: txt2Id,  type: "default", style: { stroke: "#5865F2", strokeWidth: 2 } },
+      ],
+    };
+  }
+  if (id === "poll") {
+    const cId = `tpl_${t}_c`, txtId = `tpl_${t}_tx`, arId = `tpl_${t}_ar`, selId = `tpl_${t}_sl`;
+    return {
+      nodes: [
+        { id: cId,   type: "container",  position: { x: 220, y: 100 }, data: { componentType: 17, accent_color: null, spoiler: false } },
+        { id: txtId, type: "textDisplay",position: { x: 500, y: 60  }, data: { componentType: 10, content: "🗳️ **Community Poll**\n\nWhat should we do next?" } },
+        { id: arId,  type: "actionRow",  position: { x: 500, y: 210 }, data: { componentType: 1 } },
+        { id: selId, type: "selectMenu", position: { x: 500, y: 360 }, data: { componentType: 3, custom_id: "poll_vote", placeholder: "Cast your vote…", min_values: 1, max_values: 1, options: [{ label: "Option A", value: "a" }, { label: "Option B", value: "b" }, { label: "Option C", value: "c" }], disabled: false } },
+      ],
+      edges: [
+        { id: `e${t}1`, source: cId,  target: txtId, type: "default", style: { stroke: "#5865F2", strokeWidth: 2 } },
+        { id: `e${t}2`, source: cId,  target: arId,  type: "default", style: { stroke: "#5865F2", strokeWidth: 2 } },
+        { id: `e${t}3`, source: arId, target: selId, type: "default", style: { stroke: "#5865F2", strokeWidth: 2 } },
+      ],
+    };
+  }
+  return { nodes: [], edges: [] };
+}
+
 export function Home() {
   const [, navigate] = useLocation();
   const queryClient = useQueryClient();
@@ -124,6 +191,7 @@ export function Home() {
 
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [newName, setNewName] = useState("");
+  const [selectedTemplate, setSelectedTemplate] = useState<TemplateId>("blank");
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
@@ -132,7 +200,7 @@ export function Home() {
 
   const handleCreate = () => {
     createProject.mutate(
-      { data: { name: newName.trim() || "Untitled Project", graph: { nodes: [], edges: [] } } },
+      { data: { name: newName.trim() || "Untitled Project", graph: buildTemplateGraph(selectedTemplate) } },
       {
         onSuccess: (p: unknown) => {
           queryClient.invalidateQueries({ queryKey: getListProjectsQueryKey() });
@@ -159,6 +227,7 @@ export function Home() {
 
   const openCreate = () => {
     setNewName("");
+    setSelectedTemplate("blank");
     setShowCreateModal(true);
   };
 
@@ -511,14 +580,14 @@ export function Home() {
                       <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
                         <span style={{
                           display: "flex", alignItems: "center", gap: 4,
-                          color: "#404040", fontSize: 11,
+                          color: "#555", fontSize: 11,
                         }}>
                           <Clock size={10} />
                           {timeAgo(project.updatedAt)}
                         </span>
                         <span style={{
                           display: "flex", alignItems: "center", gap: 4,
-                          color: "#404040", fontSize: 11,
+                          color: "#555", fontSize: 11,
                         }}>
                           <Box size={10} />
                           {nodeCount} node{nodeCount !== 1 ? "s" : ""}
@@ -602,7 +671,7 @@ export function Home() {
               background: "#1a1a1a",
               border: "1px solid rgba(255,255,255,0.09)",
               borderRadius: 18, padding: "26px 24px",
-              width: "100%", maxWidth: 420,
+              width: "100%", maxWidth: 500,
               display: "flex", flexDirection: "column", gap: 20,
               boxShadow: "0 24px 60px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.05)",
               animation: "scaleIn 0.14s cubic-bezier(0.4,0,0.2,1)",
@@ -615,7 +684,7 @@ export function Home() {
                 <h3 style={{ fontSize: 16, fontWeight: 700, color: "#f0f0f0", margin: "0 0 2px", letterSpacing: "-0.02em" }}>
                   New Project
                 </h3>
-                <p style={{ fontSize: 12, color: "#484848", margin: 0 }}>Give your project a name to get started</p>
+                <p style={{ fontSize: 12, color: "#484848", margin: 0 }}>Name your project and choose a starting template</p>
               </div>
               <button
                 onClick={() => { if (!isCreating) setShowCreateModal(false); }}
@@ -674,6 +743,47 @@ export function Home() {
                   (e.currentTarget as HTMLElement).style.boxShadow = "none";
                 }}
               />
+            </div>
+
+            {/* Template picker */}
+            <div>
+              <label style={{
+                display: "block", color: "#505050", fontSize: 10, fontWeight: 700,
+                textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 8,
+              }}>
+                Start from a template
+              </label>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+                {TEMPLATES.map((tpl) => {
+                  const active = selectedTemplate === tpl.id;
+                  return (
+                    <button
+                      key={tpl.id}
+                      onClick={() => setSelectedTemplate(tpl.id)}
+                      disabled={isCreating}
+                      style={{
+                        display: "flex", alignItems: "flex-start", gap: 10,
+                        background: active ? "rgba(88,101,242,0.12)" : "rgba(255,255,255,0.03)",
+                        border: `1px solid ${active ? "rgba(88,101,242,0.4)" : "rgba(255,255,255,0.07)"}`,
+                        borderRadius: 10, padding: "10px 12px",
+                        cursor: isCreating ? "not-allowed" : "pointer",
+                        textAlign: "left", transition: "all 0.15s",
+                        boxShadow: active ? "0 0 0 1px rgba(88,101,242,0.15)" : "none",
+                      }}
+                    >
+                      <span style={{ fontSize: 18, lineHeight: 1, flexShrink: 0, marginTop: 1 }}>{tpl.emoji}</span>
+                      <div>
+                        <div style={{ color: active ? "#818cf8" : "#d0d0d0", fontSize: 12, fontWeight: 600, marginBottom: 2 }}>
+                          {tpl.label}
+                        </div>
+                        <div style={{ color: "#484848", fontSize: 10, lineHeight: 1.4 }}>
+                          {tpl.description}
+                        </div>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
 
             {/* Actions */}
