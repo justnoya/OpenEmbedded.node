@@ -10,6 +10,14 @@ import { sessionMiddleware } from "./middleware/auth";
 /* ── App ────────────────────────────────────────────────────────────────── */
 const app = express();
 
+/* ── Proxy trust ─────────────────────────────────────────────────────────
+ *  Vercel, Replit, and most cloud platforms sit behind a reverse proxy that
+ *  sets X-Forwarded-For. Without this, express-rate-limit throws
+ *  ERR_ERL_UNEXPECTED_X_FORWARDED_FOR and cannot identify real client IPs.
+ *  "1" means trust the first hop (the platform's own load-balancer only).
+ * ─────────────────────────────────────────────────────────────────────── */
+app.set("trust proxy", 1);
+
 /* ── Fingerprint removal ─────────────────────────────────────────────────
  *  Stops attackers from trivially identifying the framework.
  *  OWASP A05 — Security Misconfiguration
