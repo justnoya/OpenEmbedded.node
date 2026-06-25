@@ -249,33 +249,7 @@ export function Login() {
                   </span>
                 </div>
                 <p style={{ margin: 0, fontSize: 12, color: "#4a4a4a", lineHeight: 1.7 }}>
-                  Add{" "}
-                  <code
-                    style={{
-                      background: "#222",
-                      padding: "1px 5px",
-                      borderRadius: 4,
-                      color: "#c084fc",
-                      fontFamily: "JetBrains Mono, monospace",
-                      fontSize: 11,
-                    }}
-                  >
-                    DISCORD_CLIENT_ID
-                  </code>{" "}
-                  and{" "}
-                  <code
-                    style={{
-                      background: "#222",
-                      padding: "1px 5px",
-                      borderRadius: 4,
-                      color: "#c084fc",
-                      fontFamily: "JetBrains Mono, monospace",
-                      fontSize: 11,
-                    }}
-                  >
-                    DISCORD_CLIENT_SECRET
-                  </code>{" "}
-                  to your environment secrets to enable login.
+                  Discord login is not available. Please contact the administrator to enable authentication.
                 </p>
               </div>
             ) : (
