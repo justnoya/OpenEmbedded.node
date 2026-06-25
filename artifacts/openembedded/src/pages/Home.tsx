@@ -288,7 +288,7 @@ export function Home() {
           padding: "0 18px", height: 50, gap: 14,
         }}>
           <div style={{ display: "flex", alignItems: "center", gap: 9, flexShrink: 0 }}>
-            <div style={{ width: 28, height: 28, display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <div style={{ width: 28, height: 28, borderRadius: "50%", overflow: "hidden", flexShrink: 0 }}>
               <AppLogo size={28} />
             </div>
             <span style={{ fontSize: 14, fontWeight: 700, color: "#f0f0f0", letterSpacing: "-0.03em" }}>

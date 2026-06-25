@@ -9,7 +9,7 @@ import {
 
 const AppLogo = ({ size = 28 }: { size?: number }) => (
   <img src="/logo.png" alt="OpenEmbedded" width={size} height={size}
-    style={{ objectFit: "contain", display: "block", borderRadius: 7 }} />
+    style={{ objectFit: "contain", display: "block", borderRadius: "50%" }} />
 );
 
 // ─── Colour tokens ────────────────────────────────────────────────────────────

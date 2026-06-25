@@ -3,7 +3,7 @@ import { ArrowLeft, Shield } from "lucide-react";
 
 const AppLogo = ({ size = 28 }: { size?: number }) => (
   <img src="/logo.png" alt="OpenEmbedded" width={size} height={size}
-    style={{ objectFit: "contain", display: "block", borderRadius: 7 }} />
+    style={{ objectFit: "contain", display: "block", borderRadius: "50%" }} />
 );
 
 const BG      = "#111111";
@@ -91,21 +91,6 @@ export function Privacy() {
             borderRadius: 6, padding: "2px 8px",
           }}>Privacy Policy</span>
 
-          <div style={{ flex: 1 }} />
-
-          <button
-            onClick={() => navigate("/")}
-            style={{
-              display: "flex", alignItems: "center", gap: 6,
-              background: SURFACE, border: `1px solid ${BORDER}`,
-              borderRadius: 8, color: TEXT_SEC,
-              fontSize: 13, fontWeight: 500, padding: "6px 14px",
-              cursor: "pointer",
-            }}
-          >
-            <ArrowLeft size={13} />
-            Back to Home
-          </button>
         </header>
       </div>
 

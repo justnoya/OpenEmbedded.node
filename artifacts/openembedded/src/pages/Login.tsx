@@ -127,7 +127,7 @@ export function Login() {
             style={{
               width: 62,
               height: 62,
-              borderRadius: 18,
+              borderRadius: "50%",
               background: "#1a1a1a",
               border: "1px solid rgba(255,255,255,0.09)",
               boxShadow:
