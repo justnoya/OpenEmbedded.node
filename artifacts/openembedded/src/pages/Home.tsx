@@ -915,6 +915,35 @@ export function Home() {
         </div>
       )}
 
+      {/* ── Footer ─────────────────────────────────────────────────── */}
+      <footer style={{
+        borderTop: "1px solid rgba(255,255,255,0.06)",
+        padding: "18px 24px",
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+        flexWrap: "wrap", gap: 12, marginTop: "auto",
+      }}>
+        <div style={{ fontSize: 12, color: "rgba(255,255,255,0.22)" }}>
+          © 2026 OpenEmbedded
+        </div>
+        <div style={{ display: "flex", gap: 20, flexWrap: "wrap" }}>
+          {[
+            { label: "Docs",            href: "/docs" },
+            { label: "Terms of Service", href: "/tos" },
+            { label: "Privacy Policy",  href: "/privacy" },
+            { label: "Support",         href: "https://discord.gg/P84XzN2UKh" },
+          ].map((l) => (
+            <a key={l.label} href={l.href}
+              style={{
+                fontSize: 12, color: "rgba(255,255,255,0.28)",
+                textDecoration: "none", transition: "color 0.12s",
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = "rgba(255,255,255,0.65)")}
+              onMouseLeave={(e) => (e.currentTarget.style.color = "rgba(255,255,255,0.28)")}
+            >{l.label}</a>
+          ))}
+        </div>
+      </footer>
+
       <style>{`
         @keyframes scaleIn {
           from { opacity: 0; transform: scale(0.97) translateY(6px); }

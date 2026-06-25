@@ -154,6 +154,7 @@ const NAV = [
       { id: "intro",        label: "Introduction" },
       { id: "quickstart",   label: "Quick Start" },
       { id: "interface",    label: "Interface Overview" },
+      { id: "shortcuts",    label: "Keyboard Shortcuts" },
     ],
   },
   {
@@ -191,6 +192,13 @@ const NAV = [
       { id: "api-export",    label: "Export" },
       { id: "api-webhook",   label: "Webhook" },
       { id: "api-bot",       label: "Bot Send" },
+    ],
+  },
+  {
+    label: "Help",
+    icon: <Hash size={14} />,
+    items: [
+      { id: "faq", label: "FAQ & Troubleshooting" },
     ],
   },
 ];
@@ -480,6 +488,50 @@ export function Docs() {
             </Callout>
           </section>
 
+          {/* ══ KEYBOARD SHORTCUTS ════════════════════════════════════════ */}
+          <section id="shortcuts" data-section>
+            <H2 id="shortcuts">Keyboard Shortcuts</H2>
+            <P>Speed up your workflow with these shortcuts — they work anywhere on the canvas.</P>
+            <div style={{ display: "flex", flexDirection: "column", gap: 6, margin: "20px 0 28px" }}>
+              {[
+                { keys: ["Ctrl", "Z"],           label: "Undo last action" },
+                { keys: ["Ctrl", "Shift", "Z"],  label: "Redo" },
+                { keys: ["Ctrl", "A"],           label: "Select all nodes" },
+                { keys: ["Backspace / Delete"],  label: "Delete selected node(s)" },
+                { keys: ["Ctrl", "C"],           label: "Copy selected node(s)" },
+                { keys: ["Ctrl", "V"],           label: "Paste node(s)" },
+                { keys: ["Ctrl", "D"],           label: "Duplicate selected node(s)" },
+                { keys: ["Scroll"],              label: "Zoom in / out on canvas" },
+                { keys: ["Space + drag"],        label: "Pan the canvas" },
+                { keys: ["Ctrl", "Shift", "F"],  label: "Fit all nodes into view" },
+                { keys: ["Escape"],              label: "Deselect / close panels" },
+              ].map((s, i) => (
+                <div key={i} style={{
+                  ...card(), padding: "11px 18px",
+                  display: "flex", alignItems: "center", justifyContent: "space-between", gap: 20,
+                }}>
+                  <span style={{ fontSize: 13.5, color: TEXT_SEC }}>{s.label}</span>
+                  <div style={{ display: "flex", gap: 5, flexShrink: 0 }}>
+                    {s.keys.map((k) => (
+                      <span key={k} style={{
+                        fontFamily: `"JetBrains Mono", monospace`,
+                        fontSize: 11.5, fontWeight: 600, color: TEXT_PRI,
+                        background: "rgba(255,255,255,0.07)",
+                        border: `1px solid rgba(255,255,255,0.13)`,
+                        borderBottom: "2px solid rgba(255,255,255,0.18)",
+                        borderRadius: 5, padding: "2px 8px",
+                        whiteSpace: "nowrap",
+                      }}>{k}</span>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+            <Callout type="tip">
+              On macOS, replace <IC>Ctrl</IC> with <IC>⌘ Cmd</IC> for all shortcuts.
+            </Callout>
+          </section>
+
           {/* ══ NODE TYPES — LAYOUT ═══════════════════════════════════════ */}
           <section id="nodes-layout" data-section>
             <div style={{
@@ -727,11 +779,11 @@ const { success, message } = await res.json();`}</CodeBlock>
             <P>Base URL: <IC>https://your-domain.com/api</IC></P>
 
             {[
-              { method: "GET",    path: "/v1/projects",     desc: "List all projects",                 auth: false },
-              { method: "POST",   path: "/v1/projects",     desc: "Create a new project",              auth: false },
-              { method: "GET",    path: "/v1/projects/:id", desc: "Get a single project by ID",        auth: false },
-              { method: "PUT",    path: "/v1/projects/:id", desc: "Update project name, graph, or payload", auth: false },
-              { method: "DELETE", path: "/v1/projects/:id", desc: "Delete a project permanently",      auth: false },
+              { method: "GET",    path: "/v1/projects",     desc: "List all projects owned by the authenticated user", auth: true },
+              { method: "POST",   path: "/v1/projects",     desc: "Create a new project",              auth: true },
+              { method: "GET",    path: "/v1/projects/:id", desc: "Get a single project by ID",        auth: true },
+              { method: "PUT",    path: "/v1/projects/:id", desc: "Update project name, graph, or payload", auth: true },
+              { method: "DELETE", path: "/v1/projects/:id", desc: "Delete a project permanently",      auth: true },
             ].map((r) => {
               const mc = { GET: GREEN, POST: ACCENT, PUT: AMBER, DELETE: RED, PATCH: "#e879f9" }[r.method] ?? TEXT_MUT;
               return (
@@ -875,8 +927,111 @@ const { success, message } = await res.json();`}</CodeBlock>
               </a>
             </div>
           </section>
+
+          {/* ══ FAQ ═══════════════════════════════════════════════════════ */}
+          <section id="faq" data-section>
+            <div style={{
+              display: "inline-flex", alignItems: "center", gap: 7,
+              background: "rgba(255,255,255,0.05)", border: `1px solid ${BORDER_STR}`,
+              borderRadius: 8, padding: "4px 12px", marginBottom: 8, marginTop: 40,
+              fontSize: 12, fontWeight: 600, color: TEXT_SEC,
+            }}>
+              <Hash size={12} /> FAQ &amp; Troubleshooting
+            </div>
+            <H2 id="faq">Frequently Asked Questions</H2>
+
+            {[
+              {
+                q: "My message doesn't appear in Discord — what's wrong?",
+                a: "Make sure your payload includes a top-level Container node (type 17). Discord requires the IS_COMPONENTS_V2 flag (flags: 32768) for CV2 messages — OpenEmbedded sets this automatically. If you're sending via webhook, confirm the webhook URL is valid and the channel still exists.",
+              },
+              {
+                q: "Can I send interactive buttons and selects via webhook?",
+                a: "No. Discord's API does not allow interactive components (buttons, string selects) via webhooks — they require a bot account. Use the Bot Send panel and provide your bot token to send messages with interactive components.",
+              },
+              {
+                q: "Where is my project saved?",
+                a: "Projects are saved to our PostgreSQL database automatically whenever you make changes. They are linked to your Discord account. You can access them from any device by signing in with the same Discord account.",
+              },
+              {
+                q: "Is my bot token stored on your server?",
+                a: "No. Bot tokens are transmitted over HTTPS for the single request you make (send message, fetch channels, etc.) and are never written to our database or server logs. See the Privacy Policy for details.",
+              },
+              {
+                q: "The canvas feels slow — how do I fix it?",
+                a: "If you have many nodes, try using Ctrl + Shift + F to fit all nodes into view and reduce rendering load. Splitting very large designs into multiple smaller projects also improves performance.",
+              },
+              {
+                q: "Why are my node connections not compiling correctly?",
+                a: "Connections must flow parent → child in the correct order. Containers are the top-level parent. Sections must connect to a Container. Interactive nodes (Buttons, Selects) must connect to an Action Row, which connects to a Container. Check the Node Types reference above for valid parent-child relationships.",
+              },
+              {
+                q: "Can I export a project and import it somewhere else?",
+                a: "Yes — use Export JSON to get the raw Discord API payload. You can paste this directly into any Discord API request (REST API, discord.js, etc.). The discord.js Code export gives you ready-to-paste builder code.",
+              },
+              {
+                q: "I get a 401 Unauthorized error on API calls.",
+                a: "All project API endpoints require an authenticated session. Sign in with Discord first. Sessions expire after 7 days of inactivity — if your session expired, sign in again.",
+              },
+            ].map((item, i) => (
+              <details key={i} style={{
+                ...card(), marginBottom: 8, overflow: "hidden",
+              }}>
+                <summary style={{
+                  padding: "15px 20px", cursor: "pointer",
+                  fontSize: 14.5, fontWeight: 600, color: TEXT_PRI,
+                  display: "flex", alignItems: "center", justifyContent: "space-between",
+                  gap: 12, listStyle: "none",
+                  userSelect: "none",
+                }}>
+                  {item.q}
+                  <ChevronRight size={15} style={{ color: TEXT_MUT, flexShrink: 0 }} />
+                </summary>
+                <div style={{
+                  padding: "0 20px 16px", fontSize: 14, lineHeight: 1.7,
+                  color: TEXT_SEC, borderTop: `1px solid ${BORDER}`,
+                  paddingTop: 14, marginTop: 0,
+                }}>
+                  {item.a}
+                </div>
+              </details>
+            ))}
+
+            <Callout type="info">
+              Still stuck? Join our{" "}
+              <a href="https://discord.gg/P84XzN2UKh" target="_blank" rel="noreferrer"
+                style={{ color: "#818cf8", textDecoration: "none", fontWeight: 600 }}>
+                Discord support server
+              </a>
+              {" "}and we'll help you out.
+            </Callout>
+          </section>
         </main>
       </div>
+
+      {/* ── Docs footer ─────────────────────────────────────────────── */}
+      <footer style={{
+        borderTop: `1px solid ${BORDER}`,
+        padding: "20px 32px",
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+        flexWrap: "wrap", gap: 12,
+      }}>
+        <div style={{ fontSize: 13, color: TEXT_MUT }}>© 2026 OpenEmbedded</div>
+        <div style={{ display: "flex", gap: 20, flexWrap: "wrap" }}>
+          {[
+            { label: "Home",           href: "/" },
+            { label: "Terms of Service", href: "/tos" },
+            { label: "Privacy Policy", href: "/privacy" },
+            { label: "Support",        href: "https://discord.gg/P84XzN2UKh" },
+          ].map((l) => (
+            <a key={l.label} href={l.href}
+              style={{ fontSize: 13, color: TEXT_MUT, textDecoration: "none", transition: "color 0.12s" }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = TEXT_SEC)}
+              onMouseLeave={(e) => (e.currentTarget.style.color = TEXT_MUT)}
+            >{l.label}</a>
+          ))}
+        </div>
+      </footer>
 
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');

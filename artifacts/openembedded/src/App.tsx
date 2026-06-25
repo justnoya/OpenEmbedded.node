@@ -9,7 +9,9 @@ import { DiscordProvider } from "@/lib/discordContext";
 import { DiscordActivityOverlay } from "@/components/DiscordActivityOverlay";
 
 const Builder = lazy(() => import("@/pages/Builder").then((m) => ({ default: m.Builder })));
-const Docs = lazy(() => import("@/pages/Docs").then((m) => ({ default: m.Docs })));
+const Docs    = lazy(() => import("@/pages/Docs").then((m) => ({ default: m.Docs })));
+const Terms   = lazy(() => import("@/pages/Terms").then((m) => ({ default: m.Terms })));
+const Privacy = lazy(() => import("@/pages/Privacy").then((m) => ({ default: m.Privacy })));
 
 const queryClient = new QueryClient();
 
@@ -20,10 +22,10 @@ function Support() {
 
 function PageLoader() {
   return (
-    <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", background: "#0f0f0f", minHeight: "100vh" }}>
+    <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", background: "#111111", minHeight: "100vh" }}>
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" style={{ animation: "spin 0.8s linear infinite" }}>
-        <circle cx="12" cy="12" r="10" stroke="rgba(88,101,242,0.18)" strokeWidth="2.5" />
-        <path d="M12 2A10 10 0 0 1 22 12" stroke="#5865F2" strokeWidth="2.5" strokeLinecap="round" />
+        <circle cx="12" cy="12" r="10" stroke="rgba(255,255,255,0.08)" strokeWidth="2.5" />
+        <path d="M12 2A10 10 0 0 1 22 12" stroke="rgba(255,255,255,0.55)" strokeWidth="2.5" strokeLinecap="round" />
       </svg>
       <style>{`@keyframes spin { from { transform:rotate(0deg) } to { transform:rotate(360deg) } }`}</style>
     </div>
@@ -37,6 +39,17 @@ function Router() {
       <Route path="/docs">
         <Suspense fallback={<PageLoader />}>
           <Docs />
+        </Suspense>
+      </Route>
+      {/* ── Public legal pages — no auth required ─────────────────── */}
+      <Route path="/tos">
+        <Suspense fallback={<PageLoader />}>
+          <Terms />
+        </Suspense>
+      </Route>
+      <Route path="/privacy">
+        <Suspense fallback={<PageLoader />}>
+          <Privacy />
         </Suspense>
       </Route>
       <Route path="/support" component={Support} />
