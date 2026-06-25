@@ -108,7 +108,10 @@ export function Login() {
     <div
       style={{
         minHeight: "100dvh",
-        background: "#1a1a1a",
+        backgroundImage: "url(/login-bg.png)",
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
         fontFamily: `"DM Sans", system-ui, sans-serif`,
         display: "flex",
         flexDirection: "column",
@@ -121,15 +124,14 @@ export function Login() {
         transition: "opacity 0.4s ease, transform 0.4s ease",
       }}
     >
-      {/* Subtle radial glow */}
+      {/* Subtle dark overlay to keep card readable */}
       <div
         aria-hidden
         style={{
           position: "fixed",
           inset: 0,
           pointerEvents: "none",
-          background:
-            "radial-gradient(ellipse 900px 550px at 50% 36%, rgba(88,101,242,0.06) 0%, transparent 68%)",
+          background: "rgba(10, 8, 20, 0.45)",
         }}
       />
 
