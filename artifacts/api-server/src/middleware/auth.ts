@@ -34,7 +34,10 @@ const PgStore = connectPgSimple(session);
 export const sessionMiddleware = session({
   store: new PgStore({
     pool,
-    createTableIfMissing: true,
+    // Table is created/managed by Drizzle schema (lib/db/src/schema/sessions.ts).
+    // createTableIfMissing is intentionally disabled — it reads a SQL file from
+    // disk at runtime which breaks in bundled/serverless environments.
+    createTableIfMissing: false,
     tableName: "user_sessions",
     pruneSessionInterval: 60 * 15,
   }),
