@@ -165,7 +165,7 @@ const GROUPS = [
   { label: "Modals",          types: ["textInput"],                                                                     hint: "For modal dialogs" },
   { label: "Legacy",          types: ["embed"],                                                                         hint: "V1 only" },
   { label: "Message & Modal",  types: ["message", "modal"],                                                             hint: "Standalone" },
-  { label: "Bot Integration", types: ["bot", "webhook", "openembedded"],                                                hint: "Send to Discord" },
+  { label: "Advanced",         types: ["bot", "webhook", "openembedded"],                                                hint: "Send to Discord" },
 ];
 
 const NODE_MAP = new Map(NODE_DEFS.map((d) => [d.type, d]));
