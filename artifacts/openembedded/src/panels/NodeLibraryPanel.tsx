@@ -4,7 +4,7 @@ import {
   Box, AlignJustify, AlignLeft, Image, LayoutGrid, Minus,
   LayoutList, MousePointerClick, ListFilter, User, Shield,
   AtSign, Hash, TextCursorInput, Layers, Bot, Workflow,
-  Search, Sparkles, Zap,
+  Search, Zap,
 } from "lucide-react";
 
 interface NodeDef {
@@ -16,6 +16,7 @@ interface NodeDef {
   componentType: number | null;
   defaultData: Partial<AppNodeData>;
   recommended?: boolean;
+  comingSoon?: boolean;
 }
 
 const IC = ({ children, color }: { children: ReactNode; color?: string }) => (
@@ -87,36 +88,42 @@ const NODE_DEFS: NodeDef[] = [
     description: "Lets users pick someone from the server member list.",
     icon: <IC><User size={15} /></IC>, componentType: 5,
     defaultData: { componentType: 5, custom_id: "", placeholder: "Select a user…", min_values: 1, max_values: 1, disabled: false },
+    comingSoon: true,
   },
   {
     type: "roleSelect", label: "Role Select", alias: "Role picker",
     description: "Lets users choose a server role from a dropdown.",
     icon: <IC><Shield size={15} /></IC>, componentType: 6,
     defaultData: { componentType: 6, custom_id: "", placeholder: "Select a role…", min_values: 1, max_values: 1, disabled: false },
+    comingSoon: true,
   },
   {
     type: "mentionableSelect", label: "Mentionable Select", alias: "User or role",
     description: "Dropdown that lets users pick a user or a role.",
     icon: <IC><AtSign size={15} /></IC>, componentType: 7,
     defaultData: { componentType: 7, custom_id: "", placeholder: "Select a user or role…", min_values: 1, max_values: 1, disabled: false },
+    comingSoon: true,
   },
   {
     type: "channelSelect", label: "Channel Select", alias: "Channel picker",
     description: "Lets users pick a channel from the server channel list.",
     icon: <IC><Hash size={15} /></IC>, componentType: 8,
     defaultData: { componentType: 8, custom_id: "", placeholder: "Select a channel…", min_values: 1, max_values: 1, disabled: false },
+    comingSoon: true,
   },
   {
     type: "textInput", label: "Text Input", alias: "Text field",
     description: "A text field inside a modal dialog — attach to a button.",
     icon: <IC><TextCursorInput size={15} /></IC>, componentType: 4,
     defaultData: { componentType: 4, custom_id: "", label: "Label", style: "Short", placeholder: "", required: true, min_length: null, max_length: null, value: "" },
+    comingSoon: true,
   },
   {
     type: "embed", label: "Embed", alias: "Legacy V1",
     description: "Classic Discord embed (V1). Use Container for newer CV2 messages.",
     icon: <IC><Layers size={15} /></IC>, componentType: 0,
     defaultData: { componentType: 0, title: "", description: "", color: 0x5865f2 },
+    comingSoon: true,
   },
   {
     type: "bot", label: "Bot", alias: "Your bot token",
@@ -125,10 +132,11 @@ const NODE_DEFS: NodeDef[] = [
     defaultData: { componentType: -1, token: "", connected: false, botName: null, botAvatar: null, selectedGuildId: null, selectedChannelId: null, guilds: [], channels: [] },
   },
   {
-    type: "openembedded", label: "OpenEmbedded Bot", alias: "✨ No token needed",
+    type: "openembedded", label: "OpenEmbedded Bot", alias: "No token needed",
     description: "Send via the platform's managed bot — no setup required.",
-    icon: <IC color="#818cf8"><Workflow size={15} /></IC>, componentType: null,
+    icon: <IC color="#555"><Workflow size={15} /></IC>, componentType: null,
     defaultData: { componentType: -2, initialNodeId: null },
+    comingSoon: true,
   },
 ];
 
@@ -153,6 +161,7 @@ export function NodeLibraryPanel() {
 
   const handleAdd = useCallback(
     (def: NodeDef) => {
+      if (def.comingSoon) return;
       const id = `node_${nodeIdCounter++}`;
       const node: AppNode = {
         id,
@@ -172,40 +181,50 @@ export function NodeLibraryPanel() {
 
   const renderRow = (def: NodeDef, isLast: boolean) => {
     const isHovered = hoveredType === def.type;
+    const isDisabled = !!def.comingSoon;
+
     return (
       <button
         key={def.type}
         data-testid={`add-node-${def.type}`}
         onClick={() => handleAdd(def)}
-        onMouseEnter={() => setHoveredType(def.type)}
+        onMouseEnter={() => !isDisabled && setHoveredType(def.type)}
         onMouseLeave={() => setHoveredType(null)}
+        disabled={isDisabled}
         style={{
           display: "flex",
           alignItems: "flex-start",
           gap: 10,
           width: "100%",
           padding: "9px 14px",
-          background: isHovered ? "rgba(255,255,255,0.05)" : "transparent",
+          background: isDisabled ? "transparent" : isHovered ? "rgba(255,255,255,0.05)" : "transparent",
           border: "none",
-          cursor: "pointer",
+          cursor: isDisabled ? "default" : "pointer",
           textAlign: "left",
           position: "relative",
           transition: "background 0.1s",
           boxSizing: "border-box",
+          opacity: isDisabled ? 0.38 : 1,
+          pointerEvents: "auto",
         }}
       >
-        <div style={{ marginTop: 1, flexShrink: 0 }}>{def.icon}</div>
+        {/* Icon — slightly dimmed for disabled */}
+        <div style={{ marginTop: 1, flexShrink: 0, filter: isDisabled ? "grayscale(1)" : "none" }}>
+          {def.icon}
+        </div>
 
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
             <span style={{
-              fontSize: 13, fontWeight: 500, color: "#d4d4d4",
+              fontSize: 13, fontWeight: 500,
+              color: isDisabled ? "#4a4a4a" : "#d4d4d4",
               fontFamily: "inherit", letterSpacing: "-0.01em",
               overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
             }}>
               {def.label}
             </span>
-            {def.recommended && (
+
+            {def.recommended && !isDisabled && (
               <span style={{
                 fontSize: 9, fontWeight: 700, color: "#5865F2",
                 background: "rgba(88,101,242,0.12)",
@@ -216,9 +235,22 @@ export function NodeLibraryPanel() {
                 Start here
               </span>
             )}
+
+            {isDisabled && (
+              <span style={{
+                fontSize: 9, fontWeight: 700, color: "#666",
+                background: "rgba(255,255,255,0.05)",
+                border: "1px solid rgba(255,255,255,0.08)",
+                borderRadius: 4, padding: "1px 5px",
+                letterSpacing: "0.05em", textTransform: "uppercase", flexShrink: 0,
+              }}>
+                Soon
+              </span>
+            )}
           </div>
+
           <div style={{
-            fontSize: 11, color: "#555",
+            fontSize: 11, color: isDisabled ? "#363636" : "#555",
             lineHeight: 1.45, marginTop: 1,
             overflow: "hidden",
             display: "-webkit-box",
