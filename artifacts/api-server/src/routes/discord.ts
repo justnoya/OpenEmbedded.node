@@ -18,6 +18,7 @@ function isAllowedRedirectUri(uri: string): boolean {
 
     if (url.hostname === "localhost" || url.hostname === "127.0.0.1") return true;
 
+    // FRONTEND_URL: single canonical frontend origin (e.g. https://openembedded.xyz)
     if (process.env["FRONTEND_URL"]) {
       try {
         const allowed = new URL(process.env["FRONTEND_URL"]);
@@ -25,6 +26,27 @@ function isAllowedRedirectUri(uri: string): boolean {
       } catch { /* ignore bad FRONTEND_URL */ }
     }
 
+    // FRONTEND_ORIGIN: alias for FRONTEND_URL (either is accepted)
+    if (process.env["FRONTEND_ORIGIN"]) {
+      try {
+        const allowed = new URL(process.env["FRONTEND_ORIGIN"]);
+        if (url.hostname === allowed.hostname) return true;
+      } catch { /* ignore bad FRONTEND_ORIGIN */ }
+    }
+
+    // ALLOWED_ORIGINS: comma-separated list of additional trusted origins
+    const extraOrigins = (process.env["ALLOWED_ORIGINS"] ?? "")
+      .split(",")
+      .map((o) => o.trim())
+      .filter(Boolean);
+    for (const origin of extraOrigins) {
+      try {
+        const allowed = new URL(origin);
+        if (url.hostname === allowed.hostname) return true;
+      } catch { /* skip bad entry */ }
+    }
+
+    // Replit-managed domains (REPLIT_DOMAINS env is set automatically)
     const replitDomains = (process.env["REPLIT_DOMAINS"] ?? "")
       .split(",")
       .map((d) => d.trim())
@@ -291,6 +313,18 @@ router.post("/v1/auth/login", authLimiter, async (req, res) => {
     const message = err instanceof Error ? err.message : String(err);
     const type = err instanceof Error ? err.constructor?.name : typeof err;
     req.log.error({ type, message, stack: err instanceof Error ? err.stack : undefined }, "Auth login: unexpected error");
+
+    // Surface actionable errors for known misconfiguration cases
+    if (message.includes("DATABASE_URL") || message.includes("ECONNREFUSED") || message.includes("ENOTFOUND") || message.includes("connect ETIMEDOUT")) {
+      res.status(503).json({ error: "Database is not reachable. Please ensure DATABASE_URL is set in your deployment environment." });
+      return;
+    }
+
+    if (message.includes("SESSION_SECRET")) {
+      res.status(503).json({ error: "Session secret is not configured. Please set SESSION_SECRET in your deployment environment." });
+      return;
+    }
+
     res.status(500).json({ error: "Internal authentication error" });
   }
 });

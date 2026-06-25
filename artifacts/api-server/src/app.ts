@@ -69,9 +69,17 @@ const allowedOrigins: (string | RegExp)[] = process.env["NODE_ENV"] === "product
     ]
   : ["http://localhost:5000", "http://localhost:5173"];
 
+// FRONTEND_ORIGIN: single trusted origin (e.g. https://openembedded.xyz)
 if (process.env["FRONTEND_ORIGIN"]) {
   allowedOrigins.push(process.env["FRONTEND_ORIGIN"]);
 }
+
+// ALLOWED_ORIGINS: comma-separated list of additional trusted origins
+(process.env["ALLOWED_ORIGINS"] ?? "")
+  .split(",")
+  .map((o) => o.trim())
+  .filter(Boolean)
+  .forEach((o) => allowedOrigins.push(o));
 
 app.use(
   cors({
