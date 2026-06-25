@@ -773,17 +773,31 @@ export function DiscordPreview() {
   const setSenderName = usePreviewStore((s) => s.setSenderName);
   const setSenderAvatarUrl = usePreviewStore((s) => s.setSenderAvatarUrl);
 
-  // Check for a connected bot node
+  // Check for a connected bot or webhook node (bot takes priority)
   const nodes = useGraphStore((s) => s.nodes);
   const botNode = nodes.find(
     (n) => n.type === "bot" && (n.data as Record<string, unknown>).connected === true
   );
+  const webhookNode = nodes.find(
+    (n) => n.type === "webhook" && (n.data as Record<string, unknown>).connected === true
+  );
   const botName = botNode ? (botNode.data as Record<string, unknown>).botName as string | null : null;
   const botAvatar = botNode ? (botNode.data as Record<string, unknown>).botAvatar as string | null : null;
+  const webhookName = webhookNode ? (webhookNode.data as Record<string, unknown>).webhookName as string | null : null;
+  const webhookAvatar = webhookNode ? (webhookNode.data as Record<string, unknown>).webhookAvatar as string | null : null;
   const isBotConnected = !!botNode;
+  const isWebhookConnected = !isBotConnected && !!webhookNode;
 
-  const displayName = isBotConnected ? (botName ?? "Bot") : (senderName || "MyBot");
-  const displayAvatar = isBotConnected ? botAvatar : senderAvatarUrl;
+  const displayName = isBotConnected
+    ? (botName ?? "Bot")
+    : isWebhookConnected
+    ? (webhookName ?? "Webhook")
+    : (senderName || "MyBot");
+  const displayAvatar = isBotConnected
+    ? botAvatar
+    : isWebhookConnected
+    ? webhookAvatar
+    : senderAvatarUrl;
 
   const components = (payload?.components ?? []) as DC[];
   const embeds = (payload?.embeds ?? []) as Embed[];
@@ -804,7 +818,7 @@ export function DiscordPreview() {
   };
 
   const openNameEdit = () => {
-    if (isBotConnected) return;
+    if (isBotConnected || isWebhookConnected) return;
     setNameValue(senderName);
     setEditingName(true);
     setTimeout(() => { nameInputRef.current?.select(); }, 30);
@@ -898,8 +912,8 @@ export function DiscordPreview() {
         </div>
       )}
 
-      {/* Bot connected indicator */}
-      {isBotConnected && (
+      {/* Bot / Webhook connected indicator */}
+      {(isBotConnected || isWebhookConnected) && (
         <div
           style={{
             flexShrink: 0,
@@ -914,10 +928,14 @@ export function DiscordPreview() {
           {displayAvatar ? (
             <img src={displayAvatar} alt="" style={{ width: 20, height: 20, borderRadius: "50%", flexShrink: 0 }} onError={() => setAvatarError(true)} />
           ) : (
-            <div style={{ width: 20, height: 20, borderRadius: "50%", background: "#5865f2", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10 }}>🤖</div>
+            <div style={{ width: 20, height: 20, borderRadius: "50%", background: "#5865f2", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10 }}>
+              {isBotConnected ? "🤖" : "🪝"}
+            </div>
           )}
           <span style={{ color: "#3fb950", fontSize: 11, fontWeight: 600 }}>{displayName}</span>
-          <span style={{ color: "#3fb950", fontSize: 10, opacity: 0.65 }}>Bot connected · showing real identity</span>
+          <span style={{ color: "#3fb950", fontSize: 10, opacity: 0.65 }}>
+            {isBotConnected ? "Bot connected · showing real identity" : "Webhook connected · showing webhook identity"}
+          </span>
         </div>
       )}
 
@@ -941,8 +959,8 @@ export function DiscordPreview() {
             {/* Avatar — double-click to upload (preview mode only) */}
             <div
               style={{ position: "relative", flexShrink: 0, marginTop: 2 }}
-              onDoubleClick={() => { if (!isBotConnected) setAvatarUploadOpen(true); }}
-              title={isBotConnected ? undefined : "Double-click to change avatar"}
+              onDoubleClick={() => { if (!isBotConnected && !isWebhookConnected) setAvatarUploadOpen(true); }}
+              title={isBotConnected || isWebhookConnected ? undefined : "Double-click to change avatar"}
             >
               <div
                 style={{
@@ -950,7 +968,7 @@ export function DiscordPreview() {
                   background: "#5865f2", overflow: "hidden",
                   display: "flex", alignItems: "center", justifyContent: "center",
                   fontSize: 18,
-                  cursor: isBotConnected ? "default" : "pointer",
+                  cursor: (isBotConnected || isWebhookConnected) ? "default" : "pointer",
                   outline: avatarUploadOpen ? "2px solid #5865f2" : "none",
                   outlineOffset: 2,
                 }}
@@ -965,7 +983,7 @@ export function DiscordPreview() {
                 ) : "🤖"}
               </div>
               {/* Subtle upload hint ring */}
-              {!isBotConnected && (
+              {!isBotConnected && !isWebhookConnected && (
                 <div
                   style={{
                     position: "absolute", inset: -2, borderRadius: "50%",
@@ -1008,12 +1026,12 @@ export function DiscordPreview() {
                   <span
                     style={{
                       color: TEXT_NORMAL, fontWeight: 700, fontSize: 15, fontFamily: DC_FONT,
-                      cursor: isBotConnected ? "default" : "text",
-                      borderBottom: isBotConnected ? "none" : "1px dashed rgba(255,255,255,0.15)",
+                      cursor: (isBotConnected || isWebhookConnected) ? "default" : "text",
+                      borderBottom: (isBotConnected || isWebhookConnected) ? "none" : "1px dashed rgba(255,255,255,0.15)",
                       paddingBottom: 1,
                     }}
                     onDoubleClick={openNameEdit}
-                    title={isBotConnected ? undefined : "Double-click to edit name"}
+                    title={(isBotConnected || isWebhookConnected) ? undefined : "Double-click to edit name"}
                   >
                     {displayName}
                   </span>

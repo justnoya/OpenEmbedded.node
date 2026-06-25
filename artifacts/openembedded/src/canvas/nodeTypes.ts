@@ -11,6 +11,7 @@ import { SelectMenuNode } from "./nodes/SelectMenuNode";
 import { AutoSelectNode } from "./nodes/AutoSelectNode";
 import { TextInputNode } from "./nodes/TextInputNode";
 import { BotNode } from "./nodes/BotNode";
+import { WebhookNode } from "./nodes/WebhookNode";
 import { OpenEmbeddedNode } from "./nodes/OpenEmbeddedNode";
 import { MessageNode } from "./nodes/MessageNode";
 import { ModalNode } from "./nodes/ModalNode";
@@ -32,6 +33,7 @@ export const nodeTypes = {
   channelSelect: AutoSelectNode,
   textInput: TextInputNode,
   bot: BotNode,
+  webhook: WebhookNode,
   openembedded: OpenEmbeddedNode,
   message: MessageNode,
   modal: ModalNode,

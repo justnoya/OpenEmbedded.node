@@ -1,32 +1,35 @@
 import { useState } from "react";
 import { useGraphStore } from "@/lib/graphStore";
 import { usePreviewStore } from "@/lib/previewStore";
-import { useSettingsStore } from "@/lib/settingsStore";
 import { useExportCode, useSendWebhook } from "@workspace/api-client-react";
-import { Copy, Check, Code2, Webhook, FileJson, Send, Loader2, AlertCircle, CheckCircle2, ExternalLink } from "lucide-react";
+import {
+  Copy, Check, Code2, Webhook, FileJson, Send,
+  Loader2, AlertCircle, CheckCircle2,
+} from "lucide-react";
 
 type Tab = "json" | "code" | "webhook";
 
-const DISCORD_WEBHOOK_RE = /^https:\/\/(?:ptb\.|canary\.)?discord(?:app)?\.com\/api\/webhooks\/\d+\/.+/;
-
 const TAB_META: Record<Tab, { label: string; icon: React.ReactNode; description: string }> = {
-  json:    { label: "JSON",       icon: <FileJson size={13} />,  description: "Raw Discord API payload" },
-  code:    { label: "discord.js", icon: <Code2 size={13} />,    description: "Ready-to-paste bot code" },
-  webhook: { label: "Webhook",    icon: <Webhook size={13} />,  description: "No code — send directly" },
+  json:    { label: "JSON",       icon: <FileJson size={13} />, description: "Raw Discord API payload" },
+  code:    { label: "discord.js", icon: <Code2 size={13} />,   description: "Ready-to-paste bot code" },
+  webhook: { label: "Webhook",    icon: <Webhook size={13} />, description: "No code — send directly" },
 };
 
-const inputStyle: React.CSSProperties = {
-  background: "rgba(255,255,255,0.04)",
-  border: "1px solid rgba(255,255,255,0.09)",
-  borderRadius: 8,
-  color: "#e0e0e0",
+const codeBlockStyle: React.CSSProperties = {
+  background: "#0d0d0d",
+  border: "1px solid rgba(255,255,255,0.07)",
+  borderRadius: 10,
+  padding: 14,
+  color: "#c8d0e0",
   fontSize: 12,
-  padding: "8px 11px",
-  outline: "none",
-  fontFamily: "inherit",
-  width: "100%",
-  boxSizing: "border-box",
-  transition: "border-color 0.15s, box-shadow 0.15s",
+  fontFamily: "'JetBrains Mono', monospace",
+  overflowX: "auto",
+  margin: 0,
+  lineHeight: 1.65,
+  whiteSpace: "pre",
+  maxHeight: 190,
+  overflowY: "auto",
+  boxShadow: "inset 0 1px 3px rgba(0,0,0,0.3)",
 };
 
 export function ExportPanel() {
@@ -40,18 +43,20 @@ export function ExportPanel() {
   const payload = usePreviewStore((s) => s.payload);
   const nodes = useGraphStore((s) => s.nodes);
   const edges = useGraphStore((s) => s.edges);
-  const webhookUrl = useSettingsStore((s) => s.webhookUrl);
-  const setWebhookUrl = useSettingsStore((s) => s.setWebhookUrl);
 
   const exportCode = useExportCode();
   const sendWebhook = useSendWebhook();
   const jsonText = payload ? JSON.stringify(payload, null, 2) : "{}";
 
-  const isValidWebhook = DISCORD_WEBHOOK_RE.test(webhookUrl.trim());
-  const webhookHasValue = webhookUrl.trim().length > 0;
-  const webhookUrlError = webhookHasValue && !isValidWebhook
-    ? "That doesn't look like a Discord webhook URL"
-    : null;
+  // Read webhook config from the Webhook node on the canvas
+  const webhookNode = nodes.find(
+    (n) => n.type === "webhook",
+  );
+  const webhookNodeData = webhookNode?.data as Record<string, unknown> | undefined;
+  const webhookUrl = (webhookNodeData?.webhookUrl as string | undefined) ?? "";
+  const webhookConnected = !!(webhookNodeData?.connected as boolean | undefined);
+  const webhookName = (webhookNodeData?.webhookName as string | null | undefined) ?? null;
+  const webhookAvatar = (webhookNodeData?.webhookAvatar as string | null | undefined) ?? null;
 
   const handleCopy = (text: string) => {
     navigator.clipboard.writeText(text);
@@ -73,37 +78,30 @@ export function ExportPanel() {
   };
 
   const handleSendWebhook = () => {
-    if (!webhookUrl || !payload || !isValidWebhook) return;
+    if (!webhookUrl || !payload || !webhookConnected) return;
     setWebhookStatus("sending");
     sendWebhook.mutate(
       { data: { webhookUrl, payload: payload as Record<string, unknown> } },
       {
         onSuccess: (result) => {
           const r = result as { success: boolean; message?: string | null };
-          if (r.success) { setWebhookStatus("success"); setWebhookMsg("Message sent successfully!"); }
-          else { setWebhookStatus("error"); setWebhookMsg(r.message ?? "Discord rejected the message — double-check your webhook URL and try again."); }
+          if (r.success) {
+            setWebhookStatus("success");
+            setWebhookMsg("Message sent successfully!");
+          } else {
+            setWebhookStatus("error");
+            setWebhookMsg(r.message ?? "Discord rejected the message — check your webhook and try again.");
+          }
         },
-        onError: () => { setWebhookStatus("error"); setWebhookMsg("Couldn't reach Discord — check your internet connection and try again."); },
+        onError: () => {
+          setWebhookStatus("error");
+          setWebhookMsg("Couldn't reach Discord — check your internet connection and try again.");
+        },
       }
     );
   };
 
-  const codeBlockStyle: React.CSSProperties = {
-    background: "#0d0d0d",
-    border: "1px solid rgba(255,255,255,0.07)",
-    borderRadius: 10,
-    padding: 14,
-    color: "#c8d0e0",
-    fontSize: 12,
-    fontFamily: "'JetBrains Mono', monospace",
-    overflowX: "auto",
-    margin: 0,
-    lineHeight: 1.65,
-    whiteSpace: "pre",
-    maxHeight: 190,
-    overflowY: "auto",
-    boxShadow: "inset 0 1px 3px rgba(0,0,0,0.3)",
-  };
+  const canSend = webhookConnected && !!payload;
 
   return (
     <div style={{
@@ -126,9 +124,9 @@ export function ExportPanel() {
               display: "flex", flexDirection: "column", alignItems: "flex-start",
               padding: "8px 14px 6px",
               background: "transparent", border: "none",
-              borderBottom: activeTab === id ? "2px solid #5865F2" : "2px solid transparent",
+              borderBottom: activeTab === id ? "2px solid rgba(255,255,255,0.55)" : "2px solid transparent",
               borderRadius: 0,
-              color: activeTab === id ? "#818cf8" : "#505050",
+              color: activeTab === id ? "#c0c0c0" : "#505050",
               cursor: "pointer",
               transition: "color 0.12s, border-color 0.12s",
               gap: 2,
@@ -138,7 +136,7 @@ export function ExportPanel() {
               {meta.icon}
               {meta.label}
             </span>
-            <span style={{ fontSize: 9, color: activeTab === id ? "#5865F2" : "#3a3a3a", fontWeight: 400 }}>
+            <span style={{ fontSize: 9, color: activeTab === id ? "#404040" : "#3a3a3a", fontWeight: 400 }}>
               {meta.description}
             </span>
           </button>
@@ -171,12 +169,8 @@ export function ExportPanel() {
         {/* JSON tab */}
         {activeTab === "json" && (
           <div>
-            <div style={{
-              display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8,
-            }}>
-              <span style={{ fontSize: 11, color: "#484848" }}>
-                Paste this into your Discord bot's message payload
-              </span>
+            <div style={{ fontSize: 11, color: "#484848", marginBottom: 8 }}>
+              Paste this into your Discord bot's message payload
             </div>
             <pre style={codeBlockStyle}>{jsonText}</pre>
           </div>
@@ -209,12 +203,11 @@ export function ExportPanel() {
                 disabled={codeLoading}
                 style={{
                   display: "flex", alignItems: "center", gap: 6,
-                  background: "linear-gradient(135deg, #5865F2, #7c3aed)",
-                  border: "none", borderRadius: 8, color: "#fff",
+                  background: "#efefef",
+                  border: "none", borderRadius: 8, color: "#111111",
                   fontSize: 12, fontWeight: 600, padding: "8px 18px",
                   cursor: codeLoading ? "wait" : "pointer",
                   opacity: codeLoading ? 0.7 : 1,
-                  boxShadow: "0 2px 12px rgba(88,101,242,0.3)",
                   transition: "opacity 0.15s",
                 }}
               >
@@ -228,89 +221,94 @@ export function ExportPanel() {
         {/* Webhook tab */}
         {activeTab === "webhook" && (
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-            {/* Info banner */}
-            <div style={{
-              padding: "8px 11px", borderRadius: 8,
-              background: "rgba(88,101,242,0.06)", border: "1px solid rgba(88,101,242,0.14)",
-              display: "flex", alignItems: "flex-start", gap: 8,
-            }}>
-              <CheckCircle2 size={13} color="#818cf8" style={{ marginTop: 1, flexShrink: 0 }} />
-              <div style={{ fontSize: 11, color: "#707090", lineHeight: 1.6 }}>
-                No bot needed — just paste a Discord webhook URL and click send.{" "}
-                <a
-                  href="/docs#send-via-webhook"
-                  style={{ color: "#818cf8", textDecoration: "none" }}
-                >
-                  How to get a webhook URL <ExternalLink size={9} style={{ display: "inline" }} />
-                </a>
-              </div>
-            </div>
 
-            <div>
-              <label style={{
-                display: "block", color: "#555", fontSize: 10, fontWeight: 700,
-                textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 6,
+            {/* Webhook node status */}
+            {!webhookNode ? (
+              /* No webhook node on canvas */
+              <div style={{
+                display: "flex", flexDirection: "column", alignItems: "center",
+                gap: 10, padding: "22px 0", textAlign: "center",
               }}>
-                Webhook URL
-              </label>
-              <input
-                type="text"
-                value={webhookUrl}
-                onChange={(e) => { setWebhookUrl(e.target.value); setWebhookStatus("idle"); }}
-                placeholder="https://discord.com/api/webhooks/…"
-                data-testid="webhook-url"
-                style={{
-                  ...inputStyle,
-                  borderColor: webhookUrlError ? "rgba(248,81,73,0.45)" : undefined,
-                }}
-                onFocus={(e) => {
-                  (e.currentTarget as HTMLElement).style.borderColor = "rgba(88,101,242,0.5)";
-                  (e.currentTarget as HTMLElement).style.boxShadow = "0 0 0 3px rgba(88,101,242,0.1)";
-                }}
-                onBlur={(e) => {
-                  (e.currentTarget as HTMLElement).style.borderColor = webhookUrlError ? "rgba(248,81,73,0.45)" : "rgba(255,255,255,0.09)";
-                  (e.currentTarget as HTMLElement).style.boxShadow = "none";
-                }}
-              />
-              {/* Validation feedback */}
-              {webhookUrlError && (
-                <div style={{ display: "flex", alignItems: "center", gap: 5, color: "#f85149", fontSize: 11, marginTop: 5 }}>
-                  <AlertCircle size={11} />
-                  {webhookUrlError}
+                <Webhook size={28} color="#2e2e2e" />
+                <div>
+                  <div style={{ color: "#888", fontSize: 13, fontWeight: 600, marginBottom: 4 }}>
+                    No Webhook node on canvas
+                  </div>
+                  <div style={{ color: "#484848", fontSize: 11, lineHeight: 1.6 }}>
+                    Add a <strong style={{ color: "#606060" }}>Webhook</strong> node from the
+                    left panel, paste your Discord webhook URL in it, and come back here to send.
+                  </div>
                 </div>
-              )}
-              {webhookHasValue && isValidWebhook && (
-                <div style={{ display: "flex", alignItems: "center", gap: 5, color: "#3fb950", fontSize: 11, marginTop: 5 }}>
-                  <CheckCircle2 size={11} />
-                  Valid Discord webhook URL
+              </div>
+            ) : !webhookConnected ? (
+              /* Webhook node exists but URL not validated yet */
+              <div style={{
+                padding: "10px 12px", borderRadius: 9,
+                background: "rgba(255,255,255,0.03)",
+                border: "1px solid rgba(255,255,255,0.07)",
+                display: "flex", alignItems: "center", gap: 10,
+              }}>
+                <AlertCircle size={14} color="#484848" />
+                <div>
+                  <div style={{ color: "#888", fontSize: 12, fontWeight: 600 }}>Webhook not connected</div>
+                  <div style={{ color: "#484848", fontSize: 11, marginTop: 2 }}>
+                    Paste a valid Discord webhook URL into the Webhook node on the canvas.
+                  </div>
                 </div>
-              )}
-              {!webhookHasValue && (
-                <div style={{ color: "#3d3d3d", fontSize: 10, marginTop: 4 }}>
-                  Supports V1 Embeds and Components V2
+              </div>
+            ) : (
+              /* Connected — show identity card */
+              <div style={{
+                padding: "10px 12px", borderRadius: 9,
+                background: "rgba(63,185,80,0.06)",
+                border: "1px solid rgba(63,185,80,0.16)",
+                display: "flex", alignItems: "center", gap: 10,
+              }}>
+                {webhookAvatar ? (
+                  <img src={webhookAvatar} alt="" style={{ width: 32, height: 32, borderRadius: "50%", flexShrink: 0 }} />
+                ) : (
+                  <div style={{
+                    width: 32, height: 32, borderRadius: "50%",
+                    background: "#5865f2", flexShrink: 0,
+                    display: "flex", alignItems: "center", justifyContent: "center", fontSize: 15,
+                  }}>🪝</div>
+                )}
+                <div style={{ minWidth: 0, flex: 1 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                    <CheckCircle2 size={12} color="#3fb950" />
+                    <span style={{ color: "#3fb950", fontSize: 13, fontWeight: 700, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                      {webhookName ?? "Webhook"}
+                    </span>
+                  </div>
+                  <div style={{ color: "#2e4a32", fontSize: 10, marginTop: 1 }}>
+                    Webhook connected · ready to send
+                  </div>
                 </div>
-              )}
-            </div>
+              </div>
+            )}
 
+            {/* Send button */}
             <button
               data-testid="send-webhook"
               onClick={handleSendWebhook}
-              disabled={!isValidWebhook || !payload || webhookStatus === "sending"}
+              disabled={!canSend || webhookStatus === "sending"}
               style={{
                 display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
                 background: webhookStatus === "success"
                   ? "rgba(63,185,80,0.15)"
-                  : "linear-gradient(135deg, #5865F2, #7c3aed)",
+                  : "#efefef",
                 border: webhookStatus === "success" ? "1px solid rgba(63,185,80,0.25)" : "none",
-                borderRadius: 8, color: webhookStatus === "success" ? "#3fb950" : "#fff",
+                borderRadius: 8,
+                color: webhookStatus === "success" ? "#3fb950" : "#111111",
                 fontSize: 12, fontWeight: 700, padding: "9px 0",
-                cursor: (!isValidWebhook || !payload) ? "not-allowed" : "pointer",
-                opacity: (!isValidWebhook || !payload) ? 0.35 : 1,
+                cursor: !canSend ? "not-allowed" : "pointer",
+                opacity: !canSend ? 0.3 : 1,
                 transition: "all 0.15s",
-                boxShadow: webhookStatus !== "success" ? "0 2px 12px rgba(88,101,242,0.3)" : "none",
               }}
             >
-              {webhookStatus === "sending" ? <Loader2 size={13} style={{ animation: "spin 1s linear infinite" }} /> : <Send size={13} />}
+              {webhookStatus === "sending"
+                ? <Loader2 size={13} style={{ animation: "spin 1s linear infinite" }} />
+                : <Send size={13} />}
               {webhookStatus === "sending" ? "Sending…" : webhookStatus === "success" ? "Sent ✓" : "Send to Discord"}
             </button>
 

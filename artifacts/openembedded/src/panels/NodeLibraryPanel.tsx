@@ -4,7 +4,7 @@ import {
   Box, AlignJustify, AlignLeft, Image, LayoutGrid, Minus,
   LayoutList, MousePointerClick, ListFilter, User, Shield,
   AtSign, Hash, TextCursorInput, Layers, Bot, Workflow,
-  Search, Zap, MessageCircle, PanelTop,
+  Search, Zap, MessageCircle, PanelTop, Webhook,
 } from "lucide-react";
 
 interface NodeDef {
@@ -144,6 +144,12 @@ const NODE_DEFS: NodeDef[] = [
     defaultData: { componentType: -1, token: "", connected: false, botName: null, botAvatar: null, selectedGuildId: null, selectedChannelId: null, guilds: [], channels: [] },
   },
   {
+    type: "webhook", label: "Webhook", alias: "Webhook URL",
+    description: "Send via a Discord webhook URL — no bot token needed.",
+    icon: <IC><Webhook size={15} /></IC>, componentType: null,
+    defaultData: { componentType: -5, webhookUrl: "", connected: false, webhookName: null, webhookAvatar: null },
+  },
+  {
     type: "openembedded", label: "OpenEmbedded Bot", alias: "No token needed",
     description: "Send via the platform's managed bot — no setup required.",
     icon: <IC color="#555"><Workflow size={15} /></IC>, componentType: null,
@@ -159,7 +165,7 @@ const GROUPS = [
   { label: "Modals",          types: ["textInput"],                                                                     hint: "For modal dialogs" },
   { label: "Legacy",          types: ["embed"],                                                                         hint: "V1 only" },
   { label: "Message & Modal",  types: ["message", "modal"],                                                             hint: "Standalone" },
-  { label: "Bot Integration", types: ["bot", "openembedded"],                                                           hint: "Send to Discord" },
+  { label: "Bot Integration", types: ["bot", "webhook", "openembedded"],                                                hint: "Send to Discord" },
 ];
 
 const NODE_MAP = new Map(NODE_DEFS.map((d) => [d.type, d]));
