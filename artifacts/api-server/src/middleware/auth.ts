@@ -25,8 +25,34 @@ function resolveSecret(): string {
   return randomBytes(48).toString("hex");
 }
 
+/* ── Session table bootstrap ────────────────────────────────────────────────
+ *  Creates the user_sessions table inline using the pool directly.
+ *  This avoids connect-pg-simple's createTableIfMissing which reads a SQL
+ *  file from disk — that file is absent in bundled/serverless environments.
+ *  Safe to call multiple times (IF NOT EXISTS).
+ * ─────────────────────────────────────────────────────────────────────────── */
+export async function ensureSessionTable(): Promise<void> {
+  const client = await pool.connect();
+  try {
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS "user_sessions" (
+        "sid"    varchar      NOT NULL,
+        "sess"   json         NOT NULL,
+        "expire" timestamp(6) NOT NULL,
+        CONSTRAINT "user_sessions_pkey" PRIMARY KEY ("sid")
+      );
+      CREATE INDEX IF NOT EXISTS "IDX_user_sessions_expire"
+        ON "user_sessions" ("expire");
+    `);
+  } finally {
+    client.release();
+  }
+}
+
 /* ── Session store ──────────────────────────────────────────────────────────
  *  PostgreSQL-backed store keeps sessions alive across restarts.
+ *  createTableIfMissing is disabled — we bootstrap the table via
+ *  ensureSessionTable() at app startup instead, avoiding the disk-read issue.
  *  OWASP A07 — Identification & Authentication Failures
  * ─────────────────────────────────────────────────────────────────────────── */
 const PgStore = connectPgSimple(session);
@@ -34,9 +60,6 @@ const PgStore = connectPgSimple(session);
 export const sessionMiddleware = session({
   store: new PgStore({
     pool,
-    // Table is created/managed by Drizzle schema (lib/db/src/schema/sessions.ts).
-    // createTableIfMissing is intentionally disabled — it reads a SQL file from
-    // disk at runtime which breaks in bundled/serverless environments.
     createTableIfMissing: false,
     tableName: "user_sessions",
     pruneSessionInterval: 60 * 15,

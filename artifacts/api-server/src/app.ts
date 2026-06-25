@@ -5,7 +5,16 @@ import type { IncomingMessage, ServerResponse } from "http";
 import router from "./routes";
 import { logger } from "./lib/logger";
 import { helmetMiddleware, generalLimiter } from "./middleware/security";
-import { sessionMiddleware } from "./middleware/auth";
+import { sessionMiddleware, ensureSessionTable } from "./middleware/auth";
+
+/* ── Session table bootstrap ────────────────────────────────────────────────
+ *  Runs once at module load time (cold start in serverless environments).
+ *  Creates user_sessions if it doesn't exist yet using inline SQL — no disk
+ *  reads, compatible with esbuild bundles and Vercel serverless.
+ * ─────────────────────────────────────────────────────────────────────────── */
+await ensureSessionTable().catch((err: unknown) => {
+  logger.error({ err }, "Failed to ensure session table on startup");
+});
 
 /* ── App ────────────────────────────────────────────────────────────────── */
 const app = express();
