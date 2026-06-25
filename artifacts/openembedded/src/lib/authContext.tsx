@@ -164,7 +164,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           response_type: "code",
           scope: "identify",
           state,
-          prompt: "none",
         });
 
         window.location.href = `https://discord.com/api/oauth2/authorize?${params}`;
