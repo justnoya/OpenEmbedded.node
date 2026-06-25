@@ -1,11 +1,14 @@
-import { Switch, Route, Router as WouterRouter } from "wouter";
-import { lazy, Suspense } from "react";
+import { Switch, Route, Router as WouterRouter, useLocation } from "wouter";
+import { lazy, Suspense, useEffect, type ReactNode } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Home } from "@/pages/Home";
 import NotFound from "@/pages/not-found";
-import { DiscordProvider } from "@/lib/discordContext";
+import { Login } from "@/pages/Login";
+import { AuthCallback } from "@/pages/AuthCallback";
+import { AuthProvider, useAuth } from "@/lib/authContext";
+import { DiscordProvider, useDiscord } from "@/lib/discordContext";
 import { DiscordActivityOverlay } from "@/components/DiscordActivityOverlay";
 
 const Builder = lazy(() => import("@/pages/Builder").then((m) => ({ default: m.Builder })));
@@ -22,26 +25,75 @@ function Support() {
 
 function PageLoader() {
   return (
-    <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", background: "#111111", minHeight: "100vh" }}>
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" style={{ animation: "spin 0.8s linear infinite" }}>
+    <div
+      style={{
+        flex: 1,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        background: "#111111",
+        minHeight: "100vh",
+      }}
+    >
+      <svg
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+        style={{ animation: "spin 0.8s linear infinite" }}
+      >
         <circle cx="12" cy="12" r="10" stroke="rgba(255,255,255,0.08)" strokeWidth="2.5" />
-        <path d="M12 2A10 10 0 0 1 22 12" stroke="rgba(255,255,255,0.55)" strokeWidth="2.5" strokeLinecap="round" />
+        <path
+          d="M12 2A10 10 0 0 1 22 12"
+          stroke="rgba(255,255,255,0.55)"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+        />
       </svg>
       <style>{`@keyframes spin { from { transform:rotate(0deg) } to { transform:rotate(360deg) } }`}</style>
     </div>
   );
 }
 
+/* ── AuthGuard ───────────────────────────────────────────────────────────────
+ *  Protects routes from unauthenticated access.
+ *  Discord Activity users are handled by DiscordActivityOverlay — they bypass
+ *  this guard while the overlay is visible so the two systems don't conflict.
+ * ─────────────────────────────────────────────────────────────────────────── */
+function AuthGuard({ children }: { children: ReactNode }) {
+  const { auth } = useAuth();
+  const { isDiscord } = useDiscord();
+  const [, navigate] = useLocation();
+
+  useEffect(() => {
+    if (auth.status === "unauthenticated" && !isDiscord) {
+      navigate("/login");
+    }
+  }, [auth.status, isDiscord, navigate]);
+
+  // Discord Activity: auth is managed by DiscordActivityOverlay
+  if (isDiscord) return <>{children}</>;
+
+  // Web browser: show loader while checking session
+  if (auth.status === "loading") return <PageLoader />;
+
+  // Unauthenticated: render nothing while navigate fires
+  if (auth.status === "unauthenticated") return null;
+
+  return <>{children}</>;
+}
+
 function Router() {
   return (
     <Switch>
-      <Route path="/" component={Home} />
+      {/* ── Public routes — no auth required ────────────────────────── */}
+      <Route path="/login" component={Login} />
+      <Route path="/auth/callback" component={AuthCallback} />
       <Route path="/docs">
         <Suspense fallback={<PageLoader />}>
           <Docs />
         </Suspense>
       </Route>
-      {/* ── Public legal pages — no auth required ─────────────────── */}
       <Route path="/tos">
         <Suspense fallback={<PageLoader />}>
           <Terms />
@@ -53,11 +105,21 @@ function Router() {
         </Suspense>
       </Route>
       <Route path="/support" component={Support} />
-      <Route path="/builder/:id">
-        <Suspense fallback={<PageLoader />}>
-          <Builder />
-        </Suspense>
+
+      {/* ── Protected routes — require authentication ────────────────── */}
+      <Route path="/">
+        <AuthGuard>
+          <Home />
+        </AuthGuard>
       </Route>
+      <Route path="/builder/:id">
+        <AuthGuard>
+          <Suspense fallback={<PageLoader />}>
+            <Builder />
+          </Suspense>
+        </AuthGuard>
+      </Route>
+
       <Route component={NotFound} />
     </Switch>
   );
@@ -68,11 +130,13 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <DiscordProvider>
-          <DiscordActivityOverlay />
-          <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-            <Router />
-          </WouterRouter>
-          <Toaster />
+          <AuthProvider>
+            <DiscordActivityOverlay />
+            <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+              <Router />
+            </WouterRouter>
+            <Toaster />
+          </AuthProvider>
         </DiscordProvider>
       </TooltipProvider>
     </QueryClientProvider>

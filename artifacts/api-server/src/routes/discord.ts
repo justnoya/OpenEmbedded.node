@@ -1,12 +1,47 @@
 /// <reference lib="dom" />
 import { Router } from "express";
 import { db, usersTable } from "@workspace/db";
+import { eq } from "drizzle-orm";
 import { authLimiter } from "../middleware/security";
 
 const router = Router();
 
+/* ── Allowed redirect URIs ───────────────────────────────────────────────────
+ *  Only accept redirect URIs from our own origins.
+ *  Prevents open-redirect abuse in the OAuth2 authorization-code flow.
+ *  OWASP A01 — Broken Access Control, CWE-601
+ * ─────────────────────────────────────────────────────────────────────────── */
+function isAllowedRedirectUri(uri: string): boolean {
+  try {
+    const url = new URL(uri);
+    if (url.pathname !== "/auth/callback") return false;
+
+    if (url.hostname === "localhost" || url.hostname === "127.0.0.1") return true;
+
+    if (process.env["FRONTEND_URL"]) {
+      try {
+        const allowed = new URL(process.env["FRONTEND_URL"]);
+        if (url.hostname === allowed.hostname) return true;
+      } catch { /* ignore bad FRONTEND_URL */ }
+    }
+
+    const replitDomains = (process.env["REPLIT_DOMAINS"] ?? "")
+      .split(",")
+      .map((d) => d.trim())
+      .filter(Boolean);
+    if (replitDomains.some((d) => url.hostname === d)) return true;
+
+    if (url.hostname.endsWith(".replit.app") || url.hostname.endsWith(".repl.co")) return true;
+
+    return false;
+  } catch {
+    return false;
+  }
+}
+
 /* ── POST /v1/discord/token ──────────────────────────────────────────────────
  *  Exchange a Discord Activity auth code for an access_token.
+ *  Used ONLY by the embedded Discord Activity SDK — not the web OAuth flow.
  *  Rate-limited: 10 req / 15 min per IP.
  * ─────────────────────────────────────────────────────────────────────────── */
 router.post("/v1/discord/token", authLimiter, async (req, res) => {
@@ -22,9 +57,7 @@ router.post("/v1/discord/token", authLimiter, async (req, res) => {
 
   if (!clientId || !clientSecret) {
     req.log.warn("DISCORD_CLIENT_ID or DISCORD_CLIENT_SECRET not configured");
-    res.status(503).json({
-      error: "Discord integration not configured",
-    });
+    res.status(503).json({ error: "Discord integration not configured" });
     return;
   }
 
@@ -62,6 +95,7 @@ router.get("/v1/discord/config", (_req, res) => {
 
 /* ── POST /v1/discord/me ─────────────────────────────────────────────────────
  *  Fetch Discord profile, upsert to DB, and establish a server-side session.
+ *  Used by the Discord Activity SDK overlay flow (embedded in Discord).
  *  OWASP A07 — after this call, req.session.userId is set for all routes.
  * ─────────────────────────────────────────────────────────────────────────── */
 router.post("/v1/discord/me", authLimiter, async (req, res) => {
@@ -113,8 +147,7 @@ router.post("/v1/discord/me", authLimiter, async (req, res) => {
       });
 
     req.session.userId = profile.id;
-
-    req.log.info({ discordId: profile.id }, "Discord user authenticated and session established");
+    req.log.info({ discordId: profile.id }, "Discord Activity user authenticated");
 
     res.json({
       id: profile.id,
@@ -129,27 +162,186 @@ router.post("/v1/discord/me", authLimiter, async (req, res) => {
   }
 });
 
-/* ── GET /v1/auth/session ────────────────────────────────────────────────────
- *  Returns the current session state. Frontend calls this on startup.
+/* ── POST /v1/auth/login ─────────────────────────────────────────────────────
+ *  Web OAuth2 login: exchange a Discord authorization code for a session.
+ *
+ *  Security model (OWASP A07, CWE-287, CWE-384):
+ *    ✓ Rate-limited: 10 req / 15 min per IP (brute-force & replay protection)
+ *    ✓ redirect_uri validated server-side against allowed origins (CWE-601)
+ *    ✓ code length/format validated before touching external services
+ *    ✓ Code exchange is fully server-side — client_secret never exposed
+ *    ✓ Session regenerated after auth (session fixation prevention, CWE-384)
+ *    ✓ Session saved before responding (atomicity guarantee)
+ *    ✓ access_token NEVER returned to the client or stored
+ *    ✓ All auth events logged with structured context
  * ─────────────────────────────────────────────────────────────────────────── */
-router.get("/v1/auth/session", (req, res) => {
-  if (!req.session?.userId) {
-    res.json({ authenticated: false, userId: null });
+router.post("/v1/auth/login", authLimiter, async (req, res) => {
+  const { code, redirectUri } = req.body as { code?: unknown; redirectUri?: unknown };
+
+  if (!code || typeof code !== "string" || code.trim().length === 0 || code.length > 512) {
+    req.log.warn("Auth login: invalid or missing code");
+    res.status(400).json({ error: "Invalid authorization code" });
     return;
   }
-  res.json({ authenticated: true, userId: req.session.userId });
+
+  if (!redirectUri || typeof redirectUri !== "string" || !isAllowedRedirectUri(redirectUri)) {
+    req.log.warn({ redirectUri }, "Auth login: disallowed redirect URI");
+    res.status(400).json({ error: "Invalid redirect URI" });
+    return;
+  }
+
+  const clientId = process.env["DISCORD_CLIENT_ID"];
+  const clientSecret = process.env["DISCORD_CLIENT_SECRET"];
+
+  if (!clientId || !clientSecret) {
+    req.log.warn("Auth login: Discord credentials not configured");
+    res.status(503).json({ error: "Discord integration not configured. Contact the administrator." });
+    return;
+  }
+
+  try {
+    // 1. Exchange code server-side (client_secret never reaches the browser)
+    const tokenRes = await fetch("https://discord.com/api/oauth2/token", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({
+        client_id: clientId,
+        client_secret: clientSecret,
+        grant_type: "authorization_code",
+        code: code.trim(),
+        redirect_uri: redirectUri,
+      }),
+    });
+
+    if (!tokenRes.ok) {
+      const errText = await tokenRes.text().catch(() => "");
+      req.log.warn({ status: tokenRes.status, body: errText.slice(0, 200) }, "Auth login: Discord rejected code exchange");
+      res.status(401).json({
+        error: "Discord rejected the authorization code. It may have expired — please try signing in again.",
+      });
+      return;
+    }
+
+    const tokenData = (await tokenRes.json()) as { access_token: string };
+
+    // 2. Fetch profile — access_token is ephemeral here, never stored or returned
+    const profileRes = await fetch("https://discord.com/api/v10/users/@me", {
+      headers: { Authorization: `Bearer ${tokenData.access_token}` },
+    });
+
+    if (!profileRes.ok) {
+      req.log.warn({ status: profileRes.status }, "Auth login: profile fetch failed");
+      res.status(502).json({ error: "Failed to retrieve your Discord profile. Try again." });
+      return;
+    }
+
+    const profile = (await profileRes.json()) as {
+      id: string;
+      username: string;
+      global_name?: string | null;
+      discriminator: string;
+      avatar?: string | null;
+    };
+
+    // 3. Upsert user record
+    await db
+      .insert(usersTable)
+      .values({
+        discordId: profile.id,
+        username: profile.username,
+        globalName: profile.global_name ?? null,
+        discriminator: profile.discriminator ?? "0",
+        avatar: profile.avatar ?? null,
+        lastSeenAt: new Date(),
+      })
+      .onConflictDoUpdate({
+        target: usersTable.discordId,
+        set: {
+          username: profile.username,
+          globalName: profile.global_name ?? null,
+          discriminator: profile.discriminator ?? "0",
+          avatar: profile.avatar ?? null,
+          lastSeenAt: new Date(),
+        },
+      });
+
+    // 4. Session fixation prevention — regenerate session ID before writing userId (CWE-384)
+    await new Promise<void>((resolve, reject) => {
+      req.session.regenerate((err) => (err ? reject(err) : resolve()));
+    });
+
+    req.session.userId = profile.id;
+
+    // 5. Explicit save ensures session is persisted before we respond
+    await new Promise<void>((resolve, reject) => {
+      req.session.save((err) => (err ? reject(err) : resolve()));
+    });
+
+    req.log.info({ discordId: profile.id, username: profile.username }, "Web OAuth login successful");
+
+    // 6. Return sanitized profile — access_token intentionally NOT included
+    res.json({
+      id: profile.id,
+      username: profile.username,
+      globalName: profile.global_name ?? null,
+      discriminator: profile.discriminator,
+      avatar: profile.avatar ?? null,
+    });
+  } catch (err) {
+    req.log.error({ err }, "Auth login: unexpected error");
+    res.status(500).json({ error: "Internal authentication error" });
+  }
+});
+
+/* ── GET /v1/auth/session ────────────────────────────────────────────────────
+ *  Returns current session state with full user profile from the database.
+ *  Frontend calls this on startup to restore auth without re-logging in.
+ * ─────────────────────────────────────────────────────────────────────────── */
+router.get("/v1/auth/session", async (req, res) => {
+  if (!req.session?.userId) {
+    res.json({ authenticated: false, user: null });
+    return;
+  }
+
+  try {
+    const [user] = await db
+      .select({
+        id: usersTable.discordId,
+        username: usersTable.username,
+        globalName: usersTable.globalName,
+        discriminator: usersTable.discriminator,
+        avatar: usersTable.avatar,
+      })
+      .from(usersTable)
+      .where(eq(usersTable.discordId, req.session.userId))
+      .limit(1);
+
+    if (!user) {
+      // Session references a deleted user — destroy it
+      req.session.destroy(() => {});
+      res.json({ authenticated: false, user: null });
+      return;
+    }
+
+    res.json({ authenticated: true, user });
+  } catch (err) {
+    req.log.error({ err }, "Session lookup failed");
+    res.status(500).json({ error: "Session lookup failed" });
+  }
 });
 
 /* ── POST /v1/auth/logout ────────────────────────────────────────────────────
  *  Destroys the server-side session and clears the cookie.
  * ─────────────────────────────────────────────────────────────────────────── */
 router.post("/v1/auth/logout", (req, res) => {
+  const userId = req.session?.userId;
   req.session.destroy((err) => {
     if (err) {
       req.log.error({ type: (err as Error).constructor?.name }, "Session destroy failed");
       res.status(500).json({ error: "Logout failed" });
       return;
     }
+    req.log.info({ discordId: userId }, "User logged out");
     res.clearCookie("oe.sid");
     res.json({ success: true });
   });

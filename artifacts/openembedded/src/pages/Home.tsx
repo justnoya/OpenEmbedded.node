@@ -18,7 +18,9 @@ import {
   Clock,
   Box,
   Loader2,
+  LogOut,
 } from "lucide-react";
+import { useAuth } from "@/lib/authContext";
 
 const AppLogo = ({ size = 32 }: { size?: number }) => (
   <img
@@ -211,6 +213,7 @@ const btnDark: React.CSSProperties = {
 export function Home() {
   const [, navigate] = useLocation();
   const queryClient = useQueryClient();
+  const { user, logout } = useAuth();
   const { data: rawProjects, isLoading } = useListProjects();
   const createProject = useCreateProject();
   const deleteProject = useDeleteProject();
@@ -294,6 +297,90 @@ export function Home() {
           </div>
 
           <div style={{ flex: 1 }} />
+
+          {/* ── User avatar + logout ──────────────────────────────── */}
+          {user && (
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginRight: 6 }}>
+              {/* Avatar */}
+              <div
+                title={user.globalName ?? user.username}
+                style={{
+                  width: 28,
+                  height: 28,
+                  borderRadius: "50%",
+                  overflow: "hidden",
+                  border: "1.5px solid rgba(255,255,255,0.1)",
+                  flexShrink: 0,
+                  background: "#2a2a2a",
+                }}
+              >
+                <img
+                  src={
+                    user.avatar
+                      ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=64`
+                      : `https://cdn.discordapp.com/embed/avatars/${parseInt(user.id.slice(-2), 16) % 6}.png`
+                  }
+                  alt={user.username}
+                  width={28}
+                  height={28}
+                  style={{ display: "block", objectFit: "cover" }}
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = `https://cdn.discordapp.com/embed/avatars/0.png`;
+                  }}
+                />
+              </div>
+
+              {/* Username — hidden when narrow */}
+              <span
+                style={{
+                  fontSize: 13,
+                  fontWeight: 600,
+                  color: "#686868",
+                  letterSpacing: "-0.01em",
+                  maxWidth: 120,
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {user.globalName ?? user.username}
+              </span>
+
+              {/* Logout button */}
+              <button
+                onClick={() => void logout()}
+                title="Sign out"
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  width: 28,
+                  height: 28,
+                  background: "transparent",
+                  border: "1px solid rgba(255,255,255,0.07)",
+                  borderRadius: 7,
+                  color: "#585858",
+                  cursor: "pointer",
+                  transition: "background 0.12s, color 0.12s, border-color 0.12s",
+                  flexShrink: 0,
+                }}
+                onMouseEnter={(e) => {
+                  const el = e.currentTarget as HTMLElement;
+                  el.style.background = "#1e1e1e";
+                  el.style.color = "#f85149";
+                  el.style.borderColor = "rgba(248,81,73,0.22)";
+                }}
+                onMouseLeave={(e) => {
+                  const el = e.currentTarget as HTMLElement;
+                  el.style.background = "transparent";
+                  el.style.color = "#585858";
+                  el.style.borderColor = "rgba(255,255,255,0.07)";
+                }}
+              >
+                <LogOut size={13} strokeWidth={2} />
+              </button>
+            </div>
+          )}
 
           <button
             onClick={openCreate}
