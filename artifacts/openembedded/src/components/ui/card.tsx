@@ -2,6 +2,16 @@ import * as React from "react"
 
 import { cn } from "@/lib/utils"
 
+/* ── Card — primary container unit ─────────────────────────────────────────
+ *
+ *  Background:   #1a1a1a  (primary surface)
+ *  Border:       rgba(255,255,255,0.07)  — hairline, no hue
+ *  Radius:       12px
+ *  Inner top:    inset 0 1px 0 rgba(255,255,255,0.04) — depth illusion
+ *  Shadow:       0 2px 8px rgba(0,0,0,0.5) — grounded, no glow
+ *
+ * ─────────────────────────────────────────────────────────────────────────── */
+
 const Card = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
@@ -9,7 +19,8 @@ const Card = React.forwardRef<
   <div
     ref={ref}
     className={cn(
-      "rounded-xl border bg-card text-card-foreground shadow",
+      "rounded-[12px] border border-[rgba(255,255,255,0.07)] bg-[#1a1a1a] text-[#f0f0f0]",
+      "shadow-[0_2px_8px_rgba(0,0,0,0.5),inset_0_1px_0_rgba(255,255,255,0.04)]",
       className
     )}
     {...props}
@@ -35,7 +46,7 @@ const CardTitle = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn("font-semibold leading-none tracking-tight", className)}
+    className={cn("font-semibold leading-none tracking-tight text-[#f0f0f0]", className)}
     {...props}
   />
 ))
@@ -47,7 +58,7 @@ const CardDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn("text-sm text-muted-foreground", className)}
+    className={cn("text-sm text-[#606060]", className)}
     {...props}
   />
 ))
