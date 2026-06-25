@@ -1,5 +1,6 @@
 import { Router } from "express";
-import { db, projectsTable, eq } from "@workspace/db";
+import { db, projectsTable, eq, and } from "@workspace/db";
+import type { Project } from "@workspace/db";
 import {
   ListProjectsResponseItem,
   CreateProjectBody,
@@ -8,16 +9,26 @@ import {
   UpdateProjectParams,
   DeleteProjectParams,
 } from "@workspace/api-zod";
+import { requireAuth } from "../middleware/auth";
 
 const router = Router();
 
-router.get("/v1/projects", async (req, res) => {
+/* ── All project routes require authentication ───────────────────────────────
+ *  OWASP A01 — Broken Access Control
+ *  Every query is scoped to req.session.userId (the authenticated Discord ID).
+ * ─────────────────────────────────────────────────────────────────────────── */
+
+/* ── GET /v1/projects ─────────────────────────────────────────────────────── */
+router.get("/v1/projects", requireAuth, async (req, res) => {
+  const userId = req.session.userId!;
   try {
     const projects = await db
       .select()
       .from(projectsTable)
+      .where(eq(projectsTable.ownerId, userId))
       .orderBy(projectsTable.updatedAt);
-    const parsed = projects.map((p) =>
+
+    const parsed = projects.map((p: Project) =>
       ListProjectsResponseItem.parse({
         id: p.id,
         name: p.name,
@@ -29,12 +40,14 @@ router.get("/v1/projects", async (req, res) => {
     );
     res.json(parsed);
   } catch (err) {
-    req.log.error({ err }, "Failed to list projects");
+    req.log.error({ type: (err as Error).constructor?.name }, "Failed to list projects");
     res.status(500).json({ error: "Internal server error" });
   }
 });
 
-router.post("/v1/projects", async (req, res) => {
+/* ── POST /v1/projects ────────────────────────────────────────────────────── */
+router.post("/v1/projects", requireAuth, async (req, res) => {
+  const userId = req.session.userId!;
   const parsed = CreateProjectBody.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ error: "Invalid request body" });
@@ -46,6 +59,7 @@ router.post("/v1/projects", async (req, res) => {
       .values({
         name: parsed.data.name,
         graph: parsed.data.graph as { nodes: unknown[]; edges: unknown[] },
+        ownerId: userId,
       })
       .returning();
     res.status(201).json({
@@ -57,12 +71,14 @@ router.post("/v1/projects", async (req, res) => {
       updatedAt: project.updatedAt.toISOString(),
     });
   } catch (err) {
-    req.log.error({ err }, "Failed to create project");
+    req.log.error({ type: (err as Error).constructor?.name }, "Failed to create project");
     res.status(500).json({ error: "Internal server error" });
   }
 });
 
-router.get("/v1/projects/:id", async (req, res) => {
+/* ── GET /v1/projects/:id ─────────────────────────────────────────────────── */
+router.get("/v1/projects/:id", requireAuth, async (req, res) => {
+  const userId = req.session.userId!;
   const params = GetProjectParams.safeParse(req.params);
   if (!params.success) {
     res.status(400).json({ error: "Invalid project id" });
@@ -72,8 +88,14 @@ router.get("/v1/projects/:id", async (req, res) => {
     const [project] = await db
       .select()
       .from(projectsTable)
-      .where(eq(projectsTable.id, params.data.id))
+      .where(
+        and(
+          eq(projectsTable.id, params.data.id),
+          eq(projectsTable.ownerId, userId),
+        ),
+      )
       .limit(1);
+
     if (!project) {
       res.status(404).json({ error: "Project not found" });
       return;
@@ -87,12 +109,14 @@ router.get("/v1/projects/:id", async (req, res) => {
       updatedAt: project.updatedAt.toISOString(),
     });
   } catch (err) {
-    req.log.error({ err }, "Failed to get project");
+    req.log.error({ type: (err as Error).constructor?.name }, "Failed to get project");
     res.status(500).json({ error: "Internal server error" });
   }
 });
 
-router.put("/v1/projects/:id", async (req, res) => {
+/* ── PUT /v1/projects/:id ─────────────────────────────────────────────────── */
+router.put("/v1/projects/:id", requireAuth, async (req, res) => {
+  const userId = req.session.userId!;
   const params = UpdateProjectParams.safeParse(req.params);
   if (!params.success) {
     res.status(400).json({ error: "Invalid project id" });
@@ -112,8 +136,14 @@ router.put("/v1/projects/:id", async (req, res) => {
     const [project] = await db
       .update(projectsTable)
       .set(updateData)
-      .where(eq(projectsTable.id, params.data.id))
+      .where(
+        and(
+          eq(projectsTable.id, params.data.id),
+          eq(projectsTable.ownerId, userId),
+        ),
+      )
       .returning();
+
     if (!project) {
       res.status(404).json({ error: "Project not found" });
       return;
@@ -127,24 +157,37 @@ router.put("/v1/projects/:id", async (req, res) => {
       updatedAt: project.updatedAt.toISOString(),
     });
   } catch (err) {
-    req.log.error({ err }, "Failed to update project");
+    req.log.error({ type: (err as Error).constructor?.name }, "Failed to update project");
     res.status(500).json({ error: "Internal server error" });
   }
 });
 
-router.delete("/v1/projects/:id", async (req, res) => {
+/* ── DELETE /v1/projects/:id ──────────────────────────────────────────────── */
+router.delete("/v1/projects/:id", requireAuth, async (req, res) => {
+  const userId = req.session.userId!;
   const params = DeleteProjectParams.safeParse(req.params);
   if (!params.success) {
     res.status(400).json({ error: "Invalid project id" });
     return;
   }
   try {
-    await db
+    const result = await db
       .delete(projectsTable)
-      .where(eq(projectsTable.id, params.data.id));
+      .where(
+        and(
+          eq(projectsTable.id, params.data.id),
+          eq(projectsTable.ownerId, userId),
+        ),
+      )
+      .returning({ id: projectsTable.id });
+
+    if (result.length === 0) {
+      res.status(404).json({ error: "Project not found" });
+      return;
+    }
     res.status(204).send();
   } catch (err) {
-    req.log.error({ err }, "Failed to delete project");
+    req.log.error({ type: (err as Error).constructor?.name }, "Failed to delete project");
     res.status(500).json({ error: "Internal server error" });
   }
 });

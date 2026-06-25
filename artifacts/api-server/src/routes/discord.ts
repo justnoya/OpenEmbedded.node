@@ -1,29 +1,29 @@
 /// <reference lib="dom" />
 import { Router } from "express";
 import { db, usersTable } from "@workspace/db";
+import { authLimiter } from "../middleware/security";
 
 const router = Router();
 
-/**
- * Discord Activity token exchange endpoint.
- * The Embedded App SDK sends a short-lived code; we swap it for a real
- * access token using the client secret (never exposed to the browser).
- */
-router.post("/v1/discord/token", async (req, res) => {
+/* ── POST /v1/discord/token ──────────────────────────────────────────────────
+ *  Exchange a Discord Activity auth code for an access_token.
+ *  Rate-limited: 10 req / 15 min per IP.
+ * ─────────────────────────────────────────────────────────────────────────── */
+router.post("/v1/discord/token", authLimiter, async (req, res) => {
   const { code } = req.body as { code?: string };
 
-  if (!code || typeof code !== "string") {
+  if (!code || typeof code !== "string" || code.trim().length === 0) {
     res.status(400).json({ error: "Missing auth code" });
     return;
   }
 
-  const clientId = process.env.DISCORD_CLIENT_ID;
-  const clientSecret = process.env.DISCORD_CLIENT_SECRET;
+  const clientId = process.env["DISCORD_CLIENT_ID"];
+  const clientSecret = process.env["DISCORD_CLIENT_SECRET"];
 
   if (!clientId || !clientSecret) {
     req.log.warn("DISCORD_CLIENT_ID or DISCORD_CLIENT_SECRET not configured");
     res.status(503).json({
-      error: "Discord integration not configured — set DISCORD_CLIENT_ID and DISCORD_CLIENT_SECRET",
+      error: "Discord integration not configured",
     });
     return;
   }
@@ -36,40 +36,35 @@ router.post("/v1/discord/token", async (req, res) => {
         client_id: clientId,
         client_secret: clientSecret,
         grant_type: "authorization_code",
-        code,
+        code: code.trim(),
       }),
     });
 
     if (!response.ok) {
-      const err = await response.text();
-      req.log.warn({ status: response.status, err }, "Discord token exchange failed");
-      res.status(502).json({ error: `Discord rejected token exchange: ${err}` });
+      req.log.warn({ status: response.status }, "Discord token exchange failed");
+      res.status(502).json({ error: "Discord rejected token exchange" });
       return;
     }
 
     const data = (await response.json()) as { access_token: string };
     res.json({ access_token: data.access_token });
   } catch (err) {
-    req.log.error({ err }, "Token exchange network error");
+    req.log.error({ type: (err as Error).constructor?.name }, "Token exchange network error");
     res.status(500).json({ error: "Network error during token exchange" });
   }
 });
 
-/**
- * Returns the Discord Client ID for the frontend SDK to use.
- * Safe to expose — it's a public identifier.
- */
+/* ── GET /v1/discord/config ──────────────────────────────────────────────── */
 router.get("/v1/discord/config", (_req, res) => {
-  const clientId = process.env.DISCORD_CLIENT_ID ?? "";
+  const clientId = process.env["DISCORD_CLIENT_ID"] ?? "";
   res.json({ clientId, configured: clientId.length > 0 });
 });
 
-/**
- * Upsert the current Discord user into our database.
- * Called by the frontend after successful OAuth authentication.
- * Receives the access_token, fetches profile from Discord, and upserts.
- */
-router.post("/v1/discord/me", async (req, res) => {
+/* ── POST /v1/discord/me ─────────────────────────────────────────────────────
+ *  Fetch Discord profile, upsert to DB, and establish a server-side session.
+ *  OWASP A07 — after this call, req.session.userId is set for all routes.
+ * ─────────────────────────────────────────────────────────────────────────── */
+router.post("/v1/discord/me", authLimiter, async (req, res) => {
   const { access_token } = req.body as { access_token?: string };
 
   if (!access_token || typeof access_token !== "string") {
@@ -78,14 +73,12 @@ router.post("/v1/discord/me", async (req, res) => {
   }
 
   try {
-    // Fetch user profile from Discord
     const profileRes = await fetch("https://discord.com/api/v10/users/@me", {
       headers: { Authorization: `Bearer ${access_token}` },
     });
 
     if (!profileRes.ok) {
-      const errText = await profileRes.text();
-      req.log.warn({ status: profileRes.status, errText }, "Discord profile fetch failed");
+      req.log.warn({ status: profileRes.status }, "Discord profile fetch failed");
       res.status(502).json({ error: "Failed to fetch Discord profile" });
       return;
     }
@@ -98,7 +91,6 @@ router.post("/v1/discord/me", async (req, res) => {
       avatar?: string | null;
     };
 
-    // Upsert user record
     await db
       .insert(usersTable)
       .values({
@@ -120,7 +112,9 @@ router.post("/v1/discord/me", async (req, res) => {
         },
       });
 
-    req.log.info({ discordId: profile.id, username: profile.username }, "Discord user upserted");
+    req.session.userId = profile.id;
+
+    req.log.info({ discordId: profile.id }, "Discord user authenticated and session established");
 
     res.json({
       id: profile.id,
@@ -130,9 +124,35 @@ router.post("/v1/discord/me", async (req, res) => {
       avatar: profile.avatar ?? null,
     });
   } catch (err) {
-    req.log.error({ err }, "Failed to upsert Discord user");
+    req.log.error({ type: (err as Error).constructor?.name }, "Failed to upsert Discord user");
     res.status(500).json({ error: "Internal error saving user" });
   }
+});
+
+/* ── GET /v1/auth/session ────────────────────────────────────────────────────
+ *  Returns the current session state. Frontend calls this on startup.
+ * ─────────────────────────────────────────────────────────────────────────── */
+router.get("/v1/auth/session", (req, res) => {
+  if (!req.session?.userId) {
+    res.json({ authenticated: false, userId: null });
+    return;
+  }
+  res.json({ authenticated: true, userId: req.session.userId });
+});
+
+/* ── POST /v1/auth/logout ────────────────────────────────────────────────────
+ *  Destroys the server-side session and clears the cookie.
+ * ─────────────────────────────────────────────────────────────────────────── */
+router.post("/v1/auth/logout", (req, res) => {
+  req.session.destroy((err) => {
+    if (err) {
+      req.log.error({ type: (err as Error).constructor?.name }, "Session destroy failed");
+      res.status(500).json({ error: "Logout failed" });
+      return;
+    }
+    res.clearCookie("oe.sid");
+    res.json({ success: true });
+  });
 });
 
 export default router;
