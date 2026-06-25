@@ -18,6 +18,18 @@ const router = Router();
  *  Every query is scoped to req.tokenUser.sub (the authenticated Discord ID).
  * ─────────────────────────────────────────────────────────────────────────── */
 
+/* ── Shared DB error logger ───────────────────────────────────────────────── */
+function logDbError(req: import("express").Request, err: unknown, msg: string) {
+  const e = err as Error & { cause?: unknown; query?: string };
+  const cause = e.cause as Error | undefined;
+  req.log.error({
+    type: e.constructor?.name,
+    message: e.message,
+    cause: cause ? { type: cause.constructor?.name, message: cause.message } : undefined,
+    query: e.query?.slice(0, 200),
+  }, msg);
+}
+
 /* ── GET /v1/projects ─────────────────────────────────────────────────────── */
 router.get("/v1/projects", requireAuth, async (req, res) => {
   const userId = req.tokenUser!.sub;
@@ -40,7 +52,7 @@ router.get("/v1/projects", requireAuth, async (req, res) => {
     );
     res.json(parsed);
   } catch (err) {
-    req.log.error({ type: (err as Error).constructor?.name }, "Failed to list projects");
+    logDbError(req, err, "Failed to list projects");
     res.status(500).json({ error: "Internal server error" });
   }
 });
@@ -71,7 +83,7 @@ router.post("/v1/projects", requireAuth, async (req, res) => {
       updatedAt: project.updatedAt.toISOString(),
     });
   } catch (err) {
-    req.log.error({ type: (err as Error).constructor?.name }, "Failed to create project");
+    logDbError(req, err, "Failed to create project");
     res.status(500).json({ error: "Internal server error" });
   }
 });
@@ -109,7 +121,7 @@ router.get("/v1/projects/:id", requireAuth, async (req, res) => {
       updatedAt: project.updatedAt.toISOString(),
     });
   } catch (err) {
-    req.log.error({ type: (err as Error).constructor?.name }, "Failed to get project");
+    logDbError(req, err, "Failed to get project");
     res.status(500).json({ error: "Internal server error" });
   }
 });
@@ -157,7 +169,7 @@ router.put("/v1/projects/:id", requireAuth, async (req, res) => {
       updatedAt: project.updatedAt.toISOString(),
     });
   } catch (err) {
-    req.log.error({ type: (err as Error).constructor?.name }, "Failed to update project");
+    logDbError(req, err, "Failed to update project");
     res.status(500).json({ error: "Internal server error" });
   }
 });
@@ -187,7 +199,7 @@ router.delete("/v1/projects/:id", requireAuth, async (req, res) => {
     }
     res.status(204).send();
   } catch (err) {
-    req.log.error({ type: (err as Error).constructor?.name }, "Failed to delete project");
+    logDbError(req, err, "Failed to delete project");
     res.status(500).json({ error: "Internal server error" });
   }
 });
