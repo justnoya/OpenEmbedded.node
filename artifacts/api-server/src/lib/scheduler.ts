@@ -1,5 +1,5 @@
 /// <reference lib="dom" />
-import cron from "node-cron";
+import * as cron from "node-cron";
 import { db } from "@workspace/db";
 import { scheduledJobsTable } from "@workspace/db";
 import { eq, and } from "drizzle-orm";

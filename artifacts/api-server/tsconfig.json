@@ -6,7 +6,7 @@
     "outDir": "dist",
     "rootDir": "src",
     "lib": ["es2022", "DOM"],
-    "types": ["node"]
+    "types": ["node", "pino-http"]
   },
   "include": ["src"],
   "references": [

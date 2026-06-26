@@ -1,5 +1,6 @@
 /// <reference lib="dom" />
 import { Router } from "express";
+import "express-session";
 import { db } from "@workspace/db";
 import { userAuthorizedGuildsTable } from "@workspace/db";
 import { eq, and } from "drizzle-orm";
