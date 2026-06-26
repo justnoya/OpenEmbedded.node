@@ -1,24 +1,10 @@
 import type pg from "pg";
 
-/**
- * Applies the full schema to whatever database the server is connected to.
- *
- * Strategy:
- *  - CREATE TABLE IF NOT EXISTS  → safe on both fresh and existing DBs
- *  - ALTER TABLE … ADD COLUMN IF NOT EXISTS → fills in any columns that were
- *    added to the schema after the table was first created in production
- *
- * Every statement is idempotent, so this can run on every cold start without
- * risk of data loss or duplicate-object errors.
- */
 export async function ensureSchema(
   pool: InstanceType<typeof pg.Pool>,
 ): Promise<void> {
   const client = await pool.connect();
   try {
-    // Run each DDL statement separately to avoid pg_type duplicate key errors
-    // that can occur when multiple CREATE TABLE statements share a transaction
-    // block and the types already exist in the catalog.
     await client.query(`
       CREATE TABLE IF NOT EXISTS discord_users (
         discord_id    VARCHAR(32)  PRIMARY KEY,
@@ -40,8 +26,18 @@ export async function ensureSchema(
     `);
 
     await client.query(`
-      CREATE INDEX IF NOT EXISTS "IDX_session_expire"
-        ON user_sessions (expire)
+      DO $$
+      BEGIN
+        IF NOT EXISTS (
+          SELECT 1 FROM pg_indexes
+          WHERE schemaname = 'public'
+            AND tablename  = 'user_sessions'
+            AND indexname  = 'IDX_session_expire'
+        ) THEN
+          CREATE INDEX "IDX_session_expire" ON user_sessions (expire);
+        END IF;
+      END
+      $$
     `);
 
     await client.query(`
@@ -65,59 +61,46 @@ export async function ensureSchema(
           REFERENCES discord_users(discord_id) ON DELETE CASCADE
     `);
 
-    // Use a PL/pgSQL block to safely create the table even if pg_type has
-    // a stale entry (can occur when a previous CREATE TABLE was interrupted).
     await client.query(`
       DO $$
       BEGIN
-        IF NOT EXISTS (
-          SELECT 1 FROM information_schema.tables
-          WHERE table_schema = 'public' AND table_name = 'scheduled_jobs'
-        ) THEN
-          -- Remove any orphaned pg_type entry before creating the table
-          DELETE FROM pg_type WHERE typname = 'scheduled_jobs' AND typrelid = 0;
-          CREATE TABLE scheduled_jobs (
-            id              UUID         PRIMARY KEY DEFAULT gen_random_uuid(),
-            owner_id        VARCHAR(32)  REFERENCES discord_users(discord_id) ON DELETE CASCADE,
-            label           VARCHAR(255) NOT NULL DEFAULT 'Scheduled Message',
-            schedule_type   VARCHAR(10)  NOT NULL DEFAULT 'cron',
-            cron_expression VARCHAR(100),
-            run_at          TIMESTAMP,
-            webhook_url     TEXT,
-            channel_id      VARCHAR(32),
-            bot_token       TEXT,
-            payload         JSONB        NOT NULL DEFAULT '{}',
-            active          BOOLEAN      NOT NULL DEFAULT TRUE,
-            last_run_at     TIMESTAMP,
-            next_run_at     TIMESTAMP,
-            created_at      TIMESTAMP    NOT NULL DEFAULT NOW(),
-            updated_at      TIMESTAMP    NOT NULL DEFAULT NOW()
-          );
-        END IF;
+        CREATE TABLE scheduled_jobs (
+          id              UUID         PRIMARY KEY DEFAULT gen_random_uuid(),
+          owner_id        VARCHAR(32)  REFERENCES discord_users(discord_id) ON DELETE CASCADE,
+          label           VARCHAR(255) NOT NULL DEFAULT 'Scheduled Message',
+          schedule_type   VARCHAR(10)  NOT NULL DEFAULT 'cron',
+          cron_expression VARCHAR(100),
+          run_at          TIMESTAMP,
+          webhook_url     TEXT,
+          channel_id      VARCHAR(32),
+          bot_token       TEXT,
+          payload         JSONB        NOT NULL DEFAULT '{}',
+          active          BOOLEAN      NOT NULL DEFAULT TRUE,
+          last_run_at     TIMESTAMP,
+          next_run_at     TIMESTAMP,
+          created_at      TIMESTAMP    NOT NULL DEFAULT NOW(),
+          updated_at      TIMESTAMP    NOT NULL DEFAULT NOW()
+        );
+      EXCEPTION
+        WHEN duplicate_table THEN NULL;
+        WHEN unique_violation THEN NULL;
       END
       $$
     `);
 
-    // user_authorized_guilds — records which servers each user has added the bot to
     await client.query(`
       DO $$
-      DECLARE
-        _ns OID := (SELECT oid FROM pg_namespace WHERE nspname = 'public');
       BEGIN
-        IF NOT EXISTS (
-          SELECT 1 FROM information_schema.tables
-          WHERE table_schema = 'public' AND table_name = 'user_authorized_guilds'
-        ) THEN
-          -- Remove any stale pg_type entry by name+namespace (typrelid check is unreliable)
-          DELETE FROM pg_type WHERE typname = 'user_authorized_guilds' AND typnamespace = _ns;
-          CREATE TABLE user_authorized_guilds (
-            id        UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
-            user_id   VARCHAR(32) NOT NULL REFERENCES discord_users(discord_id) ON DELETE CASCADE,
-            guild_id  VARCHAR(32) NOT NULL,
-            added_at  TIMESTAMP   NOT NULL DEFAULT NOW(),
-            CONSTRAINT user_guild_unique UNIQUE (user_id, guild_id)
-          );
-        END IF;
+        CREATE TABLE user_authorized_guilds (
+          id        UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+          user_id   VARCHAR(32) NOT NULL REFERENCES discord_users(discord_id) ON DELETE CASCADE,
+          guild_id  VARCHAR(32) NOT NULL,
+          added_at  TIMESTAMP   NOT NULL DEFAULT NOW(),
+          CONSTRAINT user_guild_unique UNIQUE (user_id, guild_id)
+        );
+      EXCEPTION
+        WHEN duplicate_table THEN NULL;
+        WHEN unique_violation THEN NULL;
       END
       $$
     `);
