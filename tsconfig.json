@@ -1,7 +1,7 @@
 {
   "extends": "./tsconfig.base.json",
   "compileOnSave": false,
-  "files": [],
+  "files": ["global.d.ts"],
   "exclude": [
     "node_modules",
     "artifacts",
@@ -9,6 +9,16 @@
     "scripts",
     "lib"
   ],
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "lib": ["es2022", "dom", "dom.iterable"],
+    "paths": {
+      "@/*": [
+        "./artifacts/openembedded/src/*",
+        "./artifacts/mockup-sandbox/src/*"
+      ]
+    }
+  },
   "references": [
     {
       "path": "./lib/db"

@@ -30,7 +30,16 @@ Do NOT add `composite: true` to application-level packages (api-server). `compos
 
 ## Additional Fixes (Round 2)
 
-### 4. jsx: "preserve" fails on Vercel in TS 5.9 + project references
+### 4. Vercel scans ALL files with the ROOT tsconfig — not per-artifact tsconfigs
+Verified across two Vercel builds: changing artifact-specific tsconfigs (jsx, references) had ZERO effect. Vercel's TypeScript check for `framework: null` projects scans every .ts/.tsx file in the repo using the ROOT `tsconfig.json`, regardless of `files: []` or `exclude` settings. The ONLY effective fix is in the root tsconfig itself. Verified locally by creating a tsconfig that extends root + includes all artifact files.
+
+Fix pattern:
+- Add `jsx`, `dom` lib, and `paths` to root tsconfig `compilerOptions`
+- Create `global.d.ts` at root declaring `ImportMeta.env` (declare as `Record<string,string>` not `Record<string,string|undefined>` to match Vite's runtime behavior; vite package is NOT accessible from root node_modules so cannot use triple-slash ref)
+- Add `global.d.ts` to root tsconfig `files` array
+- Test with a `tsconfig.vercel-test.json` that extends root + includes all artifact src dirs
+
+### 5. jsx: "preserve" fails on Vercel in TS 5.9 + project references
 Frontend artifact tsconfigs with `jsx: "preserve"` + `references` to a composite lib whose `dist/` isn't pre-built cause cascading TS17004/TS6142 errors on Vercel. Two fixes together:
 - Change `jsx: "preserve"` → `jsx: "react-jsx"` in all frontend artifact tsconfigs.
 - Remove `references` entries where the referenced lib exports its source directly (`"exports": {".": "./src/index.ts"}`); TypeScript resolves types from source without needing composite/dist.
