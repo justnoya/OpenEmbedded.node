@@ -57,7 +57,11 @@ app.use(
  * ─────────────────────────────────────────────────────────────────────── */
 const allowedOrigins: (string | RegExp)[] =
   process.env["NODE_ENV"] === "production"
-    ? [/^https:\/\/.*\.replit\.app$/, /^https:\/\/.*\.repl\.co$/]
+    ? [
+        /^https:\/\/.*\.replit\.app$/,
+        /^https:\/\/.*\.repl\.co$/,
+        /^https:\/\/.*\.vercel\.app$/,
+      ]
     : ["http://localhost:5000", "http://localhost:5173"];
 
 if (process.env["FRONTEND_ORIGIN"]) allowedOrigins.push(process.env["FRONTEND_ORIGIN"]);
