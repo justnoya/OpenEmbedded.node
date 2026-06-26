@@ -1,9 +1,11 @@
 import "dotenv/config";
-import { Client, GatewayIntentBits, Events } from "discord.js";
+import { Client, GatewayIntentBits, Events, REST, Routes } from "discord.js";
 import { createApi } from "./api";
 import { handleInteraction } from "./handlers/interactions";
+import { statusCommandDef } from "./commands/status";
 
 const token = process.env.OPENBOT_TOKEN;
+const clientId = process.env.DISCORD_CLIENT_ID;
 
 if (!token) {
   console.error("[OpenBot] OPENBOT_TOKEN env var is required. Copy .env.example to .env and fill it in.");
@@ -17,9 +19,26 @@ const client = new Client({
   ],
 });
 
-client.once(Events.ClientReady, (readyClient) => {
+// ── Register slash commands with Discord ───────────────────────────────────────
+async function registerCommands(botToken: string, appId: string): Promise<void> {
+  const rest = new REST().setToken(botToken);
+  try {
+    await rest.put(Routes.applicationCommands(appId), {
+      body: [statusCommandDef.toJSON()],
+    });
+    console.log(`[OpenBot] Slash commands registered (${appId})`);
+  } catch (err) {
+    console.error("[OpenBot] Failed to register slash commands:", err);
+  }
+}
+
+client.once(Events.ClientReady, async (readyClient) => {
   console.log(`[OpenBot] Logged in as ${readyClient.user.tag}`);
   console.log(`[OpenBot] Serving ${readyClient.guilds.cache.size} server(s)`);
+
+  // Register slash commands using the resolved application ID
+  const appId = clientId ?? readyClient.user.id;
+  await registerCommands(token!, appId);
 
   const port = parseInt(process.env.PORT ?? "3001", 10);
   const api = createApi(client);
@@ -30,7 +49,7 @@ client.once(Events.ClientReady, (readyClient) => {
   });
 });
 
-// ── Guild join — notify api-server so it can record the authorization ─────────
+// ── Guild join ────────────────────────────────────────────────────────────────
 client.on(Events.GuildCreate, async (guild) => {
   console.log(`[OpenBot] Joined guild: ${guild.name} (${guild.id})`);
 

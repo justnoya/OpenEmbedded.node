@@ -3,11 +3,10 @@ import {
   InteractionType,
   ComponentType,
   MessageFlags,
-  TextChannel,
-  MessageCreateOptions,
   InteractionReplyOptions,
   InteractionUpdateOptions,
 } from "discord.js";
+import { handleStatusCommand } from "../commands/status";
 
 export interface FlowEntry {
   mode: "send_new" | "ephemeral" | "update_message" | "modal";
@@ -17,12 +16,26 @@ export interface FlowEntry {
 /**
  * In-memory registry: customId → interaction flow definition.
  * Populated when a message is sent via POST /send with a `flows` array.
- * In production you'd persist this to a DB; for a single-instance bot
- * an in-memory map works perfectly.
  */
 export const flowRegistry = new Map<string, FlowEntry>();
 
 export async function handleInteraction(interaction: Interaction): Promise<void> {
+  // ── /status slash command ───────────────────────────────────────────────────
+  if (interaction.isChatInputCommand()) {
+    switch (interaction.commandName) {
+      case "status":
+        await handleStatusCommand(interaction, interaction.client);
+        return;
+      default:
+        await interaction.reply({
+          content: "Unknown command.",
+          flags: MessageFlags.Ephemeral,
+        });
+        return;
+    }
+  }
+
+  // ── Message component interactions (buttons / selects) ─────────────────────
   if (interaction.type !== InteractionType.MessageComponent) return;
 
   const isButton = interaction.componentType === ComponentType.Button;
@@ -57,9 +70,6 @@ export async function handleInteraction(interaction: Interaction): Promise<void>
     } else if (mode === "update_message") {
       await interaction.update(responsePayload as InteractionUpdateOptions);
     } else if (mode === "modal") {
-      // Modals require a special ModalBuilder structure.
-      // If the payload is a full modal definition use it directly,
-      // otherwise fall back to an ephemeral reply.
       if (responsePayload.type === "MODAL" && responsePayload.data) {
         await interaction.showModal(responsePayload.data as Parameters<typeof interaction.showModal>[0]);
       } else {
