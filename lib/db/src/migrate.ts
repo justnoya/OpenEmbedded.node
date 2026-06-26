@@ -26,18 +26,7 @@ export async function ensureSchema(
     `);
 
     await client.query(`
-      DO $$
-      BEGIN
-        IF NOT EXISTS (
-          SELECT 1 FROM pg_indexes
-          WHERE schemaname = 'public'
-            AND tablename  = 'user_sessions'
-            AND indexname  = 'IDX_session_expire'
-        ) THEN
-          CREATE INDEX "IDX_session_expire" ON user_sessions (expire);
-        END IF;
-      END
-      $$
+      CREATE INDEX IF NOT EXISTS "IDX_session_expire" ON user_sessions (expire);
     `);
 
     await client.query(`
