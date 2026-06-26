@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
-import { useAuth } from "@/lib/authContext";
+import { useAuth } from "../lib/authContext.js";
 
 function DiscordIcon() {
   return (

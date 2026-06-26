@@ -1,7 +1,7 @@
 import { BaseEdge, EdgeLabelRenderer, getBezierPath, useReactFlow, type EdgeProps } from "@xyflow/react";
-import { useGraphStore } from "@/lib/graphStore";
+import { useGraphStore } from "../../lib/graphStore.js";
 import { X, Zap } from "lucide-react";
-import { getInteractionModeMeta, type InteractionMode } from "@/lib/connectionRules";
+import { getInteractionModeMeta, type InteractionMode } from "../../lib/connectionRules.js";
 
 export function InteractionEdge({
   id,

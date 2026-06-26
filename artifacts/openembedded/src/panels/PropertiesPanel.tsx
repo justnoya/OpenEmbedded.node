@@ -1,9 +1,9 @@
 import { useState, useRef, useEffect } from "react";
-import { useGraphStore } from "@/lib/graphStore";
-import { usePreviewStore } from "@/lib/previewStore";
-import { ALLOWED_CHILDREN, INTERACTION_MODES, getInteractionModeMeta, type InteractionMode } from "@/lib/connectionRules";
+import { useGraphStore } from "../lib/graphStore.js";
+import { usePreviewStore } from "../lib/previewStore.js";
+import { ALLOWED_CHILDREN, INTERACTION_MODES, getInteractionModeMeta, type InteractionMode } from "../lib/connectionRules.js";
 import { useBotValidate, useBotGetChannels, useBotSend, useOpenBotGuilds, useOpenBotChannels, useOpenBotSend, useSendWebhook } from "@workspace/api-client-react";
-import { compileGraph } from "@/lib/compiler";
+import { compileGraph } from "../lib/compiler.js";
 import {
   Package, LayoutTemplate, FileText, ImageIcon, GalleryHorizontalEnd,
   Minus, Rows3, PointerIcon, ListFilter, UserRound, ShieldCheck,

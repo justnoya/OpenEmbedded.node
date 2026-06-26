@@ -1,5 +1,5 @@
 import { useCallback, useState, type ReactNode } from "react";
-import { useGraphStore, AppNode, AppNodeData } from "@/lib/graphStore";
+import { useGraphStore, AppNode, AppNodeData } from "../lib/graphStore.js";
 import {
   Box, AlignJustify, AlignLeft, Image, LayoutGrid, Minus,
   LayoutList, MousePointerClick, ListFilter, User, Shield,

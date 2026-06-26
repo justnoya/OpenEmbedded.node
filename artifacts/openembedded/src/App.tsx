@@ -1,21 +1,21 @@
 import { Switch, Route, Router as WouterRouter, useLocation } from "wouter";
 import { lazy, Suspense, useEffect, type ReactNode } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Toaster } from "@/components/ui/toaster";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { Home } from "@/pages/Home";
-import NotFound from "@/pages/not-found";
-import { Login } from "@/pages/Login";
-import { Landing } from "@/pages/Landing";
-import { AuthCallback } from "@/pages/AuthCallback";
-import { AuthProvider, useAuth } from "@/lib/authContext";
-import { DiscordProvider, useDiscord } from "@/lib/discordContext";
-import { DiscordActivityOverlay } from "@/components/DiscordActivityOverlay";
+import { Toaster } from "./components/ui/toaster.js";
+import { TooltipProvider } from "./components/ui/tooltip.js";
+import { Home } from "./pages/Home.js";
+import NotFound from "./pages/not-found.js";
+import { Login } from "./pages/Login.js";
+import { Landing } from "./pages/Landing.js";
+import { AuthCallback } from "./pages/AuthCallback.js";
+import { AuthProvider, useAuth } from "./lib/authContext.js";
+import { DiscordProvider, useDiscord } from "./lib/discordContext.js";
+import { DiscordActivityOverlay } from "./components/DiscordActivityOverlay.js";
 
-const Builder = lazy(() => import("@/pages/Builder").then((m) => ({ default: m.Builder })));
-const Docs    = lazy(() => import("@/pages/Docs").then((m) => ({ default: m.Docs })));
-const Terms   = lazy(() => import("@/pages/Terms").then((m) => ({ default: m.Terms })));
-const Privacy = lazy(() => import("@/pages/Privacy").then((m) => ({ default: m.Privacy })));
+const Builder = lazy(() => import("./pages/Builder.js").then((m) => ({ default: m.Builder })));
+const Docs    = lazy(() => import("./pages/Docs.js").then((m) => ({ default: m.Docs })));
+const Terms   = lazy(() => import("./pages/Terms.js").then((m) => ({ default: m.Terms })));
+const Privacy = lazy(() => import("./pages/Privacy.js").then((m) => ({ default: m.Privacy })));
 
 const queryClient = new QueryClient();
 

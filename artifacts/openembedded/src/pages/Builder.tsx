@@ -10,21 +10,21 @@ import {
   type Connection,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import { useGraphStore } from "@/lib/graphStore";
-import { usePreviewStore } from "@/lib/previewStore";
-import { nodeTypes } from "@/canvas/nodeTypes";
-import { CustomEdge } from "@/canvas/edges/CustomEdge";
-import { InteractionEdge } from "@/canvas/edges/InteractionEdge";
-import { SendEdge } from "@/canvas/edges/SendEdge";
-import { isValidNodeConnection, isInteractionConnection, isBotSendConnection, getConnectionError } from "@/lib/connectionRules";
-import { NodeLibraryPanel } from "@/panels/NodeLibraryPanel";
-import { PropertiesPanel } from "@/panels/PropertiesPanel";
-import { DiscordPreview } from "@/preview/DiscordPreview";
-import { ExportPanel } from "@/panels/ExportPanel";
-import { DiscordActivityBadge } from "@/components/DiscordActivityBadge";
-import { DiscordUserBadge } from "@/components/DiscordUserBadge";
-import { useRichPresence } from "@/lib/useRichPresence";
-import { useDiscord } from "@/lib/discordContext";
+import { useGraphStore } from "../lib/graphStore.js";
+import { usePreviewStore } from "../lib/previewStore.js";
+import { nodeTypes } from "../canvas/nodeTypes.js";
+import { CustomEdge } from "../canvas/edges/CustomEdge.js";
+import { InteractionEdge } from "../canvas/edges/InteractionEdge.js";
+import { SendEdge } from "../canvas/edges/SendEdge.js";
+import { isValidNodeConnection, isInteractionConnection, isBotSendConnection, getConnectionError } from "../lib/connectionRules.js";
+import { NodeLibraryPanel } from "../panels/NodeLibraryPanel.js";
+import { PropertiesPanel } from "../panels/PropertiesPanel.js";
+import { DiscordPreview } from "../preview/DiscordPreview.js";
+import { ExportPanel } from "../panels/ExportPanel.js";
+import { DiscordActivityBadge } from "../components/DiscordActivityBadge.js";
+import { DiscordUserBadge } from "../components/DiscordUserBadge.js";
+import { useRichPresence } from "../lib/useRichPresence.js";
+import { useDiscord } from "../lib/discordContext.js";
 import {
   useListProjects,
   useCreateProject,

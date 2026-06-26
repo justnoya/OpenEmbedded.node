@@ -2,7 +2,7 @@ import { memo } from "react";
 import { Handle, Position, NodeProps } from "@xyflow/react";
 import { NodeWrapper } from "./NodeWrapper.js";
 import { Sparkles, CheckCircle2, AlertCircle, Hash, Server, Send, Zap } from "lucide-react";
-import { useGraphStore } from "@/lib/graphStore";
+import { useGraphStore } from "../../lib/graphStore.js";
 
 function OpenEmbeddedNodeComponent({ id, data }: NodeProps) {
   const edges = useGraphStore((s) => s.edges);

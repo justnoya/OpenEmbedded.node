@@ -1,5 +1,5 @@
-import { usePreviewStore } from "@/lib/previewStore";
-import { useGraphStore } from "@/lib/graphStore";
+import { usePreviewStore } from "../lib/previewStore.js";
+import { useGraphStore } from "../lib/graphStore.js";
 import { AlertTriangle, Check, Hash, ChevronDown, X, Upload, ExternalLink } from "lucide-react";
 import { useState, useRef, useCallback } from "react";
 

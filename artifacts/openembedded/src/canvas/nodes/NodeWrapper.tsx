@@ -1,7 +1,7 @@
 import { ReactNode } from "react";
 import { useStore } from "@xyflow/react";
-import { useGraphStore } from "@/lib/graphStore";
-import { NodeClass, NODE_CLASS_LABELS, NODE_CLASS_COLORS } from "@/lib/connectionRules";
+import { useGraphStore } from "../../lib/graphStore.js";
+import { NodeClass, NODE_CLASS_LABELS, NODE_CLASS_COLORS } from "../../lib/connectionRules.js";
 import { Trash2 } from "lucide-react";
 
 interface NodeWrapperProps {

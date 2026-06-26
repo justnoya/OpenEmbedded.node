@@ -3,7 +3,7 @@
  * Only renders when the app is running as a Discord Activity and the user is authed.
  */
 import { useState } from "react";
-import { useDiscord } from "@/lib/discordContext";
+import { useDiscord } from "../lib/discordContext.js";
 
 export function DiscordUserBadge() {
   const { isDiscord, sdkState, user } = useDiscord();

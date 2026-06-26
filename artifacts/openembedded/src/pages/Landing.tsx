@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
-import { useAuth } from "@/lib/authContext";
+import { useAuth } from "../lib/authContext.js";
 
 /* ── Builder design tokens (mirrors index.css) ─────────────────────────────── */
 const C = {

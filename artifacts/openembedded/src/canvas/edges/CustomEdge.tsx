@@ -1,5 +1,5 @@
 import { BaseEdge, EdgeLabelRenderer, getBezierPath, useReactFlow, type EdgeProps } from "@xyflow/react";
-import { useGraphStore } from "@/lib/graphStore";
+import { useGraphStore } from "../../lib/graphStore.js";
 import { X } from "lucide-react";
 
 export function CustomEdge({

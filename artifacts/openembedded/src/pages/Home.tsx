@@ -20,7 +20,7 @@ import {
   Loader2,
   LogOut,
 } from "lucide-react";
-import { useAuth } from "@/lib/authContext";
+import { useAuth } from "../lib/authContext.js";
 
 const AppLogo = ({ size = 32 }: { size?: number }) => (
   <img

@@ -2,7 +2,7 @@
  * Small status badge shown in the Builder toolbar when running as a Discord Activity.
  * Shows SDK state, authenticated user, and a "Rich Presence active" pill.
  */
-import { useDiscord } from "@/lib/discordContext";
+import { useDiscord } from "../lib/discordContext.js";
 import { Loader2, Wifi, WifiOff } from "lucide-react";
 
 function avatarUrl(userId: string, avatarHash: string | null) {

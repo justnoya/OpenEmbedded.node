@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useDiscord } from "@/lib/discordContext";
+import { useDiscord } from "../lib/discordContext.js";
 
 function AppLogoImg({ size = 40 }: { size?: number }) {
   return (

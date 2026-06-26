@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { useGraphStore } from "@/lib/graphStore";
-import { usePreviewStore } from "@/lib/previewStore";
+import { useGraphStore } from "../lib/graphStore.js";
+import { usePreviewStore } from "../lib/previewStore.js";
 import { useExportCode } from "@workspace/api-client-react";
 import {
   Copy, Check, Code2, FileJson,
