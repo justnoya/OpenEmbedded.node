@@ -50,6 +50,19 @@ Even with `public-hoist-pattern[]=drizzle-orm*` in `.npmrc`, Vercel's pnpm may r
 ### 6. Type augmentations as triple-slash refs
 When Vercel scans api-server files with a tsconfig that has a different `types` array, augmentations like `req.log` (pino-http) and `req.session` (express-session) disappear. Fix: add `src/types.d.ts` with `/// <reference types="pino-http" />` and `/// <reference types="express-session" />` — these fire regardless of which tsconfig is active.
 
+## Round 3: ESM relative imports need .js extensions (TS2835 → Emit skipped)
+
+### 7. TS2835 — Vercel uses node16 resolution for post-build check
+Vercel's post-build TypeScript checker hardcodes `moduleResolution: node16` regardless of what is in tsconfig. For ESM packages (`"type": "module"`), `node16` requires explicit file extensions on all relative imports. Error: `TS2835: Relative import paths need explicit file extensions`.
+
+**Fix**: Add `.js` extension to every extensionless relative import in `artifacts/openembedded/src/` (42 imports across 24 files). TypeScript's `bundler` mode also resolves `./App.js` → `./App.tsx`, so local builds keep working. Use `.js` not `.tsx` — node16 rejects TS extensions.
+
+### 8. "Emit skipped" — allowImportingTsExtensions + Vercel emit override
+After fixing TS2835, Vercel's next error is "Emit skipped". Cause: root tsconfig had `"allowImportingTsExtensions": true` which TypeScript only allows when `noEmit: true`. Vercel overrides `noEmit → false` to emit compiled serverless function output, triggering TS5096 → "Emit skipped".
+
+**Fix**: Remove `allowImportingTsExtensions: true` from root `tsconfig.json` AND from `artifacts/openembedded/tsconfig.json`. Since all imports now use `.js` extensions (not `.tsx`), this option is no longer needed anywhere.
+
+**Rule**: Never put `allowImportingTsExtensions: true` in the root tsconfig. Vercel's emit pass will break it.
+
 ## Verification
-Run `npx tsc --build tsconfig.json` from root — should produce zero output (zero errors).
-Then verify each artifact: `cd artifacts/openembedded && npx tsc -p tsconfig.json --noEmit` etc.
+Run `pnpm --filter @workspace/openembedded run typecheck` — should produce zero output (zero errors).

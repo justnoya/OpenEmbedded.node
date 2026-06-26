@@ -12,7 +12,6 @@
   "compilerOptions": {
     "module": "esnext",
     "moduleResolution": "bundler",
-    "allowImportingTsExtensions": true,
     "noEmit": true,
     "jsx": "react-jsx",
     "lib": ["es2022", "dom", "dom.iterable"],
