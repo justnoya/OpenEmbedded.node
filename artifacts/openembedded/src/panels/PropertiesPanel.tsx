@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useGraphStore } from "@/lib/graphStore";
 import { usePreviewStore } from "@/lib/previewStore";
 import { ALLOWED_CHILDREN, INTERACTION_MODES, getInteractionModeMeta, type InteractionMode } from "@/lib/connectionRules";
@@ -8,9 +8,9 @@ import {
   Package, LayoutTemplate, FileText, ImageIcon, GalleryHorizontalEnd,
   Minus, Rows3, PointerIcon, ListFilter, UserRound, ShieldCheck,
   AtSign, Hash, FormInput, MessageSquareCode, Trash2,
-  Plus, X, ChevronUp, ChevronDown, Bot, Sparkles, Webhook,
+  Plus, X, Bot, Sparkles, Webhook,
   CheckCircle2, AlertCircle, Loader2, Send, RefreshCw, Zap, Circle,
-  ArrowRight, Info, MessageCircle, PanelTop,
+  ArrowRight, Info, MessageCircle, PanelTop, GripVertical,
 } from "lucide-react";
 import { ReactNode } from "react";
 
@@ -922,6 +922,80 @@ function InteractionFlowsSection({ nodeId }: { nodeId: string }) {
 }
 
 // ─────────────────────────────────────────────────────────────
+//  Child Order — drag-to-reorder list
+// ─────────────────────────────────────────────────────────────
+type ChildItem = { id: string; componentType: number };
+
+function ChildOrderList({ items, onReorder }: { items: ChildItem[]; onReorder: (ids: string[]) => void }) {
+  const [list, setList] = useState<ChildItem[]>(items);
+  const [dragOver, setDragOver] = useState<number | null>(null);
+  const dragIdx = useRef<number | null>(null);
+
+  useEffect(() => { setList(items); }, [items.map((n) => n.id).join(",")]);
+
+  const handleDragStart = (i: number) => { dragIdx.current = i; };
+
+  const handleDragOver = (e: React.DragEvent, i: number) => {
+    e.preventDefault();
+    setDragOver(i);
+  };
+
+  const handleDrop = (dropIdx: number) => {
+    if (dragIdx.current === null || dragIdx.current === dropIdx) {
+      dragIdx.current = null;
+      setDragOver(null);
+      return;
+    }
+    const next = [...list];
+    const [moved] = next.splice(dragIdx.current, 1);
+    next.splice(dropIdx, 0, moved);
+    setList(next);
+    onReorder(next.map((n) => n.id));
+    dragIdx.current = null;
+    setDragOver(null);
+  };
+
+  const handleDragEnd = () => { dragIdx.current = null; setDragOver(null); };
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
+      {list.map((item, i) => {
+        const meta = TYPE_META[item.componentType];
+        const isOver = dragOver === i;
+        const isDragging = dragIdx.current === i;
+        return (
+          <div
+            key={item.id}
+            draggable
+            onDragStart={() => handleDragStart(i)}
+            onDragOver={(e) => handleDragOver(e, i)}
+            onDrop={() => handleDrop(i)}
+            onDragEnd={handleDragEnd}
+            style={{
+              display: "flex", alignItems: "center", gap: 7,
+              background: isOver ? "rgba(255,255,255,0.07)" : "rgba(255,255,255,0.03)",
+              border: `1px solid ${isOver ? "rgba(255,255,255,0.15)" : "rgba(255,255,255,0.07)"}`,
+              borderRadius: 7, padding: "6px 8px",
+              cursor: "grab", userSelect: "none",
+              opacity: isDragging ? 0.4 : 1,
+              transition: "background 0.1s, border-color 0.1s, opacity 0.1s",
+              transform: isOver ? "scale(1.01)" : "none",
+            }}
+          >
+            <GripVertical size={12} color="rgba(255,255,255,0.2)" style={{ flexShrink: 0 }} />
+            <span style={{ color: meta?.color ?? "#888", fontSize: 11, display: "flex", alignItems: "center", flexShrink: 0 }}>{meta?.icon}</span>
+            <span style={{ color: "#888", fontSize: 11, flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+              {meta?.label ?? "Node"}
+            </span>
+            <span style={{ fontSize: 9, color: "rgba(255,255,255,0.12)", flexShrink: 0 }}>#{i + 1}</span>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
 //  Main PropertiesPanel
 // ─────────────────────────────────────────────────────────────
 export function PropertiesPanel() {
@@ -1124,32 +1198,19 @@ export function PropertiesPanel() {
   );
 
   const childOrder = () => {
-    // Only structural edges (not interaction) define parent-child hierarchy
     const childEdges = edges.filter((e) => e.source === node.id && e.type !== "interaction");
     if (childEdges.length < 2) return null;
-    const childNodes = childEdges.map((e) => nodes.find((n) => n.id === e.target)).filter(Boolean) as typeof nodes;
+    const childItems: ChildItem[] = childEdges
+      .map((e) => nodes.find((n) => n.id === e.target))
+      .filter(Boolean)
+      .map((n) => ({ id: n!.id, componentType: n!.data.componentType as number }));
     return (
       <div style={fieldWrap}>
         <label style={labelStyle}>Child Order</label>
-        <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
-          {childNodes.map((cn, i) => {
-            const cMeta = TYPE_META[cn.data.componentType as number];
-            return (
-              <div key={cn.id} style={{ display: "flex", alignItems: "center", gap: 6, background: SURFACE, border: `1px solid ${BORDER}`, borderRadius: 6, padding: "5px 8px" }}>
-                <span style={{ color: cMeta?.color ?? "#888", fontSize: 10 }}>{cMeta?.icon}</span>
-                <span style={{ color: "#888", fontSize: 11, flex: 1, overflow: "hidden", textOverflow: "ellipsis" }}>{cMeta?.label ?? "Node"}</span>
-                <div style={{ display: "flex", flexDirection: "column", gap: 1 }}>
-                  <button disabled={i === 0} onClick={() => { const ids = childNodes.map(n => n.id); [ids[i - 1], ids[i]] = [ids[i], ids[i - 1]]; reorderChildEdges(node.id, ids); }} style={{ background: "transparent", border: "none", cursor: i === 0 ? "default" : "pointer", color: i === 0 ? "#333" : "#888", padding: "1px 2px", display: "flex" }}>
-                    <ChevronUp size={10} />
-                  </button>
-                  <button disabled={i === childNodes.length - 1} onClick={() => { const ids = childNodes.map(n => n.id); [ids[i], ids[i + 1]] = [ids[i + 1], ids[i]]; reorderChildEdges(node.id, ids); }} style={{ background: "transparent", border: "none", cursor: i === childNodes.length - 1 ? "default" : "pointer", color: i === childNodes.length - 1 ? "#333" : "#888", padding: "1px 2px", display: "flex" }}>
-                    <ChevronDown size={10} />
-                  </button>
-                </div>
-              </div>
-            );
-          })}
-        </div>
+        <ChildOrderList
+          items={childItems}
+          onReorder={(ids) => reorderChildEdges(node.id, ids)}
+        />
       </div>
     );
   };
