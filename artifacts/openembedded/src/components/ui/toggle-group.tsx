@@ -14,21 +14,36 @@ const ToggleGroupContext = React.createContext<
   variant: "default",
 })
 
-// Under certain module resolutions (e.g. Vercel CI with pnpm), @radix-ui/react-toggle-group's
-// props don't include HTML attributes such as className. Cast the primitives so JSX
-// attribute checking passes.
-type ToggleGroupRootProps = React.ComponentPropsWithoutRef<typeof ToggleGroupPrimitive.Root> &
-  React.RefAttributes<HTMLDivElement> & { className?: string }
+// Vercel's TypeScript checker (node16 resolution) resolves ToggleGroupPrimitive.Root
+// as ToggleGroupSingleProps | ToggleGroupMultipleProps — a union type that loses
+// children/className. Cast using standard React HTML types which always carry those
+// props under any TypeScript configuration.
+type ToggleGroupRootProps = React.HTMLAttributes<HTMLDivElement> &
+  React.RefAttributes<HTMLDivElement> & {
+    type?: "single" | "multiple"
+    value?: string | string[]
+    defaultValue?: string | string[]
+    onValueChange?: ((value: string) => void) | ((value: string[]) => void)
+    disabled?: boolean
+    rovingFocus?: boolean
+    orientation?: "horizontal" | "vertical"
+    dir?: "ltr" | "rtl"
+    loop?: boolean
+    asChild?: boolean
+  }
 const ToggleGroupRoot = ToggleGroupPrimitive.Root as React.ForwardRefExoticComponent<ToggleGroupRootProps>
 
-type ToggleGroupItemProps = React.ComponentPropsWithoutRef<typeof ToggleGroupPrimitive.Item> &
-  React.RefAttributes<HTMLButtonElement> & { className?: string }
-const ToggleGroupItemRoot = ToggleGroupPrimitive.Item as React.ForwardRefExoticComponent<ToggleGroupItemProps>
+type ToggleGroupItemRootProps = React.ButtonHTMLAttributes<HTMLButtonElement> &
+  React.RefAttributes<HTMLButtonElement> & {
+    value: string
+    disabled?: boolean
+    asChild?: boolean
+  }
+const ToggleGroupItemRoot = ToggleGroupPrimitive.Item as React.ForwardRefExoticComponent<ToggleGroupItemRootProps>
 
 const ToggleGroup = React.forwardRef<
-  React.ElementRef<typeof ToggleGroupPrimitive.Root>,
-  React.ComponentPropsWithoutRef<typeof ToggleGroupPrimitive.Root> &
-    VariantProps<typeof toggleVariants> & { className?: string }
+  HTMLDivElement,
+  ToggleGroupRootProps & VariantProps<typeof toggleVariants>
 >(({ className, variant, size, children, ...props }, ref) => (
   <ToggleGroupRoot
     ref={ref}
@@ -44,9 +59,8 @@ const ToggleGroup = React.forwardRef<
 ToggleGroup.displayName = ToggleGroupPrimitive.Root.displayName
 
 const ToggleGroupItem = React.forwardRef<
-  React.ElementRef<typeof ToggleGroupPrimitive.Item>,
-  React.ComponentPropsWithoutRef<typeof ToggleGroupPrimitive.Item> &
-    VariantProps<typeof toggleVariants> & { className?: string }
+  HTMLButtonElement,
+  ToggleGroupItemRootProps & VariantProps<typeof toggleVariants>
 >(({ className, children, variant, size, ...props }, ref) => {
   const context = React.useContext(ToggleGroupContext)
 
