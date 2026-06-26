@@ -4,7 +4,7 @@ import {
   Box, AlignJustify, AlignLeft, Image, LayoutGrid, Minus,
   LayoutList, MousePointerClick, ListFilter, User, Shield,
   AtSign, Hash, TextCursorInput, Layers, Bot, Workflow,
-  Search, Zap, MessageCircle, PanelTop, Webhook,
+  Search, Zap, MessageCircle, PanelTop, Webhook, Clock,
 } from "lucide-react";
 
 interface NodeDef {
@@ -156,6 +156,12 @@ const NODE_DEFS: NodeDef[] = [
     defaultData: { componentType: -2, initialNodeId: null },
     comingSoon: true,
   },
+  {
+    type: "schedule", label: "Schedule", alias: "Automated send",
+    description: "Send your message automatically on a recurring cron schedule or at a set time.",
+    icon: <IC color="#f59e0b"><Clock size={15} /></IC>, componentType: null,
+    defaultData: { componentType: -6, label: "Scheduled Message", scheduleType: "cron", cronExpression: "0 9 * * *", runAt: "", webhookUrl: "", active: false, scheduleId: null, lastRunAt: null, nextRunAt: null },
+  },
 ];
 
 const GROUPS = [
@@ -166,6 +172,7 @@ const GROUPS = [
   { label: "Legacy",          types: ["embed"],                                                                         hint: "V1 only" },
   { label: "Message & Modal",  types: ["message", "modal"],                                                             hint: "Standalone" },
   { label: "Advanced",         types: ["bot", "webhook", "openembedded"],                                                hint: "Send to Discord" },
+  { label: "Automation",       types: ["schedule"],                                                                      hint: "Scheduled sends" },
 ];
 
 const NODE_MAP = new Map(NODE_DEFS.map((d) => [d.type, d]));

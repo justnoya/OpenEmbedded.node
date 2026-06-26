@@ -15,6 +15,7 @@ import { WebhookNode } from "./nodes/WebhookNode";
 import { OpenEmbeddedNode } from "./nodes/OpenEmbeddedNode";
 import { MessageNode } from "./nodes/MessageNode";
 import { ModalNode } from "./nodes/ModalNode";
+import { ScheduleNode } from "./nodes/ScheduleNode";
 
 export const nodeTypes = {
   container: ContainerNode,
@@ -37,4 +38,5 @@ export const nodeTypes = {
   openembedded: OpenEmbeddedNode,
   message: MessageNode,
   modal: ModalNode,
+  schedule: ScheduleNode,
 };

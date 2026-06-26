@@ -8,7 +8,7 @@ import {
   Package, LayoutTemplate, FileText, ImageIcon, GalleryHorizontalEnd,
   Minus, Rows3, PointerIcon, ListFilter, UserRound, ShieldCheck,
   AtSign, Hash, FormInput, MessageSquareCode, Trash2,
-  Plus, X, Bot, Sparkles, Webhook,
+  Plus, X, Bot, Sparkles, Webhook, Clock,
   CheckCircle2, AlertCircle, Loader2, Send, RefreshCw, Zap, Circle,
   ArrowRight, Info, MessageCircle, PanelTop, GripVertical,
 } from "lucide-react";
@@ -35,6 +35,7 @@ const TYPE_META: Record<number, { label: string; icon: ReactNode; color: string 
   [-3]: { label: "Message",            icon: <MessageCircle size={14} />,        color: "#10b981" },
   [-4]: { label: "Modal",              icon: <PanelTop size={14} />,             color: "#3b82f6" },
   [-5]: { label: "Webhook",            icon: <Webhook size={14} />,              color: "#5865F2" },
+  [-6]: { label: "Schedule",           icon: <Clock size={14} />,               color: "#f59e0b" },
 };
 
 const BG = "#161616";
@@ -222,6 +223,296 @@ function WebhookProperties({ d }: {
           color: "#5865F2", fontSize: 11, lineHeight: 1.6, textAlign: "center",
         }}>
           Paste a valid Discord webhook URL into the node on the canvas to enable sending.
+        </div>
+      )}
+      <style>{`@keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }`}</style>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+//  ScheduleProperties
+// ─────────────────────────────────────────────────────────────
+const CRON_PRESETS = [
+  { label: "Every minute",        value: "* * * * *" },
+  { label: "Every 5 minutes",     value: "*/5 * * * *" },
+  { label: "Every hour",          value: "0 * * * *" },
+  { label: "Daily at 9 AM",       value: "0 9 * * *" },
+  { label: "Daily at 6 PM",       value: "0 18 * * *" },
+  { label: "Mon–Fri at 9 AM",     value: "0 9 * * 1-5" },
+  { label: "Weekly Mon at 9 AM",  value: "0 9 * * 1" },
+  { label: "Monthly on 1st 9 AM", value: "0 9 1 * *" },
+  { label: "Custom…",             value: "custom" },
+];
+
+function ScheduleProperties({ nodeId, d, updateNodeData }: {
+  nodeId: string;
+  d: Record<string, unknown>;
+  updateNodeData: (id: string, data: Record<string, unknown>) => void;
+}) {
+  const payload = usePreviewStore((s) => s.payload);
+  const isValid = usePreviewStore((s) => s.isValid);
+  const compileErrors = usePreviewStore((s) => s.errors);
+
+  const scheduleId = (d.scheduleId as string) ?? "";
+  const [scheduleType, setScheduleType] = useState((d.scheduleType as string) ?? "cron");
+  const [cronExpression, setCronExpression] = useState((d.cronExpression as string) ?? "0 9 * * *");
+  const [cronPreset, setCronPreset] = useState(() => {
+    const init = (d.cronExpression as string) ?? "0 9 * * *";
+    return CRON_PRESETS.find((p) => p.value !== "custom" && p.value === init) ? init : "custom";
+  });
+  const [runAt, setRunAt] = useState((d.runAt as string) ?? "");
+  const [webhookUrl, setWebhookUrl] = useState((d.webhookUrl as string) ?? "");
+  const [label, setLabel] = useState((d.label as string) ?? "Scheduled Message");
+  const [status, setStatus] = useState<"idle" | "saving" | "saved" | "error" | "running">("idle");
+  const [statusMsg, setStatusMsg] = useState("");
+
+  const isActive = (d.active as boolean) ?? false;
+  const lastRunAt = (d.lastRunAt as string) ?? "";
+  const nextRunAt = (d.nextRunAt as string) ?? "";
+
+  const amber = "#f59e0b";
+
+  const focusBorder = (e: React.FocusEvent) => {
+    (e.currentTarget as HTMLElement).style.borderColor = "rgba(245,158,11,0.45)";
+  };
+  const blurBorder = (e: React.FocusEvent) => {
+    (e.currentTarget as HTMLElement).style.borderColor = BORDER;
+  };
+
+  const handlePresetChange = (val: string) => {
+    setCronPreset(val);
+    if (val !== "custom") setCronExpression(val);
+  };
+
+  const buildBody = () => ({
+    label,
+    scheduleType,
+    cronExpression: scheduleType === "cron" ? cronExpression : undefined,
+    runAt: scheduleType === "once" ? runAt : undefined,
+    webhookUrl: webhookUrl || undefined,
+    payload: payload as Record<string, unknown>,
+  });
+
+  const handleActivate = async () => {
+    if (!payload) return;
+    setStatus("saving");
+    try {
+      const body = buildBody();
+      const url = scheduleId ? `/api/v1/schedules/${scheduleId}` : "/api/v1/schedules";
+      const method = scheduleId ? "PATCH" : "POST";
+      const res = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(scheduleId ? { ...body, active: true } : body),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ error: "Unknown error" })) as { error?: string };
+        setStatus("error");
+        setStatusMsg(err.error ?? "Failed to save schedule");
+        setTimeout(() => setStatus("idle"), 4000);
+        return;
+      }
+      const data = await res.json() as { id: string; active: boolean; lastRunAt?: string | null; nextRunAt?: string | null };
+      updateNodeData(nodeId, {
+        scheduleId: data.id, active: data.active,
+        lastRunAt: data.lastRunAt ?? null, nextRunAt: data.nextRunAt ?? null,
+        scheduleType, cronExpression: scheduleType === "cron" ? cronExpression : undefined,
+        runAt: scheduleType === "once" ? runAt : undefined, webhookUrl, label,
+      });
+      setStatus("saved");
+      setStatusMsg(scheduleId ? "Schedule updated!" : "Schedule activated!");
+      setTimeout(() => setStatus("idle"), 3000);
+    } catch {
+      setStatus("error");
+      setStatusMsg("Network error — check your connection.");
+      setTimeout(() => setStatus("idle"), 4000);
+    }
+  };
+
+  const handleToggle = async () => {
+    if (!scheduleId) return;
+    setStatus("saving");
+    try {
+      const res = await fetch(`/api/v1/schedules/${scheduleId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ active: !isActive }),
+      });
+      if (!res.ok) throw new Error("Failed");
+      const data = await res.json() as { active: boolean };
+      updateNodeData(nodeId, { active: data.active });
+      setStatus("saved");
+      setStatusMsg(data.active ? "Schedule resumed" : "Schedule paused");
+      setTimeout(() => setStatus("idle"), 2500);
+    } catch {
+      setStatus("error");
+      setStatusMsg("Failed to toggle schedule");
+      setTimeout(() => setStatus("idle"), 3000);
+    }
+  };
+
+  const handleRunNow = async () => {
+    if (!scheduleId) return;
+    setStatus("running");
+    try {
+      const res = await fetch(`/api/v1/schedules/${scheduleId}/run`, { method: "POST" });
+      const data = await res.json() as { success: boolean; message?: string | null };
+      if (data.success) {
+        updateNodeData(nodeId, { lastRunAt: new Date().toISOString() });
+        setStatus("saved");
+        setStatusMsg("Sent successfully!");
+      } else {
+        setStatus("error");
+        setStatusMsg(data.message ?? "Discord rejected the message");
+      }
+      setTimeout(() => setStatus("idle"), 3500);
+    } catch {
+      setStatus("error");
+      setStatusMsg("Network error");
+      setTimeout(() => setStatus("idle"), 3000);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!scheduleId) return;
+    try {
+      await fetch(`/api/v1/schedules/${scheduleId}`, { method: "DELETE" });
+      updateNodeData(nodeId, { scheduleId: null, active: false, lastRunAt: null, nextRunAt: null });
+    } catch {}
+  };
+
+  return (
+    <div>
+      <div style={fieldWrap}>
+        <label style={labelStyle}>Schedule Name</label>
+        <input type="text" value={label} onChange={(e) => setLabel(e.target.value)}
+          placeholder="My daily announcement" style={inputStyle} onFocus={focusBorder} onBlur={blurBorder} />
+      </div>
+
+      <div style={fieldWrap}>
+        <label style={labelStyle}>Schedule Type</label>
+        <div style={{ display: "flex", gap: 6 }}>
+          {(["cron", "once"] as const).map((t) => (
+            <button key={t} onClick={() => setScheduleType(t)} style={{
+              flex: 1, padding: "7px 0", borderRadius: 7, fontSize: 12, fontWeight: 600,
+              border: scheduleType === t ? `1px solid ${amber}50` : "1px solid rgba(255,255,255,0.09)",
+              background: scheduleType === t ? `${amber}18` : "rgba(255,255,255,0.04)",
+              color: scheduleType === t ? amber : "#606060", cursor: "pointer", transition: "all 0.12s",
+            }}>
+              {t === "cron" ? "Recurring" : "One-time"}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {scheduleType === "cron" ? (
+        <>
+          <div style={fieldWrap}>
+            <label style={labelStyle}>Frequency</label>
+            <select value={cronPreset} onChange={(e) => handlePresetChange(e.target.value)}
+              style={{ ...inputStyle, cursor: "pointer" }} onFocus={focusBorder} onBlur={blurBorder}>
+              {CRON_PRESETS.map((p) => <option key={p.value} value={p.value} style={{ background: BG }}>{p.label}</option>)}
+            </select>
+          </div>
+          {cronPreset === "custom" && (
+            <div style={fieldWrap}>
+              <label style={labelStyle}>Cron Expression</label>
+              <input type="text" value={cronExpression} onChange={(e) => setCronExpression(e.target.value)}
+                placeholder="0 9 * * *" style={{ ...inputStyle, fontFamily: "monospace" }}
+                onFocus={focusBorder} onBlur={blurBorder} />
+              <div style={{ color: FAINT, fontSize: 10, marginTop: 4 }}>
+                5-field syntax: minute hour day month weekday
+              </div>
+            </div>
+          )}
+        </>
+      ) : (
+        <div style={fieldWrap}>
+          <label style={labelStyle}>Run At</label>
+          <input type="datetime-local" value={runAt} onChange={(e) => setRunAt(e.target.value)}
+            style={{ ...inputStyle, colorScheme: "dark" }} onFocus={focusBorder} onBlur={blurBorder} />
+        </div>
+      )}
+
+      <div style={fieldWrap}>
+        <label style={labelStyle}>Webhook URL</label>
+        <input type="text" value={webhookUrl} onChange={(e) => setWebhookUrl(e.target.value)}
+          placeholder="https://discord.com/api/webhooks/…" style={inputStyle}
+          onFocus={focusBorder} onBlur={blurBorder} />
+        <div style={{ color: FAINT, fontSize: 10, marginTop: 4 }}>
+          Connect this node's right handle → a Container on the canvas to define what gets sent
+        </div>
+      </div>
+
+      {scheduleId && (
+        <div style={{
+          padding: "10px 12px", borderRadius: 8, marginBottom: 14,
+          background: isActive ? "rgba(245,158,11,0.07)" : "rgba(255,255,255,0.03)",
+          border: isActive ? "1px solid rgba(245,158,11,0.2)" : "1px solid rgba(255,255,255,0.07)",
+        }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: lastRunAt || nextRunAt ? 6 : 0 }}>
+            <div style={{ width: 7, height: 7, borderRadius: "50%", flexShrink: 0, background: isActive ? amber : "#484848", boxShadow: isActive ? `0 0 6px ${amber}60` : "none" }} />
+            <span style={{ color: isActive ? amber : "#606060", fontSize: 12, fontWeight: 600 }}>
+              {isActive ? "Active" : "Paused"}
+            </span>
+          </div>
+          {lastRunAt && <div style={{ color: "#484848", fontSize: 11, marginBottom: 2 }}>Last: {new Date(lastRunAt).toLocaleString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}</div>}
+          {nextRunAt && isActive && <div style={{ color: "#484848", fontSize: 11 }}>Next: {new Date(nextRunAt).toLocaleString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}</div>}
+        </div>
+      )}
+
+      {!isValid && compileErrors.length > 0 && (
+        <div style={{ marginBottom: 8 }}>
+          {compileErrors.map((e, i) => (
+            <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 6, marginBottom: 4 }}>
+              <AlertCircle size={11} color="#f85149" style={{ marginTop: 1, flexShrink: 0 }} />
+              <span style={{ color: "#f85149", fontSize: 11, lineHeight: 1.4 }}>{e.message}</span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {status !== "idle" && statusMsg && (
+        <div style={{
+          marginBottom: 10, padding: "7px 10px", borderRadius: 7, fontSize: 12,
+          background: status === "error" ? "rgba(248,81,73,0.08)" : "rgba(245,158,11,0.08)",
+          border: status === "error" ? "1px solid rgba(248,81,73,0.18)" : `1px solid ${amber}30`,
+          color: status === "error" ? "#f85149" : amber,
+        }}>{statusMsg}</div>
+      )}
+
+      <button onClick={handleActivate} disabled={status === "saving" || !payload || !isValid}
+        style={{
+          width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: 7,
+          background: status === "saved" ? "rgba(245,158,11,0.15)" : amber,
+          border: status === "saved" ? `1px solid ${amber}30` : "none",
+          borderRadius: 8, color: status === "saved" ? amber : "#1a1a1a",
+          fontSize: 13, fontWeight: 700, padding: "10px 0", cursor: "pointer",
+          transition: "opacity 0.15s", marginBottom: 8,
+          opacity: !payload || !isValid || status === "saving" ? 0.45 : 1,
+        }}>
+        {status === "saving"
+          ? <><Loader2 size={14} style={{ animation: "spin 1s linear infinite" }} /> Saving…</>
+          : scheduleId
+          ? <><RefreshCw size={14} /> Update Schedule</>
+          : <><Send size={14} /> Activate Schedule</>}
+      </button>
+
+      {scheduleId && (
+        <div style={{ display: "flex", gap: 6 }}>
+          <button onClick={handleToggle} disabled={status === "saving"}
+            style={{ flex: 1, padding: "8px 0", borderRadius: 7, fontSize: 12, fontWeight: 600, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.09)", color: "#d0d0d0", cursor: "pointer" }}>
+            {isActive ? "Pause" : "Resume"}
+          </button>
+          <button onClick={handleRunNow} disabled={status === "running"}
+            style={{ flex: 1, padding: "8px 0", borderRadius: 7, fontSize: 12, fontWeight: 600, background: "rgba(63,185,80,0.08)", border: "1px solid rgba(63,185,80,0.2)", color: "#3fb950", cursor: "pointer", opacity: status === "running" ? 0.45 : 1 }}>
+            {status === "running" ? "Sending…" : "Run Now"}
+          </button>
+          <button onClick={handleDelete} title="Delete schedule"
+            style={{ padding: "8px 10px", borderRadius: 7, background: "rgba(248,81,73,0.08)", border: "1px solid rgba(248,81,73,0.18)", color: "#f85149", cursor: "pointer", display: "flex", alignItems: "center" }}>
+            <Trash2 size={13} />
+          </button>
         </div>
       )}
       <style>{`@keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }`}</style>
@@ -1227,6 +1518,9 @@ export function PropertiesPanel() {
     if (d.componentType === -5) {
       return <WebhookProperties nodeId={node.id} d={d as Record<string, unknown>} />;
     }
+    if (d.componentType === -6) {
+      return <ScheduleProperties nodeId={node.id} d={d as Record<string, unknown>} updateNodeData={updateNodeData as (id: string, data: Record<string, unknown>) => void} />;
+    }
     if (d.componentType === -3) {
       return (
         <>
@@ -1350,7 +1644,7 @@ export function PropertiesPanel() {
         </span>
         <div style={{ width: 1, height: 18, background: "rgba(255,255,255,0.08)", margin: "0 2px" }} />
         <span style={{ color: "#a3a6aa", fontSize: 13 }}>
-          {d.componentType === -1 ? "Bot config" : d.componentType === -2 ? "Flow config" : "Properties"}
+          {d.componentType === -1 ? "Bot config" : d.componentType === -2 ? "Flow config" : d.componentType === -6 ? "Schedule config" : "Properties"}
         </span>
         <div style={{ flex: 1 }} />
         <button
@@ -1393,7 +1687,7 @@ export function PropertiesPanel() {
               {meta?.label ?? "Node"}
             </div>
             <div style={{ color: "#484848", fontSize: 10 }}>
-              {d.componentType === -1 ? "Advanced · Bot" : d.componentType === -2 ? "Platform · Interactive" : `Component type ${d.componentType}`}
+              {d.componentType === -1 ? "Advanced · Bot" : d.componentType === -2 ? "Platform · Interactive" : d.componentType === -6 ? "Automation · Scheduled Send" : `Component type ${d.componentType}`}
             </div>
           </div>
         </div>

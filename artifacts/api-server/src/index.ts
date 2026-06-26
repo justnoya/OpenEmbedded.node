@@ -1,6 +1,7 @@
 import app from "./app";
 import { logger } from "./lib/logger";
 import { pool, ensureSchema } from "@workspace/db";
+import { startScheduler } from "./lib/scheduler";
 
 const rawPort = process.env["PORT"];
 
@@ -22,6 +23,12 @@ async function start() {
   } catch (err) {
     logger.error({ err }, "Schema migration failed — aborting");
     process.exit(1);
+  }
+
+  try {
+    await startScheduler();
+  } catch (err) {
+    logger.warn({ err }, "Scheduler failed to start — continuing without scheduled jobs");
   }
 
   app.listen(port, (err) => {

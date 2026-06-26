@@ -64,6 +64,39 @@ export async function ensureSchema(
         ADD COLUMN IF NOT EXISTS owner_id VARCHAR(32)
           REFERENCES discord_users(discord_id) ON DELETE CASCADE
     `);
+
+    // Use a PL/pgSQL block to safely create the table even if pg_type has
+    // a stale entry (can occur when a previous CREATE TABLE was interrupted).
+    await client.query(`
+      DO $$
+      BEGIN
+        IF NOT EXISTS (
+          SELECT 1 FROM information_schema.tables
+          WHERE table_schema = 'public' AND table_name = 'scheduled_jobs'
+        ) THEN
+          -- Remove any orphaned pg_type entry before creating the table
+          DELETE FROM pg_type WHERE typname = 'scheduled_jobs' AND typrelid = 0;
+          CREATE TABLE scheduled_jobs (
+            id              UUID         PRIMARY KEY DEFAULT gen_random_uuid(),
+            owner_id        VARCHAR(32)  REFERENCES discord_users(discord_id) ON DELETE CASCADE,
+            label           VARCHAR(255) NOT NULL DEFAULT 'Scheduled Message',
+            schedule_type   VARCHAR(10)  NOT NULL DEFAULT 'cron',
+            cron_expression VARCHAR(100),
+            run_at          TIMESTAMP,
+            webhook_url     TEXT,
+            channel_id      VARCHAR(32),
+            bot_token       TEXT,
+            payload         JSONB        NOT NULL DEFAULT '{}',
+            active          BOOLEAN      NOT NULL DEFAULT TRUE,
+            last_run_at     TIMESTAMP,
+            next_run_at     TIMESTAMP,
+            created_at      TIMESTAMP    NOT NULL DEFAULT NOW(),
+            updated_at      TIMESTAMP    NOT NULL DEFAULT NOW()
+          );
+        END IF;
+      END
+      $$
+    `);
   } finally {
     client.release();
   }

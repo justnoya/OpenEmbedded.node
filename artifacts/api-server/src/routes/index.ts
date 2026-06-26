@@ -6,6 +6,7 @@ import webhookRouter from "./webhook";
 import discordRouter from "./discord";
 import botRouter from "./bot";
 import openbotRouter from "./openbot";
+import schedulesRouter from "./schedules";
 
 const router = Router();
 
@@ -16,5 +17,6 @@ router.use(webhookRouter);
 router.use(discordRouter);
 router.use(botRouter);
 router.use(openbotRouter);
+router.use(schedulesRouter);
 
 export default router;

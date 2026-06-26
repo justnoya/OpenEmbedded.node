@@ -18,6 +18,7 @@ export const NODE_CLASSES: Record<string, NodeClass> = {
   bot:               "root",
   openembedded:      "root",
   message:           "root",
+  schedule:          "root",
   textDisplay:       "sub",
   thumbnail:         "sub",
   mediaGallery:      "sub",
@@ -63,9 +64,9 @@ export function isValidNodeConnection(sourceType: string, targetType: string): b
  */
 const BOT_SEND_TARGETS = new Set(["container", "embed", "message"]);
 
-/** Returns true if a bot "send" connection is valid (Bot or OpenEmbedded → Container or Embed). */
+/** Returns true if a bot "send" connection is valid (Bot, OpenEmbedded, or Schedule → Container or Embed). */
 export function isBotSendConnection(sourceType: string, targetType: string): boolean {
-  return (sourceType === "bot" || sourceType === "openembedded") && BOT_SEND_TARGETS.has(targetType);
+  return (sourceType === "bot" || sourceType === "openembedded" || sourceType === "schedule") && BOT_SEND_TARGETS.has(targetType);
 }
 
 /** Returns true if an interaction (on-click flow) connection is valid. */
@@ -80,7 +81,7 @@ const FRIENDLY_NAMES: Record<string, string> = {
   textInput: "Text field", userSelect: "User Select", roleSelect: "Role Select",
   mentionableSelect: "Mentionable Select", channelSelect: "Channel Select",
   embed: "Embed", bot: "Bot", openembedded: "OpenEmbedded",
-  message: "Message", modal: "Modal",
+  message: "Message", modal: "Modal", schedule: "Schedule",
 };
 
 function friendly(type: string) {
