@@ -16,8 +16,10 @@ export async function ensureSchema(
 ): Promise<void> {
   const client = await pool.connect();
   try {
+    // Run each DDL statement separately to avoid pg_type duplicate key errors
+    // that can occur when multiple CREATE TABLE statements share a transaction
+    // block and the types already exist in the catalog.
     await client.query(`
-      -- discord_users must exist before projects (FK target)
       CREATE TABLE IF NOT EXISTS discord_users (
         discord_id    VARCHAR(32)  PRIMARY KEY,
         username      VARCHAR(64)  NOT NULL,
@@ -26,33 +28,41 @@ export async function ensureSchema(
         avatar        VARCHAR(256),
         created_at    TIMESTAMP    NOT NULL DEFAULT NOW(),
         last_seen_at  TIMESTAMP    NOT NULL DEFAULT NOW()
-      );
+      )
+    `);
 
+    await client.query(`
       CREATE TABLE IF NOT EXISTS user_sessions (
         sid    VARCHAR      NOT NULL PRIMARY KEY,
         sess   JSON         NOT NULL,
         expire TIMESTAMP(6) NOT NULL
-      );
+      )
+    `);
 
+    await client.query(`
       CREATE INDEX IF NOT EXISTS "IDX_session_expire"
-        ON user_sessions (expire);
+        ON user_sessions (expire)
+    `);
 
-      -- Base table (columns present from the very first deploy)
+    await client.query(`
       CREATE TABLE IF NOT EXISTS projects (
         id         UUID         PRIMARY KEY DEFAULT gen_random_uuid(),
         name       VARCHAR(255) NOT NULL,
         graph      JSONB        NOT NULL,
         created_at TIMESTAMP    NOT NULL DEFAULT NOW(),
         updated_at TIMESTAMP    NOT NULL DEFAULT NOW()
-      );
+      )
+    `);
 
-      -- Additive column migrations: safe to run even when the column exists
+    await client.query(`
       ALTER TABLE projects
-        ADD COLUMN IF NOT EXISTS payload  JSONB;
+        ADD COLUMN IF NOT EXISTS payload JSONB
+    `);
 
+    await client.query(`
       ALTER TABLE projects
         ADD COLUMN IF NOT EXISTS owner_id VARCHAR(32)
-          REFERENCES discord_users(discord_id) ON DELETE CASCADE;
+          REFERENCES discord_users(discord_id) ON DELETE CASCADE
     `);
   } finally {
     client.release();
