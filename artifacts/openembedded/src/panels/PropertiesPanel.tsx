@@ -99,7 +99,7 @@ function WebhookProperties({ d }: {
     sendWebhook.mutate(
       { data: { webhookUrl, payload: payload as Record<string, unknown> } },
       {
-        onSuccess: (res) => {
+        onSuccess: (res: unknown) => {
           const r = res as { success: boolean; message?: string | null };
           if (r.success) {
             setSendStatus("success");
@@ -561,7 +561,7 @@ function BotProperties({ nodeId, d, updateNodeData }: {
     botValidate.mutate(
       { data: { token: t } },
       {
-        onSuccess: (res) => {
+        onSuccess: (res: unknown) => {
           const r = res as { success: boolean; botName?: string | null; botAvatar?: string | null; guilds?: Array<{ id: string; name: string; icon: string | null }>; message?: string | null };
           if (r.success) {
             updateNodeData(nodeId, {
@@ -587,7 +587,7 @@ function BotProperties({ nodeId, d, updateNodeData }: {
     botGetChannels.mutate(
       { data: { token: t, guildId } },
       {
-        onSuccess: (res) => {
+        onSuccess: (res: unknown) => {
           const r = res as { success: boolean; channels?: Array<{ id: string; name: string }> };
           updateNodeData(nodeId, { channels: r.channels ?? [] });
           setFetchingChannels(false);
@@ -613,7 +613,7 @@ function BotProperties({ nodeId, d, updateNodeData }: {
     botSend.mutate(
       { data: { token: t, channelId, payload: payload as Record<string, unknown> } },
       {
-        onSuccess: (res) => {
+        onSuccess: (res: unknown) => {
           const r = res as { success: boolean; message?: string | null };
           if (r.success) { setSendStatus("success"); setSendMsg("Message sent!"); }
           else { setSendStatus("error"); setSendMsg(r.message ?? "Discord rejected the message — check your bot token, channel selection, and try again."); }
@@ -817,7 +817,7 @@ function OpenEmbeddedProperties({ nodeId, d, updateNodeData }: {
     openBotChannelsMutation.mutate(
       { data: { guildId } },
       {
-        onSuccess: (res) => {
+        onSuccess: (res: unknown) => {
           const r = res as { success: boolean; channels?: ChannelEntry[] };
           updateNodeData(nodeId, { channels: r.channels ?? [] });
           setFetchingChannels(false);
@@ -859,7 +859,7 @@ function OpenEmbeddedProperties({ nodeId, d, updateNodeData }: {
     openBotSendMutation.mutate(
       { data: { channelId: selectedChannelId, payload: payload as Record<string, unknown>, flows } },
       {
-        onSuccess: (res) => {
+        onSuccess: (res: unknown) => {
           const r = res as { success: boolean; message?: string | null };
           if (r.success) {
             setSendStatus("success");
