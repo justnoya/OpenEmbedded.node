@@ -6,42 +6,69 @@ export async function ensureSchema(
   const client = await pool.connect();
   try {
     await client.query(`
-      CREATE TABLE IF NOT EXISTS discord_users (
-        discord_id    VARCHAR(32)  PRIMARY KEY,
-        username      VARCHAR(64)  NOT NULL,
-        global_name   VARCHAR(64),
-        discriminator VARCHAR(8)   NOT NULL DEFAULT '0',
-        avatar        VARCHAR(256),
-        created_at    TIMESTAMP    NOT NULL DEFAULT NOW(),
-        last_seen_at  TIMESTAMP    NOT NULL DEFAULT NOW()
-      )
+      DO $$
+      BEGIN
+        CREATE TABLE discord_users (
+          discord_id    VARCHAR(32)  PRIMARY KEY,
+          username      VARCHAR(64)  NOT NULL,
+          global_name   VARCHAR(64),
+          discriminator VARCHAR(8)   NOT NULL DEFAULT '0',
+          avatar        VARCHAR(256),
+          created_at    TIMESTAMP    NOT NULL DEFAULT NOW(),
+          last_seen_at  TIMESTAMP    NOT NULL DEFAULT NOW()
+        );
+      EXCEPTION
+        WHEN duplicate_table   THEN NULL;
+        WHEN unique_violation  THEN NULL;
+        WHEN duplicate_object  THEN NULL;
+      END $$
     `);
 
     await client.query(`
-      CREATE TABLE IF NOT EXISTS user_sessions (
-        sid    VARCHAR      NOT NULL PRIMARY KEY,
-        sess   JSON         NOT NULL,
-        expire TIMESTAMP(6) NOT NULL
-      )
+      DO $$
+      BEGIN
+        CREATE TABLE user_sessions (
+          sid    VARCHAR      NOT NULL PRIMARY KEY,
+          sess   JSON         NOT NULL,
+          expire TIMESTAMP(6) NOT NULL
+        );
+      EXCEPTION
+        WHEN duplicate_table   THEN NULL;
+        WHEN unique_violation  THEN NULL;
+        WHEN duplicate_object  THEN NULL;
+      END $$
     `);
 
     await client.query(`
-      CREATE INDEX IF NOT EXISTS "IDX_session_expire" ON user_sessions (expire);
+      DO $$
+      BEGIN
+        CREATE INDEX "IDX_session_expire" ON user_sessions (expire);
+      EXCEPTION
+        WHEN duplicate_table   THEN NULL;
+        WHEN unique_violation  THEN NULL;
+        WHEN duplicate_object  THEN NULL;
+      END $$
     `);
 
     await client.query(`
-      CREATE TABLE IF NOT EXISTS projects (
-        id         UUID         PRIMARY KEY DEFAULT gen_random_uuid(),
-        name       VARCHAR(255) NOT NULL,
-        graph      JSONB        NOT NULL,
-        created_at TIMESTAMP    NOT NULL DEFAULT NOW(),
-        updated_at TIMESTAMP    NOT NULL DEFAULT NOW()
-      )
+      DO $$
+      BEGIN
+        CREATE TABLE projects (
+          id         UUID         PRIMARY KEY DEFAULT gen_random_uuid(),
+          name       VARCHAR(255) NOT NULL,
+          graph      JSONB        NOT NULL,
+          created_at TIMESTAMP    NOT NULL DEFAULT NOW(),
+          updated_at TIMESTAMP    NOT NULL DEFAULT NOW()
+        );
+      EXCEPTION
+        WHEN duplicate_table   THEN NULL;
+        WHEN unique_violation  THEN NULL;
+        WHEN duplicate_object  THEN NULL;
+      END $$
     `);
 
     await client.query(`
-      ALTER TABLE projects
-        ADD COLUMN IF NOT EXISTS payload JSONB
+      ALTER TABLE projects ADD COLUMN IF NOT EXISTS payload  JSONB
     `);
 
     await client.query(`
@@ -71,10 +98,10 @@ export async function ensureSchema(
           updated_at      TIMESTAMP    NOT NULL DEFAULT NOW()
         );
       EXCEPTION
-        WHEN duplicate_table THEN NULL;
-        WHEN unique_violation THEN NULL;
-      END
-      $$
+        WHEN duplicate_table   THEN NULL;
+        WHEN unique_violation  THEN NULL;
+        WHEN duplicate_object  THEN NULL;
+      END $$
     `);
 
     await client.query(`
@@ -88,10 +115,10 @@ export async function ensureSchema(
           CONSTRAINT user_guild_unique UNIQUE (user_id, guild_id)
         );
       EXCEPTION
-        WHEN duplicate_table THEN NULL;
-        WHEN unique_violation THEN NULL;
-      END
-      $$
+        WHEN duplicate_table   THEN NULL;
+        WHEN unique_violation  THEN NULL;
+        WHEN duplicate_object  THEN NULL;
+      END $$
     `);
   } finally {
     client.release();
