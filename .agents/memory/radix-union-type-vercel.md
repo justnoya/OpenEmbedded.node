@@ -61,8 +61,10 @@ const ToggleRoot = TogglePrimitive.Root as React.ForwardRefExoticComponent<Toggl
 
 - `artifacts/openembedded/src/components/ui/toggle.tsx` — `ToggleRoot` cast via `React.ButtonHTMLAttributes<HTMLButtonElement>`
 - `artifacts/openembedded/src/components/ui/toggle-group.tsx` — `ToggleGroupRoot` via `React.HTMLAttributes<HTMLDivElement>`, `ToggleGroupItemRoot` via `React.ButtonHTMLAttributes<HTMLButtonElement>`
+- `artifacts/openembedded/src/components/ui/toast.tsx` — all six Toast primitives (Viewport/Root/Action/Close/Title/Description) cast via HTML attribute types; Radix-specific props (altText, open, onOpenChange, type, duration, forceMount, hotkey, label, swipe handlers) explicitly typed in the cast interfaces
 
 ## Radix packages with union prop types (potential future risk)
 
 - `@radix-ui/react-toggle-group` — ToggleGroupSingleProps | ToggleGroupMultipleProps ← FIXED
+- `@radix-ui/react-toast` — ToastViewportProps, ToastProps, etc. lose className under TS 5.9 ← FIXED
 - `@radix-ui/react-accordion` — AccordionSingleProps | AccordionMultipleProps (Root re-exported as-is, not wrapped, so only consumer files are at risk — but Accordion is not used in this app)
