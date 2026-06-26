@@ -57,7 +57,7 @@ export function ExportPanel() {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       { data: { graph: { nodes: nodes as any, edges: edges as any } } },
       {
-        onSuccess: (result) => { setCode((result as { code: string }).code); setCodeLoading(false); },
+        onSuccess: (result: unknown) => { setCode((result as { code: string }).code); setCodeLoading(false); },
         onError: () => setCodeLoading(false),
       }
     );
