@@ -10,12 +10,17 @@ const labelVariants = cva(
   "text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
 )
 
+// Cast primitive to avoid Vercel TS 5.9 "className does not exist" errors.
+type LabelRootProps = React.LabelHTMLAttributes<HTMLLabelElement>
+const LabelRootPrim = LabelPrimitive.Root as React.ForwardRefExoticComponent<
+  LabelRootProps & React.RefAttributes<HTMLLabelElement>
+>
+
 const Label = React.forwardRef<
-  React.ElementRef<typeof LabelPrimitive.Root>,
-  React.ComponentPropsWithoutRef<typeof LabelPrimitive.Root> & { children?: React.ReactNode } &
-    VariantProps<typeof labelVariants>
+  HTMLLabelElement,
+  LabelRootProps & VariantProps<typeof labelVariants>
 >(({ className, ...props }, ref) => (
-  <LabelPrimitive.Root
+  <LabelRootPrim
     ref={ref}
     className={cn(labelVariants(), className)}
     {...props}

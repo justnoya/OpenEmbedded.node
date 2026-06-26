@@ -3,29 +3,47 @@ import * as ScrollAreaPrimitive from "@radix-ui/react-scroll-area"
 
 import { cn } from "../../lib/utils.js"
 
+// Cast primitives to avoid Vercel TS 5.9 "className does not exist" errors.
+type P<E, T> = React.ForwardRefExoticComponent<T & React.RefAttributes<E>>
+
+const ScrollAreaRootPrim = ScrollAreaPrimitive.Root as P<HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement> & { type?: "auto" | "always" | "scroll" | "hover"; scrollHideDelay?: number }>
+
+const ScrollAreaViewportPrim = ScrollAreaPrimitive.Viewport as P<HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>>
+
+const ScrollbarPrim = ScrollAreaPrimitive.ScrollAreaScrollbar as P<HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement> & { orientation?: "horizontal" | "vertical"; forceMount?: true }>
+
+const ScrollAreaThumbPrim = ScrollAreaPrimitive.ScrollAreaThumb as P<HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>>
+
+const ScrollAreaCornerPrim = ScrollAreaPrimitive.Corner as P<HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>>
+
 const ScrollArea = React.forwardRef<
-  React.ElementRef<typeof ScrollAreaPrimitive.Root>,
-  React.ComponentPropsWithoutRef<typeof ScrollAreaPrimitive.Root> & { children?: React.ReactNode }
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement> & { type?: "auto" | "always" | "scroll" | "hover"; scrollHideDelay?: number }
 >(({ className, children, ...props }, ref) => (
-  <ScrollAreaPrimitive.Root
+  <ScrollAreaRootPrim
     ref={ref}
     className={cn("relative overflow-hidden", className)}
     {...props}
   >
-    <ScrollAreaPrimitive.Viewport className="h-full w-full rounded-[inherit]">
+    <ScrollAreaViewportPrim className="h-full w-full rounded-[inherit]">
       {children}
-    </ScrollAreaPrimitive.Viewport>
+    </ScrollAreaViewportPrim>
     <ScrollBar />
-    <ScrollAreaPrimitive.Corner />
-  </ScrollAreaPrimitive.Root>
+    <ScrollAreaCornerPrim />
+  </ScrollAreaRootPrim>
 ))
 ScrollArea.displayName = ScrollAreaPrimitive.Root.displayName
 
 const ScrollBar = React.forwardRef<
-  React.ElementRef<typeof ScrollAreaPrimitive.ScrollAreaScrollbar>,
-  React.ComponentPropsWithoutRef<typeof ScrollAreaPrimitive.ScrollAreaScrollbar> & { children?: React.ReactNode }
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement> & { orientation?: "horizontal" | "vertical"; forceMount?: true }
 >(({ className, orientation = "vertical", ...props }, ref) => (
-  <ScrollAreaPrimitive.ScrollAreaScrollbar
+  <ScrollbarPrim
     ref={ref}
     orientation={orientation}
     className={cn(
@@ -38,8 +56,8 @@ const ScrollBar = React.forwardRef<
     )}
     {...props}
   >
-    <ScrollAreaPrimitive.ScrollAreaThumb className="relative flex-1 rounded-full bg-border" />
-  </ScrollAreaPrimitive.ScrollAreaScrollbar>
+    <ScrollAreaThumbPrim className="relative flex-1 rounded-full bg-border" />
+  </ScrollbarPrim>
 ))
 ScrollBar.displayName = ScrollAreaPrimitive.ScrollAreaScrollbar.displayName
 

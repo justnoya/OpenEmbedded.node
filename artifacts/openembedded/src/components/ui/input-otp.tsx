@@ -4,11 +4,32 @@ import { Minus } from "lucide-react"
 
 import { cn } from "../../lib/utils.js"
 
+// Cast OTPInput to avoid Vercel TS 5.9 "className does not exist" errors.
+type OTPInputProps = React.HTMLAttributes<HTMLDivElement> & {
+  maxLength: number
+  containerClassName?: string
+  value?: string
+  onChange?: (value: string) => void
+  onComplete?: (...args: unknown[]) => void
+  pattern?: string
+  inputMode?: "numeric" | "text" | "decimal" | "tel" | "search" | "email" | "url"
+  allowNavigation?: boolean
+  pushPasswordManagerStrategy?: "increase-width" | "none"
+  pasteTransformer?: (pasted: string) => string
+  autoFocus?: boolean
+  disabled?: boolean
+  id?: string
+  name?: string
+}
+const OTPInputPrim = OTPInput as React.ForwardRefExoticComponent<
+  OTPInputProps & React.RefAttributes<HTMLInputElement>
+>
+
 const InputOTP = React.forwardRef<
-  React.ElementRef<typeof OTPInput>,
-  React.ComponentPropsWithoutRef<typeof OTPInput> & { children?: React.ReactNode }
+  HTMLInputElement,
+  OTPInputProps
 >(({ className, containerClassName, ...props }, ref) => (
-  <OTPInput
+  <OTPInputPrim
     ref={ref}
     containerClassName={cn(
       "flex items-center gap-2 has-[:disabled]:opacity-50",
@@ -21,16 +42,16 @@ const InputOTP = React.forwardRef<
 InputOTP.displayName = "InputOTP"
 
 const InputOTPGroup = React.forwardRef<
-  React.ElementRef<"div">,
-  React.ComponentPropsWithoutRef<"div">
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
 >(({ className, ...props }, ref) => (
   <div ref={ref} className={cn("flex items-center", className)} {...props} />
 ))
 InputOTPGroup.displayName = "InputOTPGroup"
 
 const InputOTPSlot = React.forwardRef<
-  React.ElementRef<"div">,
-  React.ComponentPropsWithoutRef<"div"> & { index: number }
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement> & { index: number }
 >(({ index, className, ...props }, ref) => {
   const inputOTPContext = React.useContext(OTPInputContext)
   const { char, hasFakeCaret, isActive } = inputOTPContext.slots[index]
@@ -57,8 +78,8 @@ const InputOTPSlot = React.forwardRef<
 InputOTPSlot.displayName = "InputOTPSlot"
 
 const InputOTPSeparator = React.forwardRef<
-  React.ElementRef<"div">,
-  React.ComponentPropsWithoutRef<"div">
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
 >(({ ...props }, ref) => (
   <div ref={ref} role="separator" {...props}>
     <Minus />

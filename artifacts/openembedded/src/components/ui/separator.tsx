@@ -3,15 +3,18 @@ import * as SeparatorPrimitive from "@radix-ui/react-separator"
 
 import { cn } from "../../lib/utils.js"
 
-const Separator = React.forwardRef<
-  React.ElementRef<typeof SeparatorPrimitive.Root>,
-  React.ComponentPropsWithoutRef<typeof SeparatorPrimitive.Root> & { children?: React.ReactNode }
->(
-  (
-    { className, orientation = "horizontal", decorative = true, ...props },
-    ref
-  ) => (
-    <SeparatorPrimitive.Root
+// Cast primitive to avoid Vercel TS 5.9 "className does not exist" errors.
+type SeparatorRootProps = React.HTMLAttributes<HTMLDivElement> & {
+  orientation?: "horizontal" | "vertical"
+  decorative?: boolean
+}
+const SeparatorRootPrim = SeparatorPrimitive.Root as React.ForwardRefExoticComponent<
+  SeparatorRootProps & React.RefAttributes<HTMLDivElement>
+>
+
+const Separator = React.forwardRef<HTMLDivElement, SeparatorRootProps>(
+  ({ className, orientation = "horizontal", decorative = true, ...props }, ref) => (
+    <SeparatorRootPrim
       ref={ref}
       decorative={decorative}
       orientation={orientation}

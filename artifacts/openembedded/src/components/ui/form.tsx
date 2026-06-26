@@ -13,6 +13,19 @@ import {
 import { cn } from "../../lib/utils.js"
 import { Label } from "./label.js"
 
+// Cast primitives to avoid Vercel TS 5.9 "className does not exist" errors.
+type LabelRootProps = React.LabelHTMLAttributes<HTMLLabelElement>
+const LabelRootPrim = LabelPrimitive.Root as React.ForwardRefExoticComponent<
+  LabelRootProps & React.RefAttributes<HTMLLabelElement>
+>
+
+type SlotProps = React.HTMLAttributes<HTMLElement> & {
+  asChild?: boolean
+}
+const SlotPrim = Slot as React.ForwardRefExoticComponent<
+  SlotProps & React.RefAttributes<HTMLElement>
+>
+
 const Form = FormProvider
 
 type FormFieldContextValue<
@@ -84,43 +97,41 @@ const FormItem = React.forwardRef<
 })
 FormItem.displayName = "FormItem"
 
-const FormLabel = React.forwardRef<
-  React.ElementRef<typeof LabelPrimitive.Root>,
-  React.ComponentPropsWithoutRef<typeof LabelPrimitive.Root> & { children?: React.ReactNode }
->(({ className, ...props }, ref) => {
-  const { error, formItemId } = useFormField()
+const FormLabel = React.forwardRef<HTMLLabelElement, LabelRootProps>(
+  ({ className, ...props }, ref) => {
+    const { error, formItemId } = useFormField()
 
-  return (
-    <Label
-      ref={ref}
-      className={cn(error && "text-destructive", className)}
-      htmlFor={formItemId}
-      {...props}
-    />
-  )
-})
+    return (
+      <Label
+        ref={ref}
+        className={cn(error && "text-destructive", className)}
+        htmlFor={formItemId}
+        {...props}
+      />
+    )
+  }
+)
 FormLabel.displayName = "FormLabel"
 
-const FormControl = React.forwardRef<
-  React.ElementRef<typeof Slot>,
-  React.ComponentPropsWithoutRef<typeof Slot> & { children?: React.ReactNode }
->(({ ...props }, ref) => {
-  const { error, formItemId, formDescriptionId, formMessageId } = useFormField()
+const FormControl = React.forwardRef<HTMLElement, SlotProps>(
+  ({ ...props }, ref) => {
+    const { error, formItemId, formDescriptionId, formMessageId } = useFormField()
 
-  return (
-    <Slot
-      ref={ref}
-      id={formItemId}
-      aria-describedby={
-        !error
-          ? `${formDescriptionId}`
-          : `${formDescriptionId} ${formMessageId}`
-      }
-      aria-invalid={!!error}
-      {...props}
-    />
-  )
-})
+    return (
+      <SlotPrim
+        ref={ref}
+        id={formItemId}
+        aria-describedby={
+          !error
+            ? `${formDescriptionId}`
+            : `${formDescriptionId} ${formMessageId}`
+        }
+        aria-invalid={!!error}
+        {...props}
+      />
+    )
+  }
+)
 FormControl.displayName = "FormControl"
 
 const FormDescription = React.forwardRef<

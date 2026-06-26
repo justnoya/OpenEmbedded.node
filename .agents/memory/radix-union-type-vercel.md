@@ -57,14 +57,12 @@ const ToggleRoot = TogglePrimitive.Root as React.ForwardRefExoticComponent<Toggl
 
 **How to apply:** Any shadcn/ui component that wraps a Radix primitive with a union prop type (recognizable by `Single | Multiple` in its type docs) must use this pattern. Components with a single-interface Radix type (Select, Dialog, Tabs, etc.) are safe with `ComponentPropsWithoutRef`.
 
-## Components Fixed
+## Components Fixed — ALL shadcn/ui components now use the cast pattern
 
-- `artifacts/openembedded/src/components/ui/toggle.tsx` — `ToggleRoot` cast via `React.ButtonHTMLAttributes<HTMLButtonElement>`
-- `artifacts/openembedded/src/components/ui/toggle-group.tsx` — `ToggleGroupRoot` via `React.HTMLAttributes<HTMLDivElement>`, `ToggleGroupItemRoot` via `React.ButtonHTMLAttributes<HTMLButtonElement>`
-- `artifacts/openembedded/src/components/ui/toast.tsx` — all six Toast primitives (Viewport/Root/Action/Close/Title/Description) cast via HTML attribute types; Radix-specific props (altText, open, onOpenChange, type, duration, forceMount, hotkey, label, swipe handlers) explicitly typed in the cast interfaces
+All 27 files in `artifacts/openembedded/src/components/ui/` that wrap Radix (or Radix-like) primitives with `ComponentPropsWithoutRef` have been converted to the cast pattern. The complete list includes: accordion, alert-dialog, avatar, checkbox, command (cmdk), context-menu, dialog, drawer (vaul), dropdown-menu, form, hover-card, input-otp, label, menubar, navigation-menu, popover, progress, radio-group, scroll-area, select, separator, sheet, slider, switch, tabs, toast, toggle, toggle-group, tooltip.
+
+**Important:** `HTMLNavElement` does not exist in TypeScript — use `HTMLElement` for `<nav>` wrappers.
 
 ## Radix packages with union prop types (potential future risk)
 
-- `@radix-ui/react-toggle-group` — ToggleGroupSingleProps | ToggleGroupMultipleProps ← FIXED
-- `@radix-ui/react-toast` — ToastViewportProps, ToastProps, etc. lose className under TS 5.9 ← FIXED
-- `@radix-ui/react-accordion` — AccordionSingleProps | AccordionMultipleProps (Root re-exported as-is, not wrapped, so only consumer files are at risk — but Accordion is not used in this app)
+ALL shadcn/ui component files have been fixed. No more per-file failures expected.
