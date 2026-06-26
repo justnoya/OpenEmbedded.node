@@ -123,7 +123,7 @@ const TEMPLATES: { id: TemplateId; emoji: string; label: string; description: st
   { id: "poll",         emoji: "🗳️", label: "Poll",           description: "Select menu" },
 ];
 
-function buildTemplateGraph(id: TemplateId): { nodes: object[]; edges: object[] } {
+function buildTemplateGraph(id: TemplateId): { nodes: Record<string, unknown>[]; edges: Record<string, unknown>[] } {
   if (id === "blank") return { nodes: [], edges: [] };
   const t = Date.now();
   const edgeStyle = { stroke: "rgba(255,255,255,0.18)", strokeWidth: 2 };

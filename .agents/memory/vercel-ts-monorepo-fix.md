@@ -28,5 +28,19 @@ Do NOT add `composite: true` to application-level packages (api-server). `compos
 
 **Why:** Only library packages that generate `.d.ts` files need `composite: true`. App packages (api-server) use esbuild which doesn't type-check, so composite is irrelevant for them.
 
+## Additional Fixes (Round 2)
+
+### 4. jsx: "preserve" fails on Vercel in TS 5.9 + project references
+Frontend artifact tsconfigs with `jsx: "preserve"` + `references` to a composite lib whose `dist/` isn't pre-built cause cascading TS17004/TS6142 errors on Vercel. Two fixes together:
+- Change `jsx: "preserve"` → `jsx: "react-jsx"` in all frontend artifact tsconfigs.
+- Remove `references` entries where the referenced lib exports its source directly (`"exports": {".": "./src/index.ts"}`); TypeScript resolves types from source without needing composite/dist.
+
+### 5. dedupe-peer-dependents for drizzle
+Even with `public-hoist-pattern[]=drizzle-orm*` in `.npmrc`, Vercel's pnpm may resolve different peer-dep hash suffixes for `lib/db` vs `artifacts/api-server`, creating two separate drizzle type instances. Add `dedupe-peer-dependents=true` to `.npmrc`.
+
+### 6. Type augmentations as triple-slash refs
+When Vercel scans api-server files with a tsconfig that has a different `types` array, augmentations like `req.log` (pino-http) and `req.session` (express-session) disappear. Fix: add `src/types.d.ts` with `/// <reference types="pino-http" />` and `/// <reference types="express-session" />` — these fire regardless of which tsconfig is active.
+
 ## Verification
 Run `npx tsc --build tsconfig.json` from root — should produce zero output (zero errors).
+Then verify each artifact: `cd artifacts/openembedded && npx tsc -p tsconfig.json --noEmit` etc.

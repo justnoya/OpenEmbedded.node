@@ -15,7 +15,7 @@ import { pool, ensureSchema } from "@workspace/db";
  * every request on this promise so no query ever runs before the schema
  * is confirmed ready.
  */
-const schemaReady: Promise<void> = ensureSchema(pool).catch((err) => {
+const schemaReady: Promise<void> = ensureSchema(pool).catch((err: unknown) => {
   logger.error({ err }, "Schema migration failed on startup");
   return Promise.reject(err);
 });
