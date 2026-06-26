@@ -22,7 +22,10 @@ const TooltipProvider = TooltipPrimitive.Provider
 
 const Tooltip = TooltipPrimitive.Root
 
-const TooltipTrigger = TooltipPrimitive.Trigger
+// Cast trigger so Vercel's TS 5.9 checker sees children + asChild
+const TooltipTrigger = TooltipPrimitive.Trigger as React.ForwardRefExoticComponent<
+  React.ButtonHTMLAttributes<HTMLButtonElement> & { asChild?: boolean } & React.RefAttributes<HTMLButtonElement>
+>
 
 const TooltipContent = React.forwardRef<HTMLDivElement, TooltipContentProps>(
   ({ className, sideOffset = 4, ...props }, ref) => (

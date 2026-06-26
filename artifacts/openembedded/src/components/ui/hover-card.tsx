@@ -19,7 +19,10 @@ const HoverCardContentPrim = HoverCardPrimitive.Content as React.ForwardRefExoti
 
 const HoverCard = HoverCardPrimitive.Root
 
-const HoverCardTrigger = HoverCardPrimitive.Trigger
+// Cast trigger so Vercel's TS 5.9 checker sees children + asChild
+const HoverCardTrigger = HoverCardPrimitive.Trigger as React.ForwardRefExoticComponent<
+  React.AnchorHTMLAttributes<HTMLAnchorElement> & { asChild?: boolean } & React.RefAttributes<HTMLAnchorElement>
+>
 
 const HoverCardContent = React.forwardRef<HTMLDivElement, HoverCardContentProps>(
   ({ className, align = "center", sideOffset = 4, ...props }, ref) => (

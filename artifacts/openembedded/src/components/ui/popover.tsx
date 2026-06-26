@@ -29,9 +29,14 @@ const PopoverContentPrim = PopoverPrimitive.Content as React.ForwardRefExoticCom
 
 const Popover = PopoverPrimitive.Root
 
-const PopoverTrigger = PopoverPrimitive.Trigger
+// Cast trigger/anchor so Vercel's TS 5.9 checker sees children + asChild
+const PopoverTrigger = PopoverPrimitive.Trigger as React.ForwardRefExoticComponent<
+  React.ButtonHTMLAttributes<HTMLButtonElement> & { asChild?: boolean } & React.RefAttributes<HTMLButtonElement>
+>
 
-const PopoverAnchor = PopoverPrimitive.Anchor
+const PopoverAnchor = PopoverPrimitive.Anchor as React.ForwardRefExoticComponent<
+  React.HTMLAttributes<HTMLElement> & { asChild?: boolean } & React.RefAttributes<HTMLElement>
+>
 
 const PopoverContent = React.forwardRef<HTMLDivElement, PopoverContentProps>(
   ({ className, align = "center", sideOffset = 4, ...props }, ref) => (

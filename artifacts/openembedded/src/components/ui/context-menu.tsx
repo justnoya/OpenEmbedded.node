@@ -19,7 +19,10 @@ const SeparatorPrim = ContextMenuPrimitive.Separator as P<HTMLDivElement, React.
 const ItemIndicatorPrim = ContextMenuPrimitive.ItemIndicator as P<HTMLSpanElement, React.HTMLAttributes<HTMLSpanElement> & { forceMount?: true }>
 
 const ContextMenu = ContextMenuPrimitive.Root
-const ContextMenuTrigger = ContextMenuPrimitive.Trigger
+// Cast trigger so Vercel's TS 5.9 checker sees children + asChild
+const ContextMenuTrigger = ContextMenuPrimitive.Trigger as React.ForwardRefExoticComponent<
+  React.HTMLAttributes<HTMLElement> & { asChild?: boolean } & React.RefAttributes<HTMLElement>
+>
 const ContextMenuGroup = ContextMenuPrimitive.Group
 const ContextMenuPortal = ContextMenuPrimitive.Portal
 const ContextMenuSub = ContextMenuPrimitive.Sub

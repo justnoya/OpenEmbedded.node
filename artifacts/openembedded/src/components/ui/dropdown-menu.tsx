@@ -26,7 +26,10 @@ const SeparatorPrim = DropdownMenuPrimitive.Separator as P<HTMLDivElement, React
 const ItemIndicatorPrim = DropdownMenuPrimitive.ItemIndicator as P<HTMLSpanElement, React.HTMLAttributes<HTMLSpanElement> & { forceMount?: true }>
 
 const DropdownMenu = DropdownMenuPrimitive.Root
-const DropdownMenuTrigger = DropdownMenuPrimitive.Trigger
+// Cast trigger so Vercel's TS 5.9 checker sees children + asChild
+const DropdownMenuTrigger = DropdownMenuPrimitive.Trigger as React.ForwardRefExoticComponent<
+  React.ButtonHTMLAttributes<HTMLButtonElement> & { asChild?: boolean } & React.RefAttributes<HTMLButtonElement>
+>
 const DropdownMenuGroup = DropdownMenuPrimitive.Group
 const DropdownMenuPortal = DropdownMenuPrimitive.Portal
 const DropdownMenuSub = DropdownMenuPrimitive.Sub

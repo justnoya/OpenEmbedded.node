@@ -31,8 +31,13 @@ const SheetDescriptionPrim = SheetPrimitive.Description as P<HTMLParagraphElemen
   React.HTMLAttributes<HTMLParagraphElement>>
 
 const Sheet = SheetPrimitive.Root
-const SheetTrigger = SheetPrimitive.Trigger
-const SheetClose = SheetPrimitive.Close
+// Cast trigger/close so Vercel's TS 5.9 checker sees children + asChild
+const SheetTrigger = SheetPrimitive.Trigger as React.ForwardRefExoticComponent<
+  React.ButtonHTMLAttributes<HTMLButtonElement> & { asChild?: boolean } & React.RefAttributes<HTMLButtonElement>
+>
+const SheetClose = SheetPrimitive.Close as React.ForwardRefExoticComponent<
+  React.ButtonHTMLAttributes<HTMLButtonElement> & { asChild?: boolean } & React.RefAttributes<HTMLButtonElement>
+>
 const SheetPortal = SheetPrimitive.Portal
 
 const SheetOverlay = React.forwardRef<

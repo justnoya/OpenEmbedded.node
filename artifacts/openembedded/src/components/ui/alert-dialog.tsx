@@ -33,7 +33,10 @@ const AlertDialogCancelPrim = AlertDialogPrimitive.Cancel as P<HTMLButtonElement
 
 const AlertDialog = AlertDialogPrimitive.Root
 
-const AlertDialogTrigger = AlertDialogPrimitive.Trigger
+// Cast trigger so Vercel's TS 5.9 checker sees children + asChild
+const AlertDialogTrigger = AlertDialogPrimitive.Trigger as React.ForwardRefExoticComponent<
+  React.ButtonHTMLAttributes<HTMLButtonElement> & { asChild?: boolean } & React.RefAttributes<HTMLButtonElement>
+>
 
 const AlertDialogPortal = AlertDialogPrimitive.Portal
 

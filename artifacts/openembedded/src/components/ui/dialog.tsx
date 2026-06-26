@@ -29,11 +29,16 @@ const DialogDescriptionPrim = DialogPrimitive.Description as P<HTMLParagraphElem
 
 const Dialog = DialogPrimitive.Root
 
-const DialogTrigger = DialogPrimitive.Trigger
+// Cast trigger/close so Vercel's TS 5.9 checker sees children + asChild
+const DialogTrigger = DialogPrimitive.Trigger as React.ForwardRefExoticComponent<
+  React.ButtonHTMLAttributes<HTMLButtonElement> & { asChild?: boolean } & React.RefAttributes<HTMLButtonElement>
+>
 
 const DialogPortal = DialogPrimitive.Portal
 
-const DialogClose = DialogPrimitive.Close
+const DialogClose = DialogPrimitive.Close as React.ForwardRefExoticComponent<
+  React.ButtonHTMLAttributes<HTMLButtonElement> & { asChild?: boolean } & React.RefAttributes<HTMLButtonElement>
+>
 
 const DialogOverlay = React.forwardRef<
   HTMLDivElement,
