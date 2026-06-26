@@ -1,4 +1,4 @@
-import { AppNode } from "./graphStore";
+import { AppNode } from "./graphStore.js";
 import { Edge } from "@xyflow/react";
 
 export interface DiscordMessagePayload {

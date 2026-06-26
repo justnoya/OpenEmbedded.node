@@ -1,21 +1,21 @@
-import { ContainerNode } from "./nodes/ContainerNode";
-import { SectionNode } from "./nodes/SectionNode";
-import { TextDisplayNode } from "./nodes/TextDisplayNode";
-import { ThumbnailNode } from "./nodes/ThumbnailNode";
-import { MediaGalleryNode } from "./nodes/MediaGalleryNode";
-import { SeparatorNode } from "./nodes/SeparatorNode";
-import { ActionRowNode } from "./nodes/ActionRowNode";
-import { ButtonNode } from "./nodes/ButtonNode";
-import { EmbedNode } from "./nodes/EmbedNode";
-import { SelectMenuNode } from "./nodes/SelectMenuNode";
-import { AutoSelectNode } from "./nodes/AutoSelectNode";
-import { TextInputNode } from "./nodes/TextInputNode";
-import { BotNode } from "./nodes/BotNode";
-import { WebhookNode } from "./nodes/WebhookNode";
-import { OpenEmbeddedNode } from "./nodes/OpenEmbeddedNode";
-import { MessageNode } from "./nodes/MessageNode";
-import { ModalNode } from "./nodes/ModalNode";
-import { ScheduleNode } from "./nodes/ScheduleNode";
+import { ContainerNode } from "./nodes/ContainerNode.js";
+import { SectionNode } from "./nodes/SectionNode.js";
+import { TextDisplayNode } from "./nodes/TextDisplayNode.js";
+import { ThumbnailNode } from "./nodes/ThumbnailNode.js";
+import { MediaGalleryNode } from "./nodes/MediaGalleryNode.js";
+import { SeparatorNode } from "./nodes/SeparatorNode.js";
+import { ActionRowNode } from "./nodes/ActionRowNode.js";
+import { ButtonNode } from "./nodes/ButtonNode.js";
+import { EmbedNode } from "./nodes/EmbedNode.js";
+import { SelectMenuNode } from "./nodes/SelectMenuNode.js";
+import { AutoSelectNode } from "./nodes/AutoSelectNode.js";
+import { TextInputNode } from "./nodes/TextInputNode.js";
+import { BotNode } from "./nodes/BotNode.js";
+import { WebhookNode } from "./nodes/WebhookNode.js";
+import { OpenEmbeddedNode } from "./nodes/OpenEmbeddedNode.js";
+import { MessageNode } from "./nodes/MessageNode.js";
+import { ModalNode } from "./nodes/ModalNode.js";
+import { ScheduleNode } from "./nodes/ScheduleNode.js";
 
 export const nodeTypes = {
   container: ContainerNode,

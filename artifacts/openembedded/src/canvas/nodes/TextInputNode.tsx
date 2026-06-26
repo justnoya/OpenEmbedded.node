@@ -1,6 +1,6 @@
 import { memo } from "react";
 import { Handle, Position, NodeProps } from "@xyflow/react";
-import { NodeWrapper } from "./NodeWrapper";
+import { NodeWrapper } from "./NodeWrapper.js";
 import { TextCursorInput } from "lucide-react";
 
 function TextInputNodeComponent({ id, data }: NodeProps) {

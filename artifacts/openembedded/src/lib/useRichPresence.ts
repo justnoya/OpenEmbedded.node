@@ -5,7 +5,7 @@
  * Discord's RPC API. Works silently when not in a Discord context.
  */
 import { useEffect, useRef, useCallback } from "react";
-import { useDiscord } from "./discordContext";
+import { useDiscord } from "./discordContext.js";
 
 export type PresenceAction =
   | "designing"

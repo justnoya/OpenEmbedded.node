@@ -1,7 +1,7 @@
 import { create } from "zustand";
-import { AppNode } from "./graphStore";
+import { AppNode } from "./graphStore.js";
 import { Edge } from "@xyflow/react";
-import { compileGraph, CompileResult, DiscordMessagePayload } from "./compiler";
+import { compileGraph, CompileResult, DiscordMessagePayload } from "./compiler.js";
 
 interface PreviewState {
   payload: DiscordMessagePayload | null;

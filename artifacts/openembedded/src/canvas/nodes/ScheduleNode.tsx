@@ -1,6 +1,6 @@
 import { memo } from "react";
 import { Handle, Position, NodeProps } from "@xyflow/react";
-import { NodeWrapper } from "./NodeWrapper";
+import { NodeWrapper } from "./NodeWrapper.js";
 import { Clock, Calendar, CheckCircle2, AlertCircle, Send, Timer } from "lucide-react";
 
 const CRON_PRESETS: Record<string, string> = {

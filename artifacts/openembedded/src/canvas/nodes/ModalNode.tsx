@@ -1,6 +1,6 @@
 import { memo } from "react";
 import { Handle, Position, NodeProps } from "@xyflow/react";
-import { NodeWrapper } from "./NodeWrapper";
+import { NodeWrapper } from "./NodeWrapper.js";
 import { PanelTop } from "lucide-react";
 
 function ModalNodeComponent({ id, data }: NodeProps) {

@@ -1,6 +1,6 @@
 import { memo } from "react";
 import { Handle, Position, NodeProps } from "@xyflow/react";
-import { NodeWrapper } from "./NodeWrapper";
+import { NodeWrapper } from "./NodeWrapper.js";
 import { MousePointerClick } from "lucide-react";
 
 const STYLE_MAP: Record<string, { bg: string; color: string; label: string; border?: string }> = {

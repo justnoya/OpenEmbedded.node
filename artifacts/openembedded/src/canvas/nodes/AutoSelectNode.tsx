@@ -1,6 +1,6 @@
 import { memo } from "react";
 import { Handle, Position, NodeProps } from "@xyflow/react";
-import { NodeWrapper } from "./NodeWrapper";
+import { NodeWrapper } from "./NodeWrapper.js";
 import { Users, Shield, AtSign, Hash, ChevronDown } from "lucide-react";
 
 const SELECT_META: Record<number, { label: string; typeName: string; icon: React.ReactNode; color: string }> = {
