@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { Home } from "@/pages/Home";
 import NotFound from "@/pages/not-found";
 import { Login } from "@/pages/Login";
+import { Landing } from "@/pages/Landing";
 import { AuthCallback } from "@/pages/AuthCallback";
 import { AuthProvider, useAuth } from "@/lib/authContext";
 import { DiscordProvider, useDiscord } from "@/lib/discordContext";
@@ -83,6 +84,27 @@ function AuthGuard({ children }: { children: ReactNode }) {
   return <>{children}</>;
 }
 
+/* ── RootRoute ───────────────────────────────────────────────────────────────
+ *  Shows Landing page for unauthenticated visitors.
+ *  Authenticated users see their project dashboard (Home).
+ * ─────────────────────────────────────────────────────────────────────────── */
+function RootRoute() {
+  const { auth } = useAuth();
+  const { isDiscord } = useDiscord();
+
+  // Discord Activity bypasses landing
+  if (isDiscord) return <Home />;
+
+  // Still checking session — show nothing (avoids flash)
+  if (auth.status === "loading") return <PageLoader />;
+
+  // Unauthenticated visitors → public landing page
+  if (auth.status === "unauthenticated") return <Landing />;
+
+  // Authenticated → dashboard
+  return <Home />;
+}
+
 function Router() {
   return (
     <Switch>
@@ -106,12 +128,8 @@ function Router() {
       </Route>
       <Route path="/support" component={Support} />
 
-      {/* ── Protected routes — require authentication ────────────────── */}
-      <Route path="/">
-        <AuthGuard>
-          <Home />
-        </AuthGuard>
-      </Route>
+      {/* ── Root — Landing (unauth) or Dashboard (auth) ─────────────── */}
+      <Route path="/" component={RootRoute} />
       <Route path="/builder/:id">
         <AuthGuard>
           <Suspense fallback={<PageLoader />}>
