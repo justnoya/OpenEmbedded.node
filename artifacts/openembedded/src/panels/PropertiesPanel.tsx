@@ -2,13 +2,13 @@ import { useState } from "react";
 import { useGraphStore } from "@/lib/graphStore";
 import { usePreviewStore } from "@/lib/previewStore";
 import { ALLOWED_CHILDREN, INTERACTION_MODES, getInteractionModeMeta, type InteractionMode } from "@/lib/connectionRules";
-import { useBotValidate, useBotGetChannels, useBotSend, useOpenBotGuilds, useOpenBotChannels, useOpenBotSend } from "@workspace/api-client-react";
+import { useBotValidate, useBotGetChannels, useBotSend, useOpenBotGuilds, useOpenBotChannels, useOpenBotSend, useSendWebhook } from "@workspace/api-client-react";
 import { compileGraph } from "@/lib/compiler";
 import {
   Package, LayoutTemplate, FileText, ImageIcon, GalleryHorizontalEnd,
   Minus, Rows3, PointerIcon, ListFilter, UserRound, ShieldCheck,
   AtSign, Hash, FormInput, MessageSquareCode, Trash2,
-  Plus, X, ChevronUp, ChevronDown, Bot, Sparkles,
+  Plus, X, ChevronUp, ChevronDown, Bot, Sparkles, Webhook,
   CheckCircle2, AlertCircle, Loader2, Send, RefreshCw, Zap, Circle,
   ArrowRight, Info, MessageCircle, PanelTop,
 } from "lucide-react";
@@ -34,6 +34,7 @@ const TYPE_META: Record<number, { label: string; icon: ReactNode; color: string 
   [-2]: { label: "OpenEmbedded",       icon: <Sparkles size={14} />,             color: "#6366f1" },
   [-3]: { label: "Message",            icon: <MessageCircle size={14} />,        color: "#10b981" },
   [-4]: { label: "Modal",              icon: <PanelTop size={14} />,             color: "#3b82f6" },
+  [-5]: { label: "Webhook",            icon: <Webhook size={14} />,              color: "#5865F2" },
 };
 
 const BG = "#161616";
@@ -70,6 +71,163 @@ const labelStyle: React.CSSProperties = {
 const fieldWrap: React.CSSProperties = { marginBottom: 14 };
 
 const PARENT_COMPONENT_TYPES = new Set([17, 9, 1]);
+
+// ─────────────────────────────────────────────────────────────
+//  WebhookProperties
+// ─────────────────────────────────────────────────────────────
+function WebhookProperties({ d }: {
+  nodeId: string;
+  d: Record<string, unknown>;
+}) {
+  const payload = usePreviewStore((s) => s.payload);
+  const isValid = usePreviewStore((s) => s.isValid);
+  const compileErrors = usePreviewStore((s) => s.errors);
+  const [sendStatus, setSendStatus] = useState<"idle" | "sending" | "success" | "error">("idle");
+  const [sendMsg, setSendMsg] = useState("");
+
+  const sendWebhook = useSendWebhook();
+
+  const webhookUrl = (d.webhookUrl as string) ?? "";
+  const connected = !!(d.connected as boolean);
+  const webhookName = d.webhookName as string | null;
+  const webhookAvatar = d.webhookAvatar as string | null;
+
+  const handleSend = () => {
+    if (!webhookUrl || !payload) return;
+    setSendStatus("sending");
+    sendWebhook.mutate(
+      { data: { webhookUrl, payload: payload as Record<string, unknown> } },
+      {
+        onSuccess: (res) => {
+          const r = res as { success: boolean; message?: string | null };
+          if (r.success) {
+            setSendStatus("success");
+            setSendMsg("Message sent via webhook!");
+          } else {
+            setSendStatus("error");
+            setSendMsg(r.message ?? "Discord rejected the message — check your webhook URL and try again.");
+          }
+          setTimeout(() => setSendStatus("idle"), 4000);
+        },
+        onError: () => {
+          setSendStatus("error");
+          setSendMsg("Couldn't reach Discord — check your connection.");
+          setTimeout(() => setSendStatus("idle"), 4000);
+        },
+      }
+    );
+  };
+
+  const focusBorder = (e: React.FocusEvent) => {
+    (e.currentTarget as HTMLElement).style.borderColor = "rgba(88,101,242,0.6)";
+  };
+  const blurBorder = (e: React.FocusEvent) => {
+    (e.currentTarget as HTMLElement).style.borderColor = BORDER;
+  };
+
+  return (
+    <div>
+      {/* Connection status card */}
+      <div style={{
+        padding: "10px 12px", borderRadius: 8, marginBottom: 14,
+        background: connected ? "rgba(63,185,80,0.07)" : "rgba(255,255,255,0.03)",
+        border: connected ? "1px solid rgba(63,185,80,0.18)" : "1px solid rgba(255,255,255,0.07)",
+        display: "flex", alignItems: "center", gap: 10,
+      }}>
+        {webhookAvatar ? (
+          <img src={webhookAvatar} alt="" style={{ width: 28, height: 28, borderRadius: "50%", flexShrink: 0 }} />
+        ) : (
+          <div style={{ width: 28, height: 28, borderRadius: "50%", background: "rgba(88,101,242,0.2)", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <Webhook size={14} color="#818cf8" />
+          </div>
+        )}
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ color: connected ? "#3fb950" : "#a0a0a0", fontSize: 12, fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+            {connected ? (webhookName ?? "Webhook") : "No webhook connected"}
+          </div>
+          <div style={{ color: connected ? "#3fb950" : "#484848", fontSize: 10, opacity: connected ? 0.7 : 1 }}>
+            {connected ? "Connected" : "Paste a webhook URL on the canvas node"}
+          </div>
+        </div>
+        {connected && <div style={{ width: 7, height: 7, borderRadius: "50%", background: "#3fb950", flexShrink: 0 }} />}
+      </div>
+
+      {/* Webhook URL field */}
+      <div style={fieldWrap}>
+        <label style={labelStyle}>Webhook URL</label>
+        <input
+          type="text"
+          value={webhookUrl}
+          readOnly
+          placeholder="Set on the canvas node…"
+          style={{ ...inputStyle, color: webhookUrl ? TEXT : MUTED, cursor: "default" }}
+          onFocus={focusBorder}
+          onBlur={blurBorder}
+        />
+        <div style={{ color: "#383838", fontSize: 10, marginTop: 4 }}>
+          Edit the URL directly on the Webhook canvas node
+        </div>
+      </div>
+
+      {/* Send button */}
+      {connected && (
+        <div style={{ marginTop: 4 }}>
+          {!isValid && compileErrors.length > 0 && (
+            <div style={{ marginBottom: 8, display: "flex", flexDirection: "column", gap: 4 }}>
+              {compileErrors.map((e, i) => (
+                <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 6 }}>
+                  <AlertCircle size={11} color="#f85149" style={{ marginTop: 1, flexShrink: 0 }} />
+                  <span style={{ color: "#f85149", fontSize: 11, lineHeight: 1.4 }}>{e.message}</span>
+                </div>
+              ))}
+            </div>
+          )}
+          <button
+            onClick={handleSend}
+            disabled={sendStatus === "sending" || !payload || !isValid}
+            style={{
+              width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: 7,
+              background: sendStatus === "success" ? "rgba(63,185,80,0.15)" : "#5865F2",
+              border: sendStatus === "success" ? "1px solid rgba(63,185,80,0.25)" : "none",
+              borderRadius: 8, color: sendStatus === "success" ? "#3fb950" : "#fff",
+              fontSize: 13, fontWeight: 700, padding: "10px 0",
+              cursor: sendStatus === "sending" ? "wait" : "pointer",
+              transition: "opacity 0.15s",
+              opacity: !payload || !isValid || sendStatus === "sending" ? 0.45 : 1,
+            }}
+          >
+            {sendStatus === "sending" ? <Loader2 size={14} style={{ animation: "spin 1s linear infinite" }} /> : <Send size={14} />}
+            {sendStatus === "sending" ? "Sending…" : sendStatus === "success" ? "Sent ✓" : "Send via Webhook"}
+          </button>
+          {sendStatus !== "idle" && sendMsg && (
+            <div style={{
+              marginTop: 8, padding: "7px 10px", borderRadius: 7,
+              background: sendStatus === "success" ? "rgba(63,185,80,0.08)" : "rgba(248,81,73,0.08)",
+              border: sendStatus === "success" ? "1px solid rgba(63,185,80,0.18)" : "1px solid rgba(248,81,73,0.18)",
+              color: sendStatus === "success" ? "#3fb950" : "#f85149", fontSize: 12,
+            }}>
+              {sendMsg}
+            </div>
+          )}
+          <div style={{ color: "#383838", fontSize: 10, marginTop: 6, textAlign: "center" }}>
+            Sends your current canvas design to the webhook
+          </div>
+        </div>
+      )}
+
+      {!connected && (
+        <div style={{
+          padding: "10px 12px", borderRadius: 8,
+          background: "rgba(88,101,242,0.05)", border: "1px dashed rgba(88,101,242,0.2)",
+          color: "#5865F2", fontSize: 11, lineHeight: 1.6, textAlign: "center",
+        }}>
+          Paste a valid Discord webhook URL into the node on the canvas to enable sending.
+        </div>
+      )}
+      <style>{`@keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }`}</style>
+    </div>
+  );
+}
 
 // ─────────────────────────────────────────────────────────────
 //  BotProperties (unchanged)
@@ -1004,6 +1162,9 @@ export function PropertiesPanel() {
     }
     if (d.componentType === -2) {
       return <OpenEmbeddedProperties nodeId={node.id} d={d as Record<string, unknown>} updateNodeData={updateNodeData as (id: string, data: Record<string, unknown>) => void} />;
+    }
+    if (d.componentType === -5) {
+      return <WebhookProperties nodeId={node.id} d={d as Record<string, unknown>} />;
     }
     if (d.componentType === -3) {
       return (

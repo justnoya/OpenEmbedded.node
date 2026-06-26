@@ -917,9 +917,9 @@ export function DiscordPreview() {
         <div
           style={{
             flexShrink: 0,
-            background: "rgba(63,185,80,0.07)",
-            borderBottom: "1px solid rgba(63,185,80,0.15)",
-            padding: "5px 12px",
+            background: "#2b2d31",
+            borderBottom: "1px solid rgba(255,255,255,0.06)",
+            padding: "6px 14px",
             display: "flex",
             alignItems: "center",
             gap: 8,
@@ -928,14 +928,15 @@ export function DiscordPreview() {
           {displayAvatar ? (
             <img src={displayAvatar} alt="" style={{ width: 20, height: 20, borderRadius: "50%", flexShrink: 0 }} onError={() => setAvatarError(true)} />
           ) : (
-            <div style={{ width: 20, height: 20, borderRadius: "50%", background: "#5865f2", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10 }}>
+            <div style={{ width: 20, height: 20, borderRadius: "50%", background: "rgba(88,101,242,0.2)", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10 }}>
               {isBotConnected ? "🤖" : "🪝"}
             </div>
           )}
-          <span style={{ color: "#3fb950", fontSize: 11, fontWeight: 600 }}>{displayName}</span>
-          <span style={{ color: "#3fb950", fontSize: 10, opacity: 0.65 }}>
-            {isBotConnected ? "Bot connected · showing real identity" : "Webhook connected · showing webhook identity"}
+          <span style={{ color: TEXT_NORMAL, fontSize: 12, fontWeight: 600, fontFamily: DC_FONT }}>{displayName}</span>
+          <span style={{ color: TEXT_MUTED, fontSize: 11, fontFamily: DC_FONT }}>
+            {isBotConnected ? "Bot" : "Webhook"}
           </span>
+          <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#3fb950", marginLeft: "auto", flexShrink: 0 }} />
         </div>
       )}
 

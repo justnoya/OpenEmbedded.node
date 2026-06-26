@@ -321,9 +321,9 @@ export function Builder() {
 
   const SaveIndicator = () => {
     const configs = {
-      saved:   { color: "#3fb950", icon: <Check size={11} />,    text: "Saved" },
+      saved:   { color: "#e8e8e8", icon: <Check size={11} />,    text: "Saved" },
       saving:  { color: "#d29922", icon: <Loader2 size={11} style={{ animation: "spin 1s linear infinite" }} />, text: "Saving…" },
-      unsaved: { color: "#888888", icon: null,                   text: "Unsaved" },
+      unsaved: { color: "#666666", icon: null,                   text: "Unsaved" },
       error:   { color: "#f85149", icon: <AlertCircle size={11} />, text: "Save failed — will retry" },
     };
     const cfg = configs[saveStatus];
