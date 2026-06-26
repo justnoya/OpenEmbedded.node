@@ -26,12 +26,19 @@ const toggleVariants = cva(
   }
 )
 
+// Under certain module resolutions (e.g. Vercel CI with pnpm), @radix-ui/react-toggle's
+// ToggleProps doesn't include HTML button attributes such as className. Cast the
+// primitive to a type that explicitly includes className so JSX attribute checking passes.
+type ToggleRootProps = React.ComponentPropsWithoutRef<typeof TogglePrimitive.Root> &
+  React.RefAttributes<HTMLButtonElement> & { className?: string }
+const ToggleRoot = TogglePrimitive.Root as React.ForwardRefExoticComponent<ToggleRootProps>
+
 const Toggle = React.forwardRef<
   React.ElementRef<typeof TogglePrimitive.Root>,
   React.ComponentPropsWithoutRef<typeof TogglePrimitive.Root> &
     VariantProps<typeof toggleVariants> & { className?: string }
 >(({ className, variant, size, ...props }, ref) => (
-  <TogglePrimitive.Root
+  <ToggleRoot
     ref={ref}
     className={cn(toggleVariants({ variant, size, className }))}
     {...props}

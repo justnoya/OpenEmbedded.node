@@ -14,12 +14,23 @@ const ToggleGroupContext = React.createContext<
   variant: "default",
 })
 
+// Under certain module resolutions (e.g. Vercel CI with pnpm), @radix-ui/react-toggle-group's
+// props don't include HTML attributes such as className. Cast the primitives so JSX
+// attribute checking passes.
+type ToggleGroupRootProps = React.ComponentPropsWithoutRef<typeof ToggleGroupPrimitive.Root> &
+  React.RefAttributes<HTMLDivElement> & { className?: string }
+const ToggleGroupRoot = ToggleGroupPrimitive.Root as React.ForwardRefExoticComponent<ToggleGroupRootProps>
+
+type ToggleGroupItemProps = React.ComponentPropsWithoutRef<typeof ToggleGroupPrimitive.Item> &
+  React.RefAttributes<HTMLButtonElement> & { className?: string }
+const ToggleGroupItemRoot = ToggleGroupPrimitive.Item as React.ForwardRefExoticComponent<ToggleGroupItemProps>
+
 const ToggleGroup = React.forwardRef<
   React.ElementRef<typeof ToggleGroupPrimitive.Root>,
   React.ComponentPropsWithoutRef<typeof ToggleGroupPrimitive.Root> &
     VariantProps<typeof toggleVariants> & { className?: string }
 >(({ className, variant, size, children, ...props }, ref) => (
-  <ToggleGroupPrimitive.Root
+  <ToggleGroupRoot
     ref={ref}
     className={cn("flex items-center justify-center gap-1", className)}
     {...props}
@@ -27,7 +38,7 @@ const ToggleGroup = React.forwardRef<
     <ToggleGroupContext.Provider value={{ variant, size }}>
       {children}
     </ToggleGroupContext.Provider>
-  </ToggleGroupPrimitive.Root>
+  </ToggleGroupRoot>
 ))
 
 ToggleGroup.displayName = ToggleGroupPrimitive.Root.displayName
@@ -40,7 +51,7 @@ const ToggleGroupItem = React.forwardRef<
   const context = React.useContext(ToggleGroupContext)
 
   return (
-    <ToggleGroupPrimitive.Item
+    <ToggleGroupItemRoot
       ref={ref}
       className={cn(
         toggleVariants({
@@ -52,7 +63,7 @@ const ToggleGroupItem = React.forwardRef<
       {...props}
     >
       {children}
-    </ToggleGroupPrimitive.Item>
+    </ToggleGroupItemRoot>
   )
 })
 
