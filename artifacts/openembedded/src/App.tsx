@@ -11,6 +11,7 @@ import { AuthCallback } from "@/pages/AuthCallback";
 import { AuthProvider, useAuth } from "@/lib/authContext";
 import { DiscordProvider, useDiscord } from "@/lib/discordContext";
 import { DiscordActivityOverlay } from "@/components/DiscordActivityOverlay";
+import { SpeedInsights } from "@vercel/speed-insights/react";
 
 const Builder = lazy(() => import("@/pages/Builder").then((m) => ({ default: m.Builder })));
 const Docs    = lazy(() => import("@/pages/Docs").then((m) => ({ default: m.Docs })));
@@ -154,6 +155,7 @@ function App() {
               <Router />
             </WouterRouter>
             <Toaster />
+            <SpeedInsights />
           </AuthProvider>
         </DiscordProvider>
       </TooltipProvider>
