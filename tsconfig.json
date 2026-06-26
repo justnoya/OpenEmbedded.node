@@ -10,6 +10,8 @@
     "lib"
   ],
   "compilerOptions": {
+    "module": "commonjs",
+    "moduleResolution": "node",
     "jsx": "react-jsx",
     "lib": ["es2022", "dom", "dom.iterable"],
     "paths": {
