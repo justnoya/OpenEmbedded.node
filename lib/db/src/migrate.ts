@@ -97,6 +97,30 @@ export async function ensureSchema(
       END
       $$
     `);
+
+    // user_authorized_guilds — records which servers each user has added the bot to
+    await client.query(`
+      DO $$
+      DECLARE
+        _ns OID := (SELECT oid FROM pg_namespace WHERE nspname = 'public');
+      BEGIN
+        IF NOT EXISTS (
+          SELECT 1 FROM information_schema.tables
+          WHERE table_schema = 'public' AND table_name = 'user_authorized_guilds'
+        ) THEN
+          -- Remove any stale pg_type entry by name+namespace (typrelid check is unreliable)
+          DELETE FROM pg_type WHERE typname = 'user_authorized_guilds' AND typnamespace = _ns;
+          CREATE TABLE user_authorized_guilds (
+            id        UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+            user_id   VARCHAR(32) NOT NULL REFERENCES discord_users(discord_id) ON DELETE CASCADE,
+            guild_id  VARCHAR(32) NOT NULL,
+            added_at  TIMESTAMP   NOT NULL DEFAULT NOW(),
+            CONSTRAINT user_guild_unique UNIQUE (user_id, guild_id)
+          );
+        END IF;
+      END
+      $$
+    `);
   } finally {
     client.release();
   }

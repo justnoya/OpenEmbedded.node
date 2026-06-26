@@ -760,9 +760,32 @@ function OpenEmbeddedProperties({ nodeId, d, updateNodeData }: {
   type GuildEntry = { id: string; name: string; icon?: string | null };
   type ChannelEntry = { id: string; name: string };
 
-  const guildsData = guildsQuery.data as { success?: boolean; guilds?: GuildEntry[]; inviteUrl?: string | null; message?: string | null } | undefined;
-  const guilds: GuildEntry[] = guildsData?.guilds ?? [];
-  const inviteUrl: string | null = guildsData?.inviteUrl ?? null;
+  // Phase 2 — user's authorized guilds (servers they've added the bot to)
+  const [myGuilds, setMyGuilds] = useState<GuildEntry[]>([]);
+  const [myGuildsLoading, setMyGuildsLoading] = useState(true);
+  const [inviteUrl, setInviteUrl] = useState<string | null>(null);
+
+  function refreshMyGuilds() {
+    setMyGuildsLoading(true);
+    fetch("/api/v1/openbot/my-guilds")
+      .then((r) => r.json())
+      .then((data: { guilds?: GuildEntry[] }) => {
+        setMyGuilds(data.guilds ?? []);
+        setMyGuildsLoading(false);
+      })
+      .catch(() => setMyGuildsLoading(false));
+  }
+
+  useEffect(() => {
+    refreshMyGuilds();
+    fetch("/api/v1/openbot/invite-url")
+      .then((r) => r.json())
+      .then((data: { inviteUrl?: string | null }) => setInviteUrl(data.inviteUrl ?? null))
+      .catch(() => {});
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const guildsData = guildsQuery.data as { success?: boolean; message?: string | null } | undefined;
   const botNotConfigured = guildsQuery.isSuccess && guildsData?.success === false;
 
   const selectedGuildId = d.selectedGuildId as string | null;
@@ -875,19 +898,19 @@ function OpenEmbeddedProperties({ nodeId, d, updateNodeData }: {
           background: "rgba(129,140,248,0.12)", border: "1px solid rgba(129,140,248,0.18)",
           display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
         }}>
-          {guildsQuery.isLoading
+          {(guildsQuery.isLoading || myGuildsLoading)
             ? <Loader2 size={13} color="#555" style={{ animation: "spin 1s linear infinite" }} />
             : <Sparkles size={13} color="#818cf8" />}
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ color: "#d0d0d0", fontSize: 12, fontWeight: 600 }}>OpenEmbedded Bot</div>
           <div style={{ color: "#484848", fontSize: 10, marginTop: 1 }}>
-            {guildsQuery.isLoading
+            {(guildsQuery.isLoading || myGuildsLoading)
               ? "Connecting…"
               : botNotConfigured
                 ? "Not available"
-                : guilds.length > 0
-                  ? `${guilds.length} server${guilds.length !== 1 ? "s" : ""} available`
+                : myGuilds.length > 0
+                  ? `${myGuilds.length} server${myGuilds.length !== 1 ? "s" : ""} available`
                   : "No servers yet"}
           </div>
         </div>
@@ -907,13 +930,13 @@ function OpenEmbeddedProperties({ nodeId, d, updateNodeData }: {
       )}
 
       {/* Not in any server yet */}
-      {!botNotConfigured && guildsQuery.isSuccess && guilds.length === 0 && (
+      {!botNotConfigured && !myGuildsLoading && myGuilds.length === 0 && (
         <div style={{ marginBottom: 14 }}>
           <div style={{ color: "#484848", fontSize: 11, marginBottom: 8, lineHeight: 1.5 }}>
-            Add the bot to your Discord server, then refresh.
+            Add OpenEmbedded Bot to your Discord server to send messages directly from the editor.
           </div>
           <div style={{ display: "flex", gap: 6 }}>
-            {inviteUrl && (
+            {inviteUrl ? (
               <a
                 href={inviteUrl}
                 target="_blank"
@@ -924,13 +947,17 @@ function OpenEmbeddedProperties({ nodeId, d, updateNodeData }: {
                   fontSize: 11, fontWeight: 600, padding: "7px 0", textDecoration: "none",
                 }}
               >
-                Add to Server
+                Add Bot to Server
               </a>
+            ) : (
+              <div style={{ flex: 1, color: "#484848", fontSize: 10, padding: "7px 0" }}>
+                Bot invite URL not available — check OPENBOT_API_URL config.
+              </div>
             )}
             <button
-              onClick={() => guildsQuery.refetch()}
+              onClick={() => refreshMyGuilds()}
               style={{
-                flex: inviteUrl ? "0 0 auto" : 1,
+                flex: "0 0 auto",
                 display: "flex", alignItems: "center", justifyContent: "center", gap: 5,
                 background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.09)",
                 borderRadius: 7, color: "#606060", fontSize: 11, padding: "7px 10px", cursor: "pointer",
@@ -943,16 +970,16 @@ function OpenEmbeddedProperties({ nodeId, d, updateNodeData }: {
       )}
 
       {/* Server picker */}
-      {guilds.length > 0 && (
+      {myGuilds.length > 0 && (
         <div style={fieldWrap}>
           <label style={{ ...labelStyle, display: "flex", alignItems: "center", gap: 6 }}>
             Server
             <button
-              onClick={() => guildsQuery.refetch()}
+              onClick={() => refreshMyGuilds()}
               title="Refresh"
               style={{ background: "transparent", border: "none", cursor: "pointer", color: "#444", padding: 0, display: "flex", alignItems: "center" }}
             >
-              <RefreshCw size={9} />
+              {myGuildsLoading ? <Loader2 size={9} style={{ animation: "spin 1s linear infinite" }} /> : <RefreshCw size={9} />}
             </button>
           </label>
           <select
@@ -961,7 +988,7 @@ function OpenEmbeddedProperties({ nodeId, d, updateNodeData }: {
             style={selectStyle}
           >
             <option value="" disabled style={{ background: BG }}>Select a server…</option>
-            {guilds.map((g) => (
+            {myGuilds.map((g) => (
               <option key={g.id} value={g.id} style={{ background: BG }}>{g.name}</option>
             ))}
           </select>

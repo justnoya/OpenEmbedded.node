@@ -3,6 +3,9 @@ import cors from "cors";
 import { Client, TextChannel, MessageCreateOptions } from "discord.js";
 import { registerFlows } from "./handlers/interactions";
 
+// Permissions: VIEW_CHANNEL + SEND_MESSAGES + EMBED_LINKS + ATTACH_FILES + READ_MESSAGE_HISTORY
+const BOT_PERMISSIONS = 116736;
+
 export function createApi(client: Client): express.Application {
   const app = express();
   const API_KEY = process.env.OPENBOT_API_KEY;
@@ -30,13 +33,14 @@ export function createApi(client: Client): express.Application {
     const me = client.user;
     const clientId = process.env.DISCORD_CLIENT_ID ?? me?.id ?? "";
     const inviteUrl = clientId
-      ? `https://discord.com/api/oauth2/authorize?client_id=${clientId}&permissions=2048&scope=bot%20applications.commands`
+      ? `https://discord.com/oauth2/authorize?client_id=${clientId}&permissions=${BOT_PERMISSIONS}&scope=bot%20applications.commands`
       : null;
     res.json({
       ok: true,
       botName: me?.username ?? "Offline",
       botAvatar: me?.avatarURL() ?? null,
       guildCount: client.guilds.cache.size,
+      clientId,
       inviteUrl,
     });
   });
@@ -46,16 +50,33 @@ export function createApi(client: Client): express.Application {
     const me = client.user;
     const clientId = process.env.DISCORD_CLIENT_ID ?? me?.id ?? "";
     const inviteUrl = clientId
-      ? `https://discord.com/api/oauth2/authorize?client_id=${clientId}&permissions=2048&scope=bot%20applications.commands`
+      ? `https://discord.com/oauth2/authorize?client_id=${clientId}&permissions=${BOT_PERMISSIONS}&scope=bot%20applications.commands`
       : null;
 
     const guilds = client.guilds.cache.map((g) => ({
       id: g.id,
       name: g.name,
-      icon: g.iconURL(),
+      icon: g.iconURL({ size: 64 }) ?? null,
     }));
 
-    res.json({ success: true, guilds, inviteUrl });
+    res.json({ success: true, guilds, inviteUrl, clientId });
+  });
+
+  // ── GET /guilds/:guildId — single guild info ──────────────────────────────────
+  app.get("/guilds/:guildId", (req: Request, res: Response) => {
+    const { guildId } = req.params;
+    const guild = client.guilds.cache.get(guildId);
+
+    if (!guild) {
+      res.json({ success: false, guild: null, inGuild: false });
+      return;
+    }
+
+    res.json({
+      success: true,
+      inGuild: true,
+      guild: { id: guild.id, name: guild.name, icon: guild.iconURL({ size: 64 }) ?? null },
+    });
   });
 
   // ── GET /guilds/:guildId/channels ─────────────────────────────────────────────
@@ -64,7 +85,10 @@ export function createApi(client: Client): express.Application {
     const guild = client.guilds.cache.get(guildId);
 
     if (!guild) {
-      res.json({ success: false, channels: [], message: "OpenEmbedded Bot is not in this server. Add it first using the invite link." });
+      res.json({
+        success: false, channels: [],
+        message: "OpenEmbedded Bot is not in this server. Add it using the invite link.",
+      });
       return;
     }
 
@@ -103,7 +127,6 @@ export function createApi(client: Client): express.Application {
 
       await (channel as TextChannel).send(payload as MessageCreateOptions);
 
-      // Register interaction flows after a successful send
       if (flows && flows.length > 0) {
         registerFlows(flows);
       }
