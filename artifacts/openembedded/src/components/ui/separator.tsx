@@ -5,7 +5,7 @@ import { cn } from "../../lib/utils.js"
 
 const Separator = React.forwardRef<
   React.ElementRef<typeof SeparatorPrimitive.Root>,
-  React.ComponentPropsWithoutRef<typeof SeparatorPrimitive.Root>
+  React.ComponentPropsWithoutRef<typeof SeparatorPrimitive.Root> & { children?: React.ReactNode }
 >(
   (
     { className, orientation = "horizontal", decorative = true, ...props },

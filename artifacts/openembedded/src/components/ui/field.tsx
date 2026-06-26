@@ -110,7 +110,7 @@ function FieldContent({ className, ...props }: React.ComponentProps<"div">) {
 function FieldLabel({
   className,
   ...props
-}: React.ComponentProps<typeof Label>) {
+}: React.ComponentProps<typeof Label> & { children?: React.ReactNode }) {
   return (
     <Label
       data-slot="field-label"

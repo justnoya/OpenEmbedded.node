@@ -6,7 +6,7 @@ import { cn } from "../../lib/utils.js"
 
 const InputOTP = React.forwardRef<
   React.ElementRef<typeof OTPInput>,
-  React.ComponentPropsWithoutRef<typeof OTPInput>
+  React.ComponentPropsWithoutRef<typeof OTPInput> & { children?: React.ReactNode }
 >(({ className, containerClassName, ...props }, ref) => (
   <OTPInput
     ref={ref}

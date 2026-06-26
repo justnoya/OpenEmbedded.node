@@ -7,7 +7,7 @@ import { cn } from "../../lib/utils.js"
 
 const Progress = React.forwardRef<
   React.ElementRef<typeof ProgressPrimitive.Root>,
-  React.ComponentPropsWithoutRef<typeof ProgressPrimitive.Root>
+  React.ComponentPropsWithoutRef<typeof ProgressPrimitive.Root> & { children?: React.ReactNode }
 >(({ className, value, ...props }, ref) => (
   <ProgressPrimitive.Root
     ref={ref}

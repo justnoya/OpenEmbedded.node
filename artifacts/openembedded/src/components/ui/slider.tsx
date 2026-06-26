@@ -5,7 +5,7 @@ import { cn } from "../../lib/utils.js"
 
 const Slider = React.forwardRef<
   React.ElementRef<typeof SliderPrimitive.Root>,
-  React.ComponentPropsWithoutRef<typeof SliderPrimitive.Root>
+  React.ComponentPropsWithoutRef<typeof SliderPrimitive.Root> & { children?: React.ReactNode }
 >(({ className, ...props }, ref) => (
   <SliderPrimitive.Root
     ref={ref}

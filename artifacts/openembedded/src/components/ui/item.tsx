@@ -19,7 +19,7 @@ function ItemGroup({ className, ...props }: React.ComponentProps<"div">) {
 function ItemSeparator({
   className,
   ...props
-}: React.ComponentProps<typeof Separator>) {
+}: React.ComponentProps<typeof Separator> & { children?: React.ReactNode }) {
   return (
     <Separator
       data-slot="item-separator"

@@ -8,7 +8,7 @@ import { cn } from "../../lib/utils.js"
 const ResizablePanelGroup = ({
   className,
   ...props
-}: React.ComponentProps<typeof ResizablePrimitive.PanelGroup>) => (
+}: React.ComponentProps<typeof ResizablePrimitive.PanelGroup> & { children?: React.ReactNode }) => (
   <ResizablePrimitive.PanelGroup
     className={cn(
       "flex h-full w-full data-[panel-group-direction=vertical]:flex-col",
@@ -24,7 +24,7 @@ const ResizableHandle = ({
   withHandle,
   className,
   ...props
-}: React.ComponentProps<typeof ResizablePrimitive.PanelResizeHandle> & {
+}: React.ComponentProps<typeof ResizablePrimitive.PanelResizeHandle> & { children?: React.ReactNode } & {
   withHandle?: boolean
 }) => (
   <ResizablePrimitive.PanelResizeHandle

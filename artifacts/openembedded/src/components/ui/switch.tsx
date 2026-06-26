@@ -5,7 +5,7 @@ import { cn } from "../../lib/utils.js"
 
 const Switch = React.forwardRef<
   React.ElementRef<typeof SwitchPrimitives.Root>,
-  React.ComponentPropsWithoutRef<typeof SwitchPrimitives.Root>
+  React.ComponentPropsWithoutRef<typeof SwitchPrimitives.Root> & { children?: React.ReactNode }
 >(({ className, ...props }, ref) => (
   <SwitchPrimitives.Root
     className={cn(
