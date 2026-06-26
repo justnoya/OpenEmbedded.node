@@ -330,14 +330,15 @@ export function Home() {
                 />
               </div>
 
-              {/* Username — hidden when narrow */}
+              {/* Username — hidden on narrow screens */}
               <span
+                className="oe-username"
                 style={{
                   fontSize: 13,
                   fontWeight: 600,
                   color: "#686868",
                   letterSpacing: "-0.01em",
-                  maxWidth: 120,
+                  maxWidth: 100,
                   overflow: "hidden",
                   textOverflow: "ellipsis",
                   whiteSpace: "nowrap",
@@ -1047,6 +1048,9 @@ export function Home() {
         @keyframes pulse {
           0%, 100% { opacity: 0.5; }
           50%       { opacity: 0.28; }
+        }
+        @media (max-width: 520px) {
+          .oe-username { display: none !important; }
         }
       `}</style>
     </div>
