@@ -3,6 +3,7 @@ import { Client, GatewayIntentBits, Events, REST, Routes } from "discord.js";
 import { createApi } from "./api";
 import { handleInteraction } from "./handlers/interactions";
 import { statusCommandDef } from "./commands/status";
+import { connectionCommandDef } from "./commands/connection";
 
 const token = process.env.OPENBOT_TOKEN;
 const clientId = process.env.DISCORD_CLIENT_ID;
@@ -24,7 +25,7 @@ async function registerCommands(botToken: string, appId: string): Promise<void> 
   const rest = new REST().setToken(botToken);
   try {
     await rest.put(Routes.applicationCommands(appId), {
-      body: [statusCommandDef.toJSON()],
+      body: [statusCommandDef.toJSON(), connectionCommandDef.toJSON()],
     });
     console.log(`[OpenBot] Slash commands registered (${appId})`);
   } catch (err) {

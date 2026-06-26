@@ -7,6 +7,7 @@ import {
   InteractionUpdateOptions,
 } from "discord.js";
 import { handleStatusCommand } from "../commands/status";
+import { handleConnectionCommand } from "../commands/connection";
 
 export interface FlowEntry {
   mode: "send_new" | "ephemeral" | "update_message" | "modal";
@@ -25,6 +26,9 @@ export async function handleInteraction(interaction: Interaction): Promise<void>
     switch (interaction.commandName) {
       case "status":
         await handleStatusCommand(interaction, interaction.client);
+        return;
+      case "connection":
+        await handleConnectionCommand(interaction, interaction.client);
         return;
       default:
         await interaction.reply({
