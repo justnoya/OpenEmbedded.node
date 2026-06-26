@@ -6,6 +6,19 @@ import router from "./routes";
 import { logger } from "./lib/logger";
 import { helmetMiddleware, generalLimiter } from "./middleware/security";
 import { cookieMiddleware } from "./middleware/auth";
+import { pool, ensureSchema } from "@workspace/db";
+
+/**
+ * Kick off schema migration immediately when the module loads.
+ * On Vercel this runs once per cold start; warm invocations reuse the
+ * already-resolved promise (effectively free). The middleware below gates
+ * every request on this promise so no query ever runs before the schema
+ * is confirmed ready.
+ */
+const schemaReady: Promise<void> = ensureSchema(pool).catch((err) => {
+  logger.error({ err }, "Schema migration failed on startup");
+  return Promise.reject(err);
+});
 
 /* ── App ────────────────────────────────────────────────────────────────── */
 const app = express();
@@ -72,6 +85,15 @@ app.use(cookieMiddleware);
 
 /* ── Global rate limit ─────────────────────────────────────────────────── */
 app.use(generalLimiter);
+
+/* ── Schema readiness gate ────────────────────────────────────────────────
+ *  Awaits the one-time migration promise before any route handler runs.
+ *  On warm Vercel invocations schemaReady is already resolved — the
+ *  .then() microtask costs ~0 ms.
+ * ─────────────────────────────────────────────────────────────────────── */
+app.use((_req, _res, next) => {
+  schemaReady.then(() => next(), next);
+});
 
 /* ── Routes ──────────────────────────────────────────────────────────────*/
 app.use("/api", router);

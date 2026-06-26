@@ -48,4 +48,5 @@ export const db: ReturnType<typeof drizzle<typeof schema>> = new Proxy(
 );
 
 export * from "./schema";
+export { ensureSchema } from "./migrate";
 export { eq, and, or, sql, asc, desc, ne, gt, gte, lt, lte } from "drizzle-orm";
