@@ -433,31 +433,28 @@ export function Landing() {
 
           {/* F0: Visual Node Graph — 2-col */}
           <div className="oe-bento-wide"
-            style={{ gridColumn: "span 2", padding: "40px 40px 36px", background: C.panel, borderRight: `1px solid ${C.b2}`, borderBottom: `1px solid ${C.b2}`, transition: "background 0.15s", cursor: "default" }}
+            style={{ gridColumn: "span 2", padding: "36px 28px", background: C.panel, borderRight: `1px solid ${C.b2}`, borderBottom: `1px solid ${C.b2}`, transition: "background 0.15s", cursor: "default" }}
             onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = C.elevated; }}
             onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = C.panel; }}
           >
-            <div style={{ width: 44, height: 44, borderRadius: 11, background: C.elevated, border: `1px solid ${C.b3}`, display: "flex", alignItems: "center", justifyContent: "center", color: C.t1, marginBottom: 24 }}>
+            <div style={{ width: 44, height: 44, borderRadius: 11, background: C.elevated, border: `1px solid ${C.b3}`, display: "flex", alignItems: "center", justifyContent: "center", color: C.t1, marginBottom: 20 }}>
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M4.93 4.93a10 10 0 0 0 0 14.14"/><line x1="12" y1="2" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
             </div>
-            <h3 style={{ margin: "0 0 10px", fontSize: 19, fontWeight: 800, color: C.t1, letterSpacing: "-0.03em" }}>Visual Node Graph</h3>
-            <p style={{ margin: "0 0 32px", fontSize: 14, color: C.t3, lineHeight: 1.75, maxWidth: 400 }}>
+            <h3 style={{ margin: "0 0 8px", fontSize: 15, fontWeight: 800, color: C.t1, letterSpacing: "-0.025em" }}>Visual Node Graph</h3>
+            <p style={{ margin: "0 0 20px", fontSize: 13, color: C.t3, lineHeight: 1.7 }}>
               Connect nodes like wires on a circuit board. See exactly how your message hierarchy fits together — no JSON, no guessing.
             </p>
-            <div style={{ display: "flex", alignItems: "center", gap: 0 }}>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
               {([
                 { label: "Webhook", color: "#5865F2" },
                 { label: "Container", color: "#8b5cf6" },
                 { label: "Section", color: "#f59e0b" },
                 { label: "Button", color: "#10b981" },
-              ] as { label: string; color: string }[]).map((n, i, arr) => (
-                <div key={i} style={{ display: "flex", alignItems: "center" }}>
-                  <div style={{ padding: "6px 13px", background: C.canvas, border: `1px solid ${C.b3}`, borderRadius: 7, fontSize: 11, fontWeight: 600, color: C.t2, display: "flex", alignItems: "center", gap: 6, letterSpacing: "-0.01em" }}>
-                    <div style={{ width: 6, height: 6, borderRadius: "50%", background: n.color }} />
-                    {n.label}
-                  </div>
-                  {i < arr.length - 1 && <div style={{ width: 24, height: 1, background: C.b3 }} />}
-                </div>
+              ] as { label: string; color: string }[]).map((n) => (
+                <span key={n.label} style={{ fontSize: 10, fontWeight: 600, padding: "3px 7px", background: C.canvas, border: `1px solid ${C.b3}`, borderRadius: 5, color: C.t3, letterSpacing: "0.02em", display: "flex", alignItems: "center", gap: 4 }}>
+                  <span style={{ width: 5, height: 5, borderRadius: "50%", background: n.color, display: "inline-block", flexShrink: 0 }} />
+                  {n.label}
+                </span>
               ))}
             </div>
           </div>
