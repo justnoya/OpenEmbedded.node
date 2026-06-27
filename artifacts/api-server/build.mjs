@@ -157,6 +157,14 @@ globalThis.__dirname = __bannerPath.dirname(globalThis.__filename);
       resolveJsToTs,
       esbuildPluginPino({ transports: ["pino-pretty"] }),
     ],
+    // ESM packages bundled into CJS have import.meta.url === undefined at runtime.
+    // This shim makes fileURLToPath(import.meta.url) work correctly in the CJS bundle.
+    banner: {
+      js: `const __importMetaUrl = require("url").pathToFileURL(__filename).href;`,
+    },
+    define: {
+      "import.meta.url": "__importMetaUrl",
+    },
   });
   console.log("  api/_dist/ CJS bundle ready for Vercel");
 }
