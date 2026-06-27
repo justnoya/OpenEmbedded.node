@@ -141,10 +141,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .then((r) => r.json())
       .then((config: { clientId: string; configured: boolean }) => {
         if (!config.configured || !config.clientId) {
-          throw new Error(
-            "Discord is not configured on this server. " +
-            "Please set DISCORD_CLIENT_ID and DISCORD_CLIENT_SECRET in your environment secrets."
-          );
+          throw new Error("sign-in-unavailable");
         }
 
         const state = generateState();
@@ -170,8 +167,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       })
       .catch((err: unknown) => {
         console.error("[Auth] login initiation failed:", err);
-        // Surface the error — the Login page handles this via its own config check
-        alert(err instanceof Error ? err.message : "Failed to start Discord login. Please try again.");
+        // Redirect to login page — it shows proper inline error UI for
+        // misconfiguration without leaking any internal details to the user.
+        navigate("/login");
       });
   }, []);
 
