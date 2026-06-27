@@ -441,7 +441,7 @@ export function Landing() {
             onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = C.elevated; }}
             onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = C.panel; }}
           >
-            <div style={{ width: 44, height: 44, borderRadius: 11, background: C.elevated, border: `1px solid ${C.b3}`, display: "flex", alignItems: "center", justifyContent: "center", color: "#818cf8", marginBottom: 24 }}>
+            <div style={{ width: 44, height: 44, borderRadius: 11, background: C.elevated, border: `1px solid ${C.b3}`, display: "flex", alignItems: "center", justifyContent: "center", color: C.t1, marginBottom: 24 }}>
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M4.93 4.93a10 10 0 0 0 0 14.14"/><line x1="12" y1="2" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
             </div>
             <h3 style={{ margin: "0 0 10px", fontSize: 19, fontWeight: 800, color: C.t1, letterSpacing: "-0.03em" }}>Visual Node Graph</h3>
@@ -472,7 +472,7 @@ export function Landing() {
             onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = C.elevated; }}
             onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = C.panel; }}
           >
-            <div style={{ width: 44, height: 44, borderRadius: 11, background: C.elevated, border: `1px solid ${C.b3}`, display: "flex", alignItems: "center", justifyContent: "center", color: "#a78bfa", marginBottom: 20 }}>
+            <div style={{ width: 44, height: 44, borderRadius: 11, background: C.elevated, border: `1px solid ${C.b3}`, display: "flex", alignItems: "center", justifyContent: "center", color: C.t1, marginBottom: 20 }}>
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
             </div>
             <h3 style={{ margin: "0 0 8px", fontSize: 15, fontWeight: 800, color: C.t1, letterSpacing: "-0.025em" }}>All CV2 Components</h3>
@@ -492,7 +492,7 @@ export function Landing() {
             onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = C.elevated; }}
             onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = C.panel; }}
           >
-            <div style={{ width: 44, height: 44, borderRadius: 11, background: C.elevated, border: `1px solid ${C.b3}`, display: "flex", alignItems: "center", justifyContent: "center", color: "#34d399", marginBottom: 20 }}>
+            <div style={{ width: 44, height: 44, borderRadius: 11, background: C.elevated, border: `1px solid ${C.b3}`, display: "flex", alignItems: "center", justifyContent: "center", color: C.t1, marginBottom: 20 }}>
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M1 6v16l7-4 8 4 7-4V2l-7 4-8-4-7 4z"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
             </div>
             <h3 style={{ margin: "0 0 8px", fontSize: 15, fontWeight: 800, color: C.t1, letterSpacing: "-0.025em" }}>Live Discord Preview</h3>
@@ -511,7 +511,7 @@ export function Landing() {
             onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = C.elevated; }}
             onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = C.panel; }}
           >
-            <div style={{ width: 44, height: 44, borderRadius: 11, background: C.elevated, border: `1px solid ${C.b3}`, display: "flex", alignItems: "center", justifyContent: "center", color: "#fbbf24", marginBottom: 20 }}>
+            <div style={{ width: 44, height: 44, borderRadius: 11, background: C.elevated, border: `1px solid ${C.b3}`, display: "flex", alignItems: "center", justifyContent: "center", color: C.t1, marginBottom: 20 }}>
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
             </div>
             <h3 style={{ margin: "0 0 8px", fontSize: 15, fontWeight: 800, color: C.t1, letterSpacing: "-0.025em" }}>Send via Webhook or Bot</h3>
@@ -526,7 +526,7 @@ export function Landing() {
             onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = C.elevated; }}
             onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = C.panel; }}
           >
-            <div style={{ width: 44, height: 44, borderRadius: 11, background: C.elevated, border: `1px solid ${C.b3}`, display: "flex", alignItems: "center", justifyContent: "center", color: "#f472b6", marginBottom: 20 }}>
+            <div style={{ width: 44, height: 44, borderRadius: 11, background: C.elevated, border: `1px solid ${C.b3}`, display: "flex", alignItems: "center", justifyContent: "center", color: C.t1, marginBottom: 20 }}>
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
             </div>
             <h3 style={{ margin: "0 0 8px", fontSize: 15, fontWeight: 800, color: C.t1, letterSpacing: "-0.025em" }}>Export Clean JSON</h3>
@@ -541,7 +541,7 @@ export function Landing() {
             onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = C.elevated; }}
             onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = C.panel; }}
           >
-            <div style={{ width: 44, height: 44, borderRadius: 11, background: C.elevated, border: `1px solid ${C.b3}`, display: "flex", alignItems: "center", justifyContent: "center", color: "#22d3ee", marginBottom: 20 }}>
+            <div style={{ width: 44, height: 44, borderRadius: 11, background: C.elevated, border: `1px solid ${C.b3}`, display: "flex", alignItems: "center", justifyContent: "center", color: C.t1, marginBottom: 20 }}>
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
             </div>
             <h3 style={{ margin: "0 0 8px", fontSize: 15, fontWeight: 800, color: C.t1, letterSpacing: "-0.025em" }}>Secure by Design</h3>
@@ -646,7 +646,7 @@ export function Landing() {
               "Every field is a labelled form — no memorising",
             ].map((t, i) => (
               <div key={i} style={{ display: "flex", gap: 12, marginBottom: 14, alignItems: "flex-start" }}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={C.blurple} strokeWidth="2.5" strokeLinecap="round" style={{ marginTop: 2, flexShrink: 0 }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={C.t2} strokeWidth="2.5" strokeLinecap="round" style={{ marginTop: 2, flexShrink: 0 }}>
                   <polyline points="20 6 9 17 4 12"/>
                 </svg>
                 <span style={{ color: C.t2, fontSize: 13, lineHeight: 1.65 }}>{t}</span>
