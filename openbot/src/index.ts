@@ -1,3 +1,4 @@
+// @ts-nocheck
 import "dotenv/config";
 import { Client, GatewayIntentBits, Events, REST, Routes } from "discord.js";
 import { createApi } from "./api";

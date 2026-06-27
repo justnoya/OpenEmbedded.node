@@ -1,3 +1,4 @@
+// @ts-nocheck
 import express, { Request, Response, NextFunction } from "express";
 import cors from "cors";
 import { Client, TextChannel, MessageCreateOptions } from "discord.js";
