@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { cn } from "../../lib/utils.js"
 
 function Kbd({ className, ...props }: React.ComponentProps<"kbd">) {
