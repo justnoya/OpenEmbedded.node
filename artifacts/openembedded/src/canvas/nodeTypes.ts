@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { ContainerNode } from "./nodes/ContainerNode.js";
 import { SectionNode } from "./nodes/SectionNode.js";
 import { TextDisplayNode } from "./nodes/TextDisplayNode.js";

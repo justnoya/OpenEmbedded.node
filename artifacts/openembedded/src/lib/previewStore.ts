@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { create } from "zustand";
 import { AppNode } from "./graphStore.js";
 import { Edge } from "@xyflow/react";

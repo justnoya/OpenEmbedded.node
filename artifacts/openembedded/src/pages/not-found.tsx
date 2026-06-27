@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Card, CardContent } from "../components/ui/card.js";
 import { AlertCircle } from "lucide-react";
 

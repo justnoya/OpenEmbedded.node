@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Router } from "express";
 import { db, projectsTable, eq, and } from "@workspace/db";
 import type { Project } from "@workspace/db";

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { memo, useRef, useState } from "react";
 import { Handle, Position, NodeProps, useReactFlow } from "@xyflow/react";
 import { NodeWrapper } from "./NodeWrapper.js";

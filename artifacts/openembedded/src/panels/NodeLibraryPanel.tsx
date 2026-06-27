@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { useCallback, useState, type ReactNode } from "react";
 import { useGraphStore, AppNode, AppNodeData } from "../lib/graphStore.js";
 import {

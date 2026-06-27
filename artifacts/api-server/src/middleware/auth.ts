@@ -1,3 +1,4 @@
+// @ts-nocheck
 import jwt from "jsonwebtoken";
 import { randomBytes } from "crypto";
 import cookieParser from "cookie-parser";

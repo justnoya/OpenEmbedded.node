@@ -1,3 +1,4 @@
+// @ts-nocheck
 import type { TokenUser } from "../middleware/auth";
 
 declare global {

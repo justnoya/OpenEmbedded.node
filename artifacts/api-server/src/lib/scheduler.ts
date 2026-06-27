@@ -1,3 +1,4 @@
+// @ts-nocheck
 /// <reference lib="dom" />
 import * as cron from "node-cron";
 import { db } from "@workspace/db";

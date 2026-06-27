@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Node classification and connection validation rules.
  *

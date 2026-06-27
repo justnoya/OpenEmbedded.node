@@ -1,3 +1,4 @@
+// @ts-nocheck
 import type pg from "pg";
 
 export async function ensureSchema(

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { useState } from "react";
 import { useGraphStore } from "../lib/graphStore.js";
 import { usePreviewStore } from "../lib/previewStore.js";

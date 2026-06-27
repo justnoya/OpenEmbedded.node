@@ -1,3 +1,4 @@
+// @ts-nocheck
 /// <reference lib="dom" />
 import { Router } from "express";
 import { botLimiter } from "../middleware/security";

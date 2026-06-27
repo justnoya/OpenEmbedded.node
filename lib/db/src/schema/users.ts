@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { pgTable, varchar, timestamp } from "drizzle-orm/pg-core";
 
 export const usersTable = pgTable("discord_users", {

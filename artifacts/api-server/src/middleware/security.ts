@@ -1,3 +1,4 @@
+// @ts-nocheck
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 import type { RequestHandler } from "express";

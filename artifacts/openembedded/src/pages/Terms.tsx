@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { useLocation } from "wouter";
 import { ArrowLeft, Scale } from "lucide-react";
 

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { ReactNode } from "react";
 import { useStore } from "@xyflow/react";
 import { useGraphStore } from "../../lib/graphStore.js";

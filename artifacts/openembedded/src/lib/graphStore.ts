@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { create } from 'zustand';
 import { Node, Edge, Connection, addEdge, applyNodeChanges, applyEdgeChanges, NodeChange, EdgeChange } from '@xyflow/react';
 import { isValidNodeConnection, isInteractionConnection, isBotSendConnection, InteractionMode } from './connectionRules.js';

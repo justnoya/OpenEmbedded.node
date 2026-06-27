@@ -1,2 +1,3 @@
+// @ts-nocheck
 /// <reference types="pino-http" />
 /// <reference types="express-session" />

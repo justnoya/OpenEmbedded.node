@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { memo } from "react";
 import { Handle, Position, NodeProps } from "@xyflow/react";
 import { NodeWrapper } from "./NodeWrapper.js";

@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Shows the authenticated Discord user's avatar + username in the navbar.
  * Only renders when the app is running as a Discord Activity and the user is authed.

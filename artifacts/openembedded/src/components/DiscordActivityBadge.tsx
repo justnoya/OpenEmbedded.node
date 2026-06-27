@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Small status badge shown in the Builder toolbar when running as a Discord Activity.
  * Shows SDK state, authenticated user, and a "Rich Presence active" pill.

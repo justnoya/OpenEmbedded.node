@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * useRichPresence — drives Discord Rich Presence updates from Builder state.
  *

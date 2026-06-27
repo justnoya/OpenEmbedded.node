@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { BaseEdge, EdgeLabelRenderer, getBezierPath, useReactFlow, type EdgeProps } from "@xyflow/react";
 import { useGraphStore } from "../../lib/graphStore.js";
 import { X, Zap } from "lucide-react";

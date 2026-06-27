@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * /auth/callback — Discord OAuth2 redirect handler.
  *

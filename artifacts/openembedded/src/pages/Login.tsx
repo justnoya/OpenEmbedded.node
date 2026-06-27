@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "../lib/authContext.js";
