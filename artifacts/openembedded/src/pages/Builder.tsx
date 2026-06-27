@@ -26,6 +26,10 @@ import { DiscordActivityBadge } from "../components/DiscordActivityBadge.js";
 import { DiscordUserBadge } from "../components/DiscordUserBadge.js";
 import { useRichPresence } from "../lib/useRichPresence.js";
 import { useDiscord } from "../lib/discordContext.js";
+import { useForge } from "../lib/useForge.js";
+import { useForgeStore } from "../lib/forgeStore.js";
+import { ForgeWizard } from "../components/activity/ForgeWizard.js";
+import { ActivityLayout } from "../components/activity/ActivityLayout.js";
 import {
   useListProjects,
   useCreateProject,
@@ -82,7 +86,11 @@ export function Builder() {
   const previewErrors = usePreviewStore((s) => s.errors);
   const previewIsValid = usePreviewStore((s) => s.isValid);
 
-  const { isDiscord } = useDiscord();
+  const { isDiscord, sdkState } = useDiscord();
+  const { wizardStep } = useForgeStore();
+  const { sendCursor, sendNodeMove } = useForge();
+  const isActivity = isDiscord && sdkState === "ready";
+
   const [, builderParams] = useRoute("/builder/:id");
   const [, navigate] = useLocation();
   const routeProjectId = builderParams?.id ?? null;
@@ -224,6 +232,20 @@ export function Builder() {
       onNodesChange(changes);
     },
     [onNodesChange]
+  );
+
+  const onNodeDragStop = useCallback(
+    (_: unknown, node: { id: string; position: { x: number; y: number } }) => {
+      sendNodeMove(node.id, node.position);
+    },
+    [sendNodeMove]
+  );
+
+  const handleCursorMove = useCallback(
+    (x: number, y: number) => {
+      sendCursor(x, y);
+    },
+    [sendCursor]
   );
 
   const handleQuickStart = useCallback(() => {
@@ -816,6 +838,7 @@ export function Builder() {
         onConnect={onConnect}
         isValidConnection={isValidConnection}
         onConnectEnd={onConnectEnd}
+        onNodeDragStop={onNodeDragStop}
         onPaneClick={() => setSelectedNode(null)}
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
@@ -1026,6 +1049,34 @@ export function Builder() {
       <ExportPanel />
     </div>
   );
+
+  /* ── Discord Activity layout ─────────────────────────────────────────── */
+  if (isActivity) {
+    return (
+      <>
+        {/* Wizard overlays the canvas until user dismisses it */}
+        {wizardStep !== "done" && <ForgeWizard />}
+
+        <ActivityLayout
+          canvas={canvas}
+          nodeLibrary={<NodeLibraryPanel />}
+          propertiesPanel={
+            <div style={{ display: "flex", flexDirection: "column", height: "100%", overflow: "hidden" }}>
+              <PropertiesPanel />
+            </div>
+          }
+          exportPanel={<ExportPanel />}
+          undo={undo}
+          redo={redo}
+          canUndo={canUndo()}
+          canRedo={canRedo()}
+          onSend={() => {}}
+          canSend={previewIsValid}
+          onCursorMove={handleCursorMove}
+        />
+      </>
+    );
+  }
 
   if (!isMobile) {
     return (

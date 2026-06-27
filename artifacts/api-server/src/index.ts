@@ -1,8 +1,10 @@
 // @ts-nocheck
+import http from "http";
 import app from "./app";
 import { logger } from "./lib/logger";
 import { pool, ensureSchema } from "@workspace/db";
 import { startScheduler } from "./lib/scheduler";
+import { attachForgeServer } from "./lib/forgeServer";
 
 const rawPort = process.env["PORT"];
 
@@ -32,7 +34,10 @@ async function start() {
     logger.warn({ err }, "Scheduler failed to start — continuing without scheduled jobs");
   }
 
-  app.listen(port, (err) => {
+  const server = http.createServer(app);
+  attachForgeServer(server);
+
+  server.listen(port, (err?: Error) => {
     if (err) {
       logger.error({ err }, "Failed to bind port");
       process.exit(1);
