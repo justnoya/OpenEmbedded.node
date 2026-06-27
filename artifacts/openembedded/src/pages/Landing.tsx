@@ -418,261 +418,200 @@ export function Landing() {
         </div>
       </section>
 
-      {/* ── Features Bento Grid ─────────────────────────────────────────────── */}
-      <section style={{ padding: "120px 20px 80px", maxWidth: 1060, margin: "0 auto" }}>
-        <div style={{ textAlign: "center", marginBottom: 56 }}>
+      {/* ── Features Grid ───────────────────────────────────────────────────── */}
+      <section style={{ padding: "112px 20px 80px", maxWidth: 1060, margin: "0 auto" }}>
+        <div style={{ marginBottom: 64 }}>
           <SectionLabel>Everything you need</SectionLabel>
-          <h2 style={{ fontSize: "clamp(26px, 3.5vw, 44px)", fontWeight: 900, letterSpacing: "-0.04em", color: C.t1, margin: "0 auto 16px", maxWidth: 600, lineHeight: 1.08 }}>
-            The complete Discord message toolkit
-          </h2>
-          <p style={{ color: C.t3, fontSize: 16, maxWidth: 460, margin: "0 auto", lineHeight: 1.7 }}>
-            Every tool a community manager or bot developer needs, in one visual workspace.
-          </p>
+          <div className="oe-feat-header" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24, marginTop: 20, alignItems: "end" }}>
+            <h2 style={{ fontSize: "clamp(28px, 3.8vw, 46px)", fontWeight: 900, letterSpacing: "-0.045em", color: C.t1, margin: 0, lineHeight: 1.05 }}>
+              The complete Discord<br />message toolkit
+            </h2>
+            <p style={{ color: C.t3, fontSize: 15, margin: 0, lineHeight: 1.75, maxWidth: 360 }}>
+              Every tool a community manager or bot developer needs — built into one visual workspace. No code, no JSON, no context switching.
+            </p>
+          </div>
         </div>
 
-        {/* Bento grid — mixed card sizes */}
-        <div className="oe-bento" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10 }}>
+        {/* 3-col bento — 2 large, 4 small */}
+        <div className="oe-bento" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 1, border: `1px solid ${C.b2}`, borderRadius: 16, overflow: "hidden" }}>
 
-          {/* F0: Visual Node Graph — 2-col hero card */}
+          {/* F0: Visual Node Graph — 2-col */}
           <div className="oe-bento-wide"
-            style={{
-              gridColumn: "span 2",
-              padding: "36px 36px 32px",
-              background: C.panel,
-              border: `1px solid ${C.b2}`,
-              borderRadius: 16,
-              position: "relative", overflow: "hidden",
-              transition: "border-color 0.2s",
-              cursor: "default",
-            }}
-            onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "rgba(88,101,242,0.35)"; }}
-            onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = C.b2; }}
+            style={{ gridColumn: "span 2", padding: "40px 40px 36px", background: C.panel, borderRight: `1px solid ${C.b2}`, borderBottom: `1px solid ${C.b2}`, transition: "background 0.15s", cursor: "default" }}
+            onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = C.elevated; }}
+            onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = C.panel; }}
           >
-            <div aria-hidden style={{ position: "absolute", top: -40, right: -40, width: 280, height: 280, background: "radial-gradient(circle, rgba(88,101,242,0.1) 0%, transparent 65%)", pointerEvents: "none" }} />
-            <div style={{ width: 52, height: 52, borderRadius: 13, background: "rgba(88,101,242,0.18)", border: "1px solid rgba(88,101,242,0.32)", display: "flex", alignItems: "center", justifyContent: "center", color: "#818cf8", marginBottom: 22 }}>
-              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M4.93 4.93a10 10 0 0 0 0 14.14"/><line x1="12" y1="2" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
+            <div style={{ width: 44, height: 44, borderRadius: 11, background: C.elevated, border: `1px solid ${C.b3}`, display: "flex", alignItems: "center", justifyContent: "center", color: "#818cf8", marginBottom: 24 }}>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M4.93 4.93a10 10 0 0 0 0 14.14"/><line x1="12" y1="2" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
             </div>
-            <h3 style={{ margin: "0 0 10px", fontSize: 20, fontWeight: 800, color: C.t1, letterSpacing: "-0.03em" }}>Visual Node Graph</h3>
-            <p style={{ margin: 0, fontSize: 14, color: C.t3, lineHeight: 1.7, maxWidth: 380 }}>
+            <h3 style={{ margin: "0 0 10px", fontSize: 19, fontWeight: 800, color: C.t1, letterSpacing: "-0.03em" }}>Visual Node Graph</h3>
+            <p style={{ margin: "0 0 32px", fontSize: 14, color: C.t3, lineHeight: 1.75, maxWidth: 400 }}>
               Connect nodes like wires on a circuit board. See exactly how your message hierarchy fits together — no JSON, no guessing.
             </p>
-            {/* Mini node illustration */}
-            <div style={{ marginTop: 28, display: "flex", alignItems: "center", gap: 0 }}>
-              {[
+            <div style={{ display: "flex", alignItems: "center", gap: 0 }}>
+              {([
                 { label: "Webhook", color: "#5865F2" },
                 { label: "Container", color: "#8b5cf6" },
                 { label: "Section", color: "#f59e0b" },
-              ].map((n, i) => (
+                { label: "Button", color: "#10b981" },
+              ] as { label: string; color: string }[]).map((n, i, arr) => (
                 <div key={i} style={{ display: "flex", alignItems: "center" }}>
-                  <div style={{ padding: "7px 14px", background: C.elevated, border: `1px solid ${n.color}40`, borderRadius: 8, fontSize: 12, fontWeight: 600, color: C.t2, display: "flex", alignItems: "center", gap: 6 }}>
-                    <div style={{ width: 7, height: 7, borderRadius: "50%", background: n.color, boxShadow: `0 0 6px ${n.color}` }} />
+                  <div style={{ padding: "6px 13px", background: C.canvas, border: `1px solid ${C.b3}`, borderRadius: 7, fontSize: 11, fontWeight: 600, color: C.t2, display: "flex", alignItems: "center", gap: 6, letterSpacing: "-0.01em" }}>
+                    <div style={{ width: 6, height: 6, borderRadius: "50%", background: n.color }} />
                     {n.label}
                   </div>
-                  {i < 2 && (
-                    <div style={{ width: 28, height: 1, background: `linear-gradient(to right, ${n.color}60, ${[{ color: "#5865F2" }, { color: "#8b5cf6" }, { color: "#f59e0b" }][i + 1].color}40)`, margin: "0 2px" }} />
-                  )}
+                  {i < arr.length - 1 && <div style={{ width: 24, height: 1, background: C.b3 }} />}
                 </div>
               ))}
             </div>
           </div>
 
-          {/* F1: All CV2 Components — 1-col */}
+          {/* F1: All CV2 Components */}
           <div
-            style={{ padding: "32px 28px", background: C.panel, border: `1px solid ${C.b2}`, borderRadius: 16, position: "relative", overflow: "hidden", transition: "border-color 0.2s", cursor: "default" }}
-            onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "rgba(139,92,246,0.35)"; }}
-            onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = C.b2; }}
+            style={{ padding: "36px 28px", background: C.panel, borderBottom: `1px solid ${C.b2}`, transition: "background 0.15s", cursor: "default" }}
+            onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = C.elevated; }}
+            onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = C.panel; }}
           >
-            <div aria-hidden style={{ position: "absolute", top: -30, right: -30, width: 180, height: 180, background: "radial-gradient(circle, rgba(139,92,246,0.12) 0%, transparent 65%)", pointerEvents: "none" }} />
-            <div style={{ width: 48, height: 48, borderRadius: 12, background: "rgba(139,92,246,0.18)", border: "1px solid rgba(139,92,246,0.3)", display: "flex", alignItems: "center", justifyContent: "center", color: "#a78bfa", marginBottom: 20 }}>
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+            <div style={{ width: 44, height: 44, borderRadius: 11, background: C.elevated, border: `1px solid ${C.b3}`, display: "flex", alignItems: "center", justifyContent: "center", color: "#a78bfa", marginBottom: 20 }}>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
             </div>
-            <h3 style={{ margin: "0 0 8px", fontSize: 16, fontWeight: 800, color: C.t1, letterSpacing: "-0.025em" }}>All CV2 Components</h3>
-            <p style={{ margin: 0, fontSize: 13, color: C.t3, lineHeight: 1.7 }}>
-              Containers, Sections, Text Displays, Galleries, Separators, Action Rows — every type, fully visual.
+            <h3 style={{ margin: "0 0 8px", fontSize: 15, fontWeight: 800, color: C.t1, letterSpacing: "-0.025em" }}>All CV2 Components</h3>
+            <p style={{ margin: "0 0 20px", fontSize: 13, color: C.t3, lineHeight: 1.7 }}>
+              Every Components V2 type — Container, Section, Text Display, Gallery, Action Row — fully visual.
             </p>
-            <div style={{ marginTop: 20, display: "flex", flexWrap: "wrap", gap: 5 }}>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
               {["Container", "Section", "Text", "Gallery", "Button", "Separator"].map(tag => (
-                <span key={tag} style={{ fontSize: 10, fontWeight: 600, padding: "3px 8px", background: "rgba(139,92,246,0.1)", border: "1px solid rgba(139,92,246,0.2)", borderRadius: 6, color: "#a78bfa", letterSpacing: "0.02em" }}>{tag}</span>
+                <span key={tag} style={{ fontSize: 10, fontWeight: 600, padding: "3px 7px", background: C.canvas, border: `1px solid ${C.b3}`, borderRadius: 5, color: C.t3, letterSpacing: "0.02em" }}>{tag}</span>
               ))}
             </div>
           </div>
 
-          {/* F2: Live Discord Preview — 1-col */}
+          {/* F2: Live Preview */}
           <div
-            style={{ padding: "32px 28px", background: C.panel, border: `1px solid ${C.b2}`, borderRadius: 16, position: "relative", overflow: "hidden", transition: "border-color 0.2s", cursor: "default" }}
-            onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "rgba(16,185,129,0.35)"; }}
-            onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = C.b2; }}
+            style={{ padding: "36px 28px", background: C.panel, borderRight: `1px solid ${C.b2}`, borderBottom: `1px solid ${C.b2}`, transition: "background 0.15s", cursor: "default" }}
+            onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = C.elevated; }}
+            onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = C.panel; }}
           >
-            <div aria-hidden style={{ position: "absolute", bottom: -30, left: -30, width: 180, height: 180, background: "radial-gradient(circle, rgba(16,185,129,0.1) 0%, transparent 65%)", pointerEvents: "none" }} />
-            <div style={{ width: 48, height: 48, borderRadius: 12, background: "rgba(16,185,129,0.16)", border: "1px solid rgba(16,185,129,0.28)", display: "flex", alignItems: "center", justifyContent: "center", color: "#34d399", marginBottom: 20 }}>
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M1 6v16l7-4 8 4 7-4V2l-7 4-8-4-7 4z"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
+            <div style={{ width: 44, height: 44, borderRadius: 11, background: C.elevated, border: `1px solid ${C.b3}`, display: "flex", alignItems: "center", justifyContent: "center", color: "#34d399", marginBottom: 20 }}>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M1 6v16l7-4 8 4 7-4V2l-7 4-8-4-7 4z"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
             </div>
-            <h3 style={{ margin: "0 0 8px", fontSize: 16, fontWeight: 800, color: C.t1, letterSpacing: "-0.025em" }}>Live Discord Preview</h3>
+            <h3 style={{ margin: "0 0 8px", fontSize: 15, fontWeight: 800, color: C.t1, letterSpacing: "-0.025em" }}>Live Discord Preview</h3>
+            <p style={{ margin: "0 0 20px", fontSize: 13, color: C.t3, lineHeight: 1.7 }}>
+              See your message exactly as Discord renders it — channel header, bot bubble, embeds, buttons — in real time.
+            </p>
+            <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
+              <div style={{ width: 7, height: 7, borderRadius: "50%", background: "#10b981" }} />
+              <span style={{ fontSize: 11, fontWeight: 600, color: "#10b981", letterSpacing: "0.01em" }}>Updates on every connection</span>
+            </div>
+          </div>
+
+          {/* F3: Send via Webhook */}
+          <div
+            style={{ padding: "36px 28px", background: C.panel, borderRight: `1px solid ${C.b2}`, borderBottom: `1px solid ${C.b2}`, transition: "background 0.15s", cursor: "default" }}
+            onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = C.elevated; }}
+            onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = C.panel; }}
+          >
+            <div style={{ width: 44, height: 44, borderRadius: 11, background: C.elevated, border: `1px solid ${C.b3}`, display: "flex", alignItems: "center", justifyContent: "center", color: "#fbbf24", marginBottom: 20 }}>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            </div>
+            <h3 style={{ margin: "0 0 8px", fontSize: 15, fontWeight: 800, color: C.t1, letterSpacing: "-0.025em" }}>Send via Webhook or Bot</h3>
             <p style={{ margin: 0, fontSize: 13, color: C.t3, lineHeight: 1.7 }}>
-              See exactly how your message looks in Discord — channel header, bubble, embeds — updating in real time.
+              Paste a webhook URL or connect a bot token. Message delivered in under a second. No code needed.
             </p>
-            <div style={{ marginTop: 18, display: "flex", alignItems: "center", gap: 6 }}>
-              <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#10b981", boxShadow: "0 0 8px #10b981" }} />
-              <span style={{ fontSize: 11, color: "#10b981", fontWeight: 600 }}>Updates as you connect nodes</span>
-            </div>
           </div>
 
-          {/* F3: Send via Webhook — 2-col */}
-          <div className="oe-bento-wide"
-            style={{
-              gridColumn: "span 2",
-              padding: "36px 36px 32px",
-              background: C.panel,
-              border: `1px solid ${C.b2}`,
-              borderRadius: 16,
-              position: "relative", overflow: "hidden",
-              transition: "border-color 0.2s",
-              cursor: "default",
-            }}
-            onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "rgba(245,158,11,0.35)"; }}
-            onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = C.b2; }}
-          >
-            <div aria-hidden style={{ position: "absolute", bottom: -40, right: -40, width: 280, height: 280, background: "radial-gradient(circle, rgba(245,158,11,0.09) 0%, transparent 65%)", pointerEvents: "none" }} />
-            <div style={{ width: 52, height: 52, borderRadius: 13, background: "rgba(245,158,11,0.16)", border: "1px solid rgba(245,158,11,0.28)", display: "flex", alignItems: "center", justifyContent: "center", color: "#fbbf24", marginBottom: 22 }}>
-              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-            </div>
-            <h3 style={{ margin: "0 0 10px", fontSize: 20, fontWeight: 800, color: C.t1, letterSpacing: "-0.03em" }}>Send via Webhook or Bot</h3>
-            <p style={{ margin: 0, fontSize: 14, color: C.t3, lineHeight: 1.7, maxWidth: 380 }}>
-              Deliver your message directly to any Discord channel — paste a webhook URL or connect a bot token. No code needed.
-            </p>
-            {/* Input mockup */}
-            <div style={{ marginTop: 28, display: "flex", gap: 8, alignItems: "center" }}>
-              <div style={{ flex: 1, padding: "9px 14px", background: C.elevated, border: `1px solid ${C.b3}`, borderRadius: 8, fontSize: 12, color: C.t4, fontFamily: "monospace" }}>
-                https://discord.com/api/webhooks/…
-              </div>
-              <div style={{ padding: "9px 18px", background: "rgba(245,158,11,0.15)", border: "1px solid rgba(245,158,11,0.3)", borderRadius: 8, fontSize: 12, fontWeight: 700, color: "#fbbf24", whiteSpace: "nowrap" }}>
-                Send →
-              </div>
-            </div>
-          </div>
-
-          {/* F4: Export JSON — 1-col */}
+          {/* F4: Export JSON */}
           <div
-            style={{ padding: "32px 28px", background: C.panel, border: `1px solid ${C.b2}`, borderRadius: 16, position: "relative", overflow: "hidden", transition: "border-color 0.2s", cursor: "default" }}
-            onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "rgba(236,72,153,0.35)"; }}
-            onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = C.b2; }}
+            style={{ padding: "36px 28px", background: C.panel, borderRight: `1px solid ${C.b2}`, transition: "background 0.15s", cursor: "default" }}
+            onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = C.elevated; }}
+            onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = C.panel; }}
           >
-            <div aria-hidden style={{ position: "absolute", top: -30, left: -30, width: 180, height: 180, background: "radial-gradient(circle, rgba(236,72,153,0.1) 0%, transparent 65%)", pointerEvents: "none" }} />
-            <div style={{ width: 48, height: 48, borderRadius: 12, background: "rgba(236,72,153,0.16)", border: "1px solid rgba(236,72,153,0.28)", display: "flex", alignItems: "center", justifyContent: "center", color: "#f472b6", marginBottom: 20 }}>
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+            <div style={{ width: 44, height: 44, borderRadius: 11, background: C.elevated, border: `1px solid ${C.b3}`, display: "flex", alignItems: "center", justifyContent: "center", color: "#f472b6", marginBottom: 20 }}>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
             </div>
-            <h3 style={{ margin: "0 0 8px", fontSize: 16, fontWeight: 800, color: C.t1, letterSpacing: "-0.025em" }}>Export Clean JSON</h3>
+            <h3 style={{ margin: "0 0 8px", fontSize: 15, fontWeight: 800, color: C.t1, letterSpacing: "-0.025em" }}>Export Clean JSON</h3>
             <p style={{ margin: 0, fontSize: 13, color: C.t3, lineHeight: 1.7 }}>
-              One click exports the production-ready Discord API payload. Copy or download — drop it straight into your bot.
+              One click exports the production-ready Discord API payload. Copy or download it straight into your bot code.
             </p>
           </div>
 
-          {/* F5: Secure by Design — 1-col */}
+          {/* F5: Secure by Design */}
           <div
-            style={{ padding: "32px 28px", background: C.panel, border: `1px solid ${C.b2}`, borderRadius: 16, position: "relative", overflow: "hidden", transition: "border-color 0.2s", cursor: "default" }}
-            onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "rgba(6,182,212,0.35)"; }}
-            onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = C.b2; }}
+            style={{ padding: "36px 28px", background: C.panel, transition: "background 0.15s", cursor: "default" }}
+            onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = C.elevated; }}
+            onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = C.panel; }}
           >
-            <div aria-hidden style={{ position: "absolute", top: -30, right: -30, width: 180, height: 180, background: "radial-gradient(circle, rgba(6,182,212,0.1) 0%, transparent 65%)", pointerEvents: "none" }} />
-            <div style={{ width: 48, height: 48, borderRadius: 12, background: "rgba(6,182,212,0.14)", border: "1px solid rgba(6,182,212,0.26)", display: "flex", alignItems: "center", justifyContent: "center", color: "#22d3ee", marginBottom: 20 }}>
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            <div style={{ width: 44, height: 44, borderRadius: 11, background: C.elevated, border: `1px solid ${C.b3}`, display: "flex", alignItems: "center", justifyContent: "center", color: "#22d3ee", marginBottom: 20 }}>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
             </div>
-            <h3 style={{ margin: "0 0 8px", fontSize: 16, fontWeight: 800, color: C.t1, letterSpacing: "-0.025em" }}>Secure by Design</h3>
+            <h3 style={{ margin: "0 0 8px", fontSize: 15, fontWeight: 800, color: C.t1, letterSpacing: "-0.025em" }}>Secure by Design</h3>
             <p style={{ margin: 0, fontSize: 13, color: C.t3, lineHeight: 1.7 }}>
-              SSRF-protected proxy, rate-limited sends, strict Discord URL validation, session auth.
+              SSRF-protected proxy, rate-limited sends, strict Discord URL validation, and session auth out of the box.
             </p>
-          </div>
-
-          {/* F6: placeholder — empty cell fills bento → use as stats strip */}
-          <div
-            style={{ padding: "32px 28px", background: "linear-gradient(135deg, rgba(88,101,242,0.08) 0%, rgba(139,92,246,0.06) 100%)", border: `1px solid rgba(88,101,242,0.2)`, borderRadius: 16, display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", textAlign: "center" }}
-          >
-            <div style={{ fontSize: 36, fontWeight: 900, color: C.t1, letterSpacing: "-0.04em", lineHeight: 1 }}>100%</div>
-            <div style={{ fontSize: 12, color: C.t3, marginTop: 6, lineHeight: 1.5 }}>Free to use<br/>No credit card</div>
           </div>
 
         </div>
       </section>
 
-      {/* ── How It Works — Connected Timeline ───────────────────────────────── */}
+      {/* ── How It Works ────────────────────────────────────────────────────── */}
       <section style={{ padding: "0 20px 100px", maxWidth: 1060, margin: "0 auto" }}>
-        <div style={{ textAlign: "center", marginBottom: 64 }}>
-          <SectionLabel>How it works</SectionLabel>
-          <h2 style={{ fontSize: "clamp(26px, 3.5vw, 44px)", fontWeight: 900, letterSpacing: "-0.04em", color: C.t1, margin: "0 auto", maxWidth: 500, lineHeight: 1.08 }}>
-            From idea to Discord in three steps
-          </h2>
+
+        {/* Section header — left-aligned for editorial feel */}
+        <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", borderBottom: `1px solid ${C.b2}`, paddingBottom: 20, marginBottom: 48 }}>
+          <div>
+            <SectionLabel>How it works</SectionLabel>
+            <h2 style={{ fontSize: "clamp(24px, 3.2vw, 40px)", fontWeight: 900, letterSpacing: "-0.04em", color: C.t1, margin: "8px 0 0", lineHeight: 1.1 }}>
+              From idea to Discord in three steps
+            </h2>
+          </div>
         </div>
 
-        <div className="oe-steps" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 0, position: "relative" }}>
-          {/* Connector line */}
-          <div aria-hidden className="oe-steps-line" style={{
-            position: "absolute", top: 52, left: "16.666%", right: "16.666%",
-            height: 1,
-            background: `linear-gradient(to right, rgba(88,101,242,0.5), rgba(139,92,246,0.5), rgba(16,185,129,0.5))`,
-            zIndex: 0,
-          }} />
-
+        <div className="oe-steps" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 1, border: `1px solid ${C.b2}`, borderRadius: 14, overflow: "hidden" }}>
           {STEPS.map((s, i) => (
-            <div key={i} style={{ padding: "0 16px", position: "relative", zIndex: 1 }}>
-              {/* Step badge */}
-              <div style={{ display: "flex", justifyContent: "center", marginBottom: 32 }}>
-                <div style={{
-                  width: 48, height: 48, borderRadius: "50%",
-                  background: C.canvas,
-                  border: `2px solid ${s.color}`,
-                  boxShadow: `0 0 0 4px ${C.canvas}, 0 0 20px ${s.color}40`,
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  fontSize: 13, fontWeight: 800, color: s.color, letterSpacing: "-0.02em",
-                }}>
-                  {s.n}
-                </div>
-              </div>
-              {/* Card */}
-              <div style={{
-                padding: "28px 24px 26px",
+            <div
+              key={i}
+              style={{
+                padding: "36px 32px 32px",
                 background: C.panel,
-                border: `1px solid ${C.b2}`,
-                borderTop: `2px solid ${s.color}`,
-                borderRadius: "0 0 14px 14px",
-              }}>
-                <h3 style={{ margin: "0 0 10px", fontSize: 17, fontWeight: 800, color: C.t1, letterSpacing: "-0.025em" }}>
-                  {s.title}
-                </h3>
-                <p style={{ margin: 0, fontSize: 13, color: C.t3, lineHeight: 1.75 }}>
-                  {s.desc}
-                </p>
+                borderRight: i < STEPS.length - 1 ? `1px solid ${C.b2}` : "none",
+                transition: "background 0.15s",
+              }}
+              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = C.elevated; }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = C.panel; }}
+            >
+              <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", color: s.color, textTransform: "uppercase", marginBottom: 20 }}>
+                Step {s.n}
               </div>
+              <h3 style={{ margin: "0 0 12px", fontSize: 18, fontWeight: 800, color: C.t1, letterSpacing: "-0.03em", lineHeight: 1.2 }}>
+                {s.title}
+              </h3>
+              <p style={{ margin: 0, fontSize: 13, color: C.t3, lineHeight: 1.8 }}>
+                {s.desc}
+              </p>
             </div>
           ))}
         </div>
       </section>
 
-      {/* ── Why OpenEmbedded — Bold Comparison ──────────────────────────────── */}
+      {/* ── Why OpenEmbedded — Comparison ───────────────────────────────────── */}
       <section style={{ padding: "0 20px 100px", maxWidth: 1060, margin: "0 auto" }}>
-        <div style={{ textAlign: "center", marginBottom: 52 }}>
-          <SectionLabel>Why OpenEmbedded</SectionLabel>
-          <h2 style={{ fontSize: "clamp(26px, 3.5vw, 44px)", fontWeight: 900, letterSpacing: "-0.04em", color: C.t1, margin: "0 auto", maxWidth: 520, lineHeight: 1.08 }}>
-            The visual way to build Discord messages
-          </h2>
+
+        <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", borderBottom: `1px solid ${C.b2}`, paddingBottom: 20, marginBottom: 48 }}>
+          <div>
+            <SectionLabel>Why OpenEmbedded</SectionLabel>
+            <h2 style={{ fontSize: "clamp(24px, 3.2vw, 40px)", fontWeight: 900, letterSpacing: "-0.04em", color: C.t1, margin: "8px 0 0", lineHeight: 1.1 }}>
+              The visual way to build Discord messages
+            </h2>
+          </div>
         </div>
 
-        <div className="oe-compare-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+        <div className="oe-compare-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 1, border: `1px solid ${C.b2}`, borderRadius: 14, overflow: "hidden" }}>
           {/* Old way */}
-          <div style={{
-            padding: "36px 32px",
-            background: "rgba(20,16,16,0.9)",
-            border: `1px solid rgba(248,81,73,0.18)`,
-            borderRadius: 16,
-            position: "relative", overflow: "hidden",
-          }}>
-            <div aria-hidden style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, background: "radial-gradient(ellipse at 0% 0%, rgba(248,81,73,0.07) 0%, transparent 60%)", pointerEvents: "none" }} />
-            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
-              <div style={{ width: 24, height: 24, borderRadius: "50%", background: "rgba(248,81,73,0.15)", border: "1px solid rgba(248,81,73,0.3)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="rgba(248,81,73,0.8)" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-              </div>
-              <p style={{ margin: 0, fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", color: "rgba(248,81,73,0.65)" }}>The old way</p>
-            </div>
-            <h3 style={{ position: "relative", margin: "0 0 28px", fontSize: 22, fontWeight: 800, color: C.t2, letterSpacing: "-0.03em", lineHeight: 1.2 }}>
+          <div style={{ padding: "40px 36px", background: C.canvas, borderRight: `1px solid ${C.b2}` }}>
+            <p style={{ margin: "0 0 8px", fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", color: C.t4 }}>
+              Without OpenEmbedded
+            </p>
+            <h3 style={{ margin: "0 0 32px", fontSize: 22, fontWeight: 800, color: C.t3, letterSpacing: "-0.035em", lineHeight: 1.2 }}>
               Painful JSON editing
             </h3>
             {[
@@ -682,32 +621,21 @@ export function Landing() {
               "One typo breaks the whole payload",
               "CV2 type IDs and flags all from memory",
             ].map((t, i) => (
-              <div key={i} style={{ display: "flex", gap: 12, marginBottom: 13, alignItems: "flex-start" }}>
-                <div style={{ width: 18, height: 18, borderRadius: "50%", background: "rgba(248,81,73,0.1)", border: "1px solid rgba(248,81,73,0.2)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginTop: 1 }}>
-                  <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="rgba(248,81,73,0.55)" strokeWidth="3" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                </div>
-                <span style={{ color: C.t3, fontSize: 13, lineHeight: 1.65 }}>{t}</span>
+              <div key={i} style={{ display: "flex", gap: 12, marginBottom: 14, alignItems: "flex-start" }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={C.t4} strokeWidth="2.5" strokeLinecap="round" style={{ marginTop: 2, flexShrink: 0 }}>
+                  <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+                <span style={{ color: C.t4, fontSize: 13, lineHeight: 1.65 }}>{t}</span>
               </div>
             ))}
           </div>
 
           {/* New way */}
-          <div style={{
-            padding: "36px 32px",
-            background: C.panel,
-            border: `1px solid rgba(16,185,129,0.25)`,
-            borderRadius: 16,
-            position: "relative", overflow: "hidden",
-            boxShadow: "0 0 0 1px rgba(16,185,129,0.06), 0 8px 40px rgba(16,185,129,0.06)",
-          }}>
-            <div aria-hidden style={{ position: "absolute", top: 0, right: 0, width: 260, height: 260, background: "radial-gradient(circle at 100% 0%, rgba(16,185,129,0.1) 0%, transparent 60%)", pointerEvents: "none" }} />
-            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
-              <div style={{ width: 24, height: 24, borderRadius: "50%", background: "rgba(16,185,129,0.2)", border: "1px solid rgba(16,185,129,0.35)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="rgba(16,185,129,0.9)" strokeWidth="3" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>
-              </div>
-              <p style={{ margin: 0, fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", color: "rgba(16,185,129,0.75)" }}>With OpenEmbedded</p>
-            </div>
-            <h3 style={{ position: "relative", margin: "0 0 28px", fontSize: 22, fontWeight: 800, color: C.t1, letterSpacing: "-0.03em", lineHeight: 1.2 }}>
+          <div style={{ padding: "40px 36px", background: C.panel }}>
+            <p style={{ margin: "0 0 8px", fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", color: C.blurple }}>
+              With OpenEmbedded
+            </p>
+            <h3 style={{ margin: "0 0 32px", fontSize: 22, fontWeight: 800, color: C.t1, letterSpacing: "-0.035em", lineHeight: 1.2 }}>
               See it as you build it
             </h3>
             {[
@@ -717,10 +645,10 @@ export function Landing() {
               "Validation errors shown instantly on the node",
               "Every field is a labelled form — no memorising",
             ].map((t, i) => (
-              <div key={i} style={{ display: "flex", gap: 12, marginBottom: 13, alignItems: "flex-start" }}>
-                <div style={{ width: 18, height: 18, borderRadius: "50%", background: "rgba(16,185,129,0.15)", border: "1px solid rgba(16,185,129,0.3)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginTop: 1 }}>
-                  <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="rgba(16,185,129,0.85)" strokeWidth="3" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>
-                </div>
+              <div key={i} style={{ display: "flex", gap: 12, marginBottom: 14, alignItems: "flex-start" }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={C.blurple} strokeWidth="2.5" strokeLinecap="round" style={{ marginTop: 2, flexShrink: 0 }}>
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
                 <span style={{ color: C.t2, fontSize: 13, lineHeight: 1.65 }}>{t}</span>
               </div>
             ))}
@@ -728,49 +656,35 @@ export function Landing() {
         </div>
       </section>
 
-      {/* ── Final CTA — Gradient treatment ──────────────────────────────────── */}
+      {/* ── Final CTA ────────────────────────────────────────────────────────── */}
       <section style={{ padding: "0 20px 112px" }}>
         <div style={{
-          maxWidth: 860, margin: "0 auto",
-          padding: "72px 48px", textAlign: "center",
-          background: "linear-gradient(135deg, rgba(88,101,242,0.12) 0%, rgba(139,92,246,0.08) 50%, rgba(88,101,242,0.1) 100%)",
-          border: `1px solid rgba(88,101,242,0.25)`,
-          borderRadius: 20,
-          boxShadow: `0 0 0 1px rgba(88,101,242,0.08), 0 24px 80px rgba(88,101,242,0.1), ${C.shadow.xl}`,
-          position: "relative", overflow: "hidden",
+          maxWidth: 1060, margin: "0 auto",
+          border: `1px solid ${C.b3}`,
+          borderRadius: 16,
+          overflow: "hidden",
         }}>
-          <div aria-hidden style={{ position: "absolute", top: -100, left: "50%", transform: "translateX(-50%)", width: 600, height: 400, background: "radial-gradient(ellipse at 50% 30%, rgba(88,101,242,0.2) 0%, rgba(139,92,246,0.08) 45%, transparent 68%)", pointerEvents: "none" }} />
-          <div aria-hidden style={{ position: "absolute", bottom: -60, left: -60, width: 240, height: 240, background: "radial-gradient(circle, rgba(88,101,242,0.08) 0%, transparent 65%)", pointerEvents: "none" }} />
-          <div aria-hidden style={{ position: "absolute", bottom: -60, right: -60, width: 240, height: 240, background: "radial-gradient(circle, rgba(139,92,246,0.08) 0%, transparent 65%)", pointerEvents: "none" }} />
-
-          <div style={{ position: "relative" }}>
-            <div style={{
-              display: "inline-flex", alignItems: "center", gap: 6,
-              padding: "4px 12px 4px 8px", borderRadius: 100,
-              background: "rgba(88,101,242,0.15)", border: `1px solid rgba(88,101,242,0.3)`,
-              fontSize: 11, fontWeight: 700, color: "#818cf8",
-              marginBottom: 24,
-            }}>
-              <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#5865F2", boxShadow: "0 0 8px #5865F2" }} />
-              Free forever · No credit card
-            </div>
-
-            <h2 style={{ fontSize: "clamp(28px, 4vw, 52px)", fontWeight: 900, letterSpacing: "-0.045em", color: C.t1, margin: "0 0 18px", lineHeight: 1.0 }}>
-              Your next Discord message<br />
-              <span style={{ background: "linear-gradient(135deg, #818cf8 0%, #a78bfa 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
-                is one canvas away.
-              </span>
+          <div style={{
+            padding: "80px 64px",
+            textAlign: "center",
+            background: C.panel,
+          }}>
+            <p style={{ margin: "0 0 20px", fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: C.t4 }}>
+              Free forever · No credit card · Discord OAuth
+            </p>
+            <h2 style={{ fontSize: "clamp(32px, 5vw, 60px)", fontWeight: 900, letterSpacing: "-0.048em", color: C.t1, margin: "0 0 20px", lineHeight: 1.0 }}>
+              Your next Discord message<br />is one canvas away.
             </h2>
-            <p style={{ color: C.t3, fontSize: 16, margin: "0 auto 36px", maxWidth: 440, lineHeight: 1.7 }}>
+            <p style={{ color: C.t3, fontSize: 16, margin: "0 auto 40px", maxWidth: 420, lineHeight: 1.75 }}>
               Sign in with Discord and start building in seconds. No setup, no guesswork — just the canvas.
             </p>
             <button
               onClick={login}
-              style={{ ...blurpleBtn.base, fontSize: 16, padding: "14px 32px", boxShadow: `0 6px 28px rgba(88,101,242,0.5)` }}
+              style={{ ...blurpleBtn.base, fontSize: 15, padding: "13px 30px", boxShadow: `0 4px 20px rgba(88,101,242,0.4)` }}
               onMouseEnter={blurpleBtn.in}
               onMouseLeave={blurpleBtn.out}
             >
-              <DiscordIcon size={18} />
+              <DiscordIcon size={17} />
               Get Started Free
             </button>
           </div>
@@ -802,16 +716,11 @@ export function Landing() {
       <style>{`
         * { box-sizing: border-box; }
         @media (max-width: 720px) {
-          .oe-bento { grid-template-columns: 1fr !important; }
-          .oe-bento-wide { grid-column: span 1 !important; }
+          .oe-bento { grid-template-columns: 1fr !important; border: none !important; }
+          .oe-bento-wide { grid-column: span 1 !important; border-right: none !important; }
+          .oe-feat-header { grid-template-columns: 1fr !important; }
           .oe-compare-grid { grid-template-columns: 1fr !important; }
           .oe-steps { grid-template-columns: 1fr !important; }
-          .oe-steps-line { display: none !important; }
-        }
-        @media (max-width: 900px) and (min-width: 721px) {
-          .oe-bento { grid-template-columns: repeat(2, 1fr) !important; }
-          .oe-bento-wide { grid-column: span 2 !important; }
-          .oe-steps { grid-template-columns: repeat(3, 1fr) !important; }
         }
       `}</style>
     </div>
