@@ -1,8 +1,5 @@
-let appPromise = import("../artifacts/api-server/dist/app.mjs").then(
-  (m) => m.default
-);
+import app from "../artifacts/api-server/dist/app.mjs";
 
-module.exports = async (req, res) => {
-  const app = await appPromise;
+export default async (req, res) => {
   app(req, res);
 };
