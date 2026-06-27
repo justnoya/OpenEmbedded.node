@@ -11,7 +11,7 @@ function TextInputNodeComponent({ id, data }: NodeProps) {
   const required = data.required as boolean | undefined;
 
   return (
-    <NodeWrapper id={id} typeName="Text Input · 4" icon={<TextCursorInput size={18} />} accentColor="#64748b">
+    <NodeWrapper id={id} typeName="Text Input · 4" icon={<TextCursorInput size={14} />} accentColor="#64748b">
       <div style={{ color: "#c0c0c0", fontSize: 12, fontWeight: 600, marginBottom: 5 }}>
         {label}
         {required && <span style={{ color: "#f85149", marginLeft: 3 }}>*</span>}
@@ -29,8 +29,8 @@ function TextInputNodeComponent({ id, data }: NodeProps) {
         {placeholder || " "}
       </div>
       <div style={{ color: "#404040", fontSize: 10, marginTop: 4 }}>{style}</div>
-      <Handle type="target" position={Position.Left} style={{ background: "#3fb950", border: "2px solid #252525", width: 12, height: 12 }} />
-      <Handle type="source" position={Position.Right} style={{ background: "#64748b", border: "2px solid #252525", width: 12, height: 12 }} />
+      <Handle type="target" position={Position.Left} style={{ background: "#3fb950", border: "2px solid #1a1a1a", width: 10, height: 10 }} />
+      <Handle type="source" position={Position.Right} style={{ background: "#64748b", border: "2px solid #1a1a1a", width: 10, height: 10 }} />
     </NodeWrapper>
   );
 }

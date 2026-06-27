@@ -8,6 +8,7 @@ import { SeparatorNode } from "./nodes/SeparatorNode.js";
 import { ActionRowNode } from "./nodes/ActionRowNode.js";
 import { ButtonNode } from "./nodes/ButtonNode.js";
 import { EmbedNode } from "./nodes/EmbedNode.js";
+import { EmbeddNode } from "./nodes/EmbeddNode.js";
 import { SelectMenuNode } from "./nodes/SelectMenuNode.js";
 import { AutoSelectNode } from "./nodes/AutoSelectNode.js";
 import { TextInputNode } from "./nodes/TextInputNode.js";
@@ -20,6 +21,7 @@ import { ScheduleNode } from "./nodes/ScheduleNode.js";
 
 export const nodeTypes = {
   container: ContainerNode,
+  embedd: EmbeddNode,
   section: SectionNode,
   textDisplay: TextDisplayNode,
   thumbnail: ThumbnailNode,

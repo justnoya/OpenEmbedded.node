@@ -9,7 +9,7 @@ function MediaGalleryNodeComponent({ id, data }: NodeProps) {
   const preview = items.slice(0, 4);
 
   return (
-    <NodeWrapper id={id} typeName="Media Gallery · 12" icon={<LayoutGrid size={18} />} accentColor="#ec4899">
+    <NodeWrapper id={id} typeName="Media Gallery · 12" icon={<LayoutGrid size={14} />} accentColor="#ec4899">
       {preview.length > 0 ? (
         <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
           {preview.map((item, i) =>
@@ -34,8 +34,8 @@ function MediaGalleryNodeComponent({ id, data }: NodeProps) {
       ) : (
         <div style={{ color: "#404040", fontSize: 11 }}>0 images</div>
       )}
-      <Handle type="target" position={Position.Left} style={{ background: "#3fb950", border: "2px solid #252525", width: 12, height: 12 }} />
-      <Handle type="source" position={Position.Right} style={{ background: "#ec4899", border: "2px solid #252525", width: 12, height: 12 }} />
+      <Handle type="target" position={Position.Left} style={{ background: "#3fb950", border: "2px solid #1a1a1a", width: 10, height: 10 }} />
+      <Handle type="source" position={Position.Right} style={{ background: "#ec4899", border: "2px solid #1a1a1a", width: 10, height: 10 }} />
     </NodeWrapper>
   );
 }

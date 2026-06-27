@@ -19,7 +19,7 @@ function ButtonNodeComponent({ id, data }: NodeProps) {
   const s = STYLE_MAP[style] ?? STYLE_MAP.Primary;
 
   return (
-    <NodeWrapper id={id} typeName="Button · 2" icon={<MousePointerClick size={18} />} accentColor="#5865F2" nodeClass="interactive" showInteractionHandle>
+    <NodeWrapper id={id} typeName="Button · 2" icon={<MousePointerClick size={14} />} accentColor="#5865F2" nodeClass="interactive" showInteractionHandle>
       <div
         style={{
           display: "inline-flex", alignItems: "center",
@@ -37,8 +37,8 @@ function ButtonNodeComponent({ id, data }: NodeProps) {
       <div style={{ color: "#404040", fontSize: 10, marginTop: 5, textTransform: "uppercase", letterSpacing: "0.06em" }}>
         {s.label} style
       </div>
-      <Handle type="target" position={Position.Left} style={{ background: "#248046", border: "2px solid #252525", width: 12, height: 12 }} />
-      <Handle type="source" position={Position.Right} style={{ background: "#f59e0b", border: "2px solid #252525", width: 12, height: 12 }} />
+      <Handle type="target" position={Position.Left} style={{ background: "#248046", border: "2px solid #1a1a1a", width: 10, height: 10 }} />
+      <Handle type="source" position={Position.Right} style={{ background: "#f59e0b", border: "2px solid #1a1a1a", width: 10, height: 10 }} />
     </NodeWrapper>
   );
 }

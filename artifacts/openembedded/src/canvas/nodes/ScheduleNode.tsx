@@ -147,7 +147,7 @@ function ScheduleNodeComponent({ id, data }: NodeProps) {
         position={Position.Right}
         style={{
           background: isReady ? "#f59e0b" : "#3a3a3a",
-          border: "2px solid #252525",
+          border: "2px solid #1a1a1a",
           width: 12,
           height: 12,
         }}

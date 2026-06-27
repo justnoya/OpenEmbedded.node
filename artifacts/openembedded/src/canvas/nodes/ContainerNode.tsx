@@ -10,32 +10,32 @@ function ContainerNodeComponent({ id, data }: NodeProps) {
       ? `#${(data.accent_color as number).toString(16).padStart(6, "0")}`
       : null;
   return (
-    <NodeWrapper id={id} typeName="Container · 17" icon={<Box size={18} />} accentColor="#8b5cf6" nodeClass="main">
+    <NodeWrapper id={id} typeName="Container" icon={<Box size={14} />} accentColor="#8b5cf6" nodeClass="main">
       <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
         {accentHex && (
           <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
             <div
               style={{
-                width: 10, height: 10, borderRadius: 3,
+                width: 8, height: 8, borderRadius: 2,
                 background: accentHex,
-                border: "1px solid rgba(255,255,255,0.12)",
+                border: "1px solid rgba(255,255,255,0.1)",
                 flexShrink: 0,
               }}
             />
-            <span style={{ color: "#666666", fontSize: 11, fontFamily: "monospace" }}>{accentHex}</span>
+            <span style={{ color: "#505050", fontSize: 10, fontFamily: "monospace" }}>{accentHex}</span>
           </div>
         )}
         {!!data.spoiler && (
-          <span style={{ background: "rgba(254,231,92,0.1)", color: "#d29922", fontSize: 10, fontWeight: 600, padding: "1px 6px", borderRadius: 4, letterSpacing: "0.04em" }}>
+          <span style={{ background: "rgba(254,231,92,0.08)", color: "#d29922", fontSize: 9, fontWeight: 600, padding: "1px 5px", borderRadius: 3, letterSpacing: "0.04em" }}>
             SPOILER
           </span>
         )}
         {!accentHex && !data.spoiler && (
-          <span style={{ color: "#404040", fontSize: 11 }}>Root wrapper</span>
+          <span style={{ color: "#333", fontSize: 10 }}>Components V2 wrapper</span>
         )}
       </div>
-      <Handle type="target" position={Position.Left} style={{ background: "#3fb950", border: "2px solid #252525", width: 12, height: 12 }} />
-      <Handle type="source" position={Position.Right} style={{ background: "#8b5cf6", border: "2px solid #252525", width: 12, height: 12 }} />
+      <Handle type="target" position={Position.Left} style={{ background: "#3fb950", border: "2px solid #1a1a1a", width: 10, height: 10 }} />
+      <Handle type="source" position={Position.Right} style={{ background: "#8b5cf6", border: "2px solid #1a1a1a", width: 10, height: 10 }} />
     </NodeWrapper>
   );
 }

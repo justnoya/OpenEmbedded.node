@@ -5,7 +5,7 @@ import {
   Box, AlignJustify, AlignLeft, Image, LayoutGrid, Minus,
   LayoutList, MousePointerClick, ListFilter, User, Shield,
   AtSign, Hash, TextCursorInput, Layers, Bot, Workflow,
-  Search, Zap, MessageCircle, PanelTop, Webhook, Clock,
+  Search, Zap, MessageCircle, PanelTop, Webhook, Clock, BookMarked,
 } from "lucide-react";
 
 interface NodeDef {
@@ -33,6 +33,12 @@ const NODE_DEFS: NodeDef[] = [
     icon: <IC><Box size={15} /></IC>, componentType: 17,
     defaultData: { componentType: 17, accent_color: null, spoiler: false },
     recommended: true,
+  },
+  {
+    type: "embedd", label: "Embed", alias: "Discord embed",
+    description: "A classic Discord embed block with title, description, and color. Connects like Container.",
+    icon: <IC color="#5865F2"><BookMarked size={15} /></IC>, componentType: 0,
+    defaultData: { componentType: 0, title: "", description: "", color: 0x5865f2, author: "", footer: "" },
   },
   {
     type: "section", label: "Section", alias: "Row layout",
@@ -166,7 +172,7 @@ const NODE_DEFS: NodeDef[] = [
 ];
 
 const GROUPS = [
-  { label: "Layout",          types: ["container", "section"],                                                          hint: "Start here" },
+  { label: "Layout",          types: ["container", "embedd", "section"],                                              hint: "Start here" },
   { label: "Content",         types: ["textDisplay", "thumbnail", "mediaGallery", "separator"],                        hint: null },
   { label: "Interactive",     types: ["actionRow", "button", "selectMenu", "userSelect", "roleSelect", "mentionableSelect", "channelSelect"], hint: null },
   { label: "Modals",          types: ["textInput"],                                                                     hint: "For modal dialogs" },

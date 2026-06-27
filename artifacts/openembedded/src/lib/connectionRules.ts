@@ -2,16 +2,18 @@
 /**
  * Node classification and connection validation rules.
  *
- * Main nodes        — can parent other nodes (container, section, actionRow)
+ * Main nodes        — can parent other nodes (container, section, actionRow, embedd)
  * Sub-nodes         — leaf/content components (cannot parent anything structurally)
  * Interactive nodes — sub-nodes that also emit interaction edges (button, selects)
  * Root nodes        — standalone, no parent or children (embed, bot, openembedded)
+ * Relay nodes       — accept incoming AND emit outgoing connections (webhook)
  */
 
-export type NodeClass = "main" | "sub" | "interactive" | "root";
+export type NodeClass = "main" | "sub" | "interactive" | "root" | "relay";
 
 export const NODE_CLASSES: Record<string, NodeClass> = {
   container:         "main",
+  embedd:            "main",
   section:           "main",
   actionRow:         "main",
   modal:             "main",
@@ -20,6 +22,7 @@ export const NODE_CLASSES: Record<string, NodeClass> = {
   openembedded:      "root",
   message:           "root",
   schedule:          "root",
+  webhook:           "relay",
   textDisplay:       "sub",
   thumbnail:         "sub",
   mediaGallery:      "sub",
@@ -38,6 +41,7 @@ export const NODE_CLASSES: Record<string, NodeClass> = {
  */
 export const ALLOWED_CHILDREN: Record<string, string[]> = {
   container: ["section", "textDisplay", "thumbnail", "mediaGallery", "separator", "actionRow"],
+  embedd:    ["textDisplay", "thumbnail", "separator"],
   section:   ["textDisplay", "thumbnail"],
   actionRow: ["button", "selectMenu", "textInput", "userSelect", "roleSelect", "mentionableSelect", "channelSelect"],
   modal:     ["actionRow"],
@@ -53,7 +57,7 @@ const INTERACTION_SOURCES = new Set([
 /**
  * Target node types that can receive interaction edges (the "response" panels).
  */
-const INTERACTION_TARGETS = new Set(["container", "embed", "section", "modal", "message"]);
+const INTERACTION_TARGETS = new Set(["container", "embedd", "embed", "section", "modal", "message"]);
 
 /** Returns true if a structural (parent-child) connection is valid. */
 export function isValidNodeConnection(sourceType: string, targetType: string): boolean {
@@ -61,13 +65,27 @@ export function isValidNodeConnection(sourceType: string, targetType: string): b
 }
 
 /**
- * Target node types that a bot/openembedded node can send to.
+ * Target node types that a bot/openembedded/schedule/webhook node can send to.
  */
-const BOT_SEND_TARGETS = new Set(["container", "embed", "message"]);
+const BOT_SEND_TARGETS = new Set(["container", "embedd", "embed", "message"]);
 
-/** Returns true if a bot "send" connection is valid (Bot, OpenEmbedded, or Schedule → Container or Embed). */
+/**
+ * Target node types that a schedule can connect to (extends bot targets to include webhook relay).
+ */
+const SCHEDULE_SEND_TARGETS = new Set(["container", "embedd", "embed", "message", "webhook"]);
+
+/** Returns true if a bot "send" connection is valid. */
 export function isBotSendConnection(sourceType: string, targetType: string): boolean {
-  return (sourceType === "bot" || sourceType === "openembedded" || sourceType === "schedule") && BOT_SEND_TARGETS.has(targetType);
+  if (sourceType === "bot" || sourceType === "openembedded") {
+    return BOT_SEND_TARGETS.has(targetType);
+  }
+  if (sourceType === "schedule") {
+    return SCHEDULE_SEND_TARGETS.has(targetType);
+  }
+  if (sourceType === "webhook") {
+    return BOT_SEND_TARGETS.has(targetType);
+  }
+  return false;
 }
 
 /** Returns true if an interaction (on-click flow) connection is valid. */
@@ -76,13 +94,14 @@ export function isInteractionConnection(sourceType: string, targetType: string):
 }
 
 const FRIENDLY_NAMES: Record<string, string> = {
-  container: "Container", section: "Section", textDisplay: "Text block",
-  thumbnail: "Thumbnail", mediaGallery: "Media Gallery", separator: "Separator",
+  container: "Container", embedd: "Embed", section: "Section",
+  textDisplay: "Text block", thumbnail: "Thumbnail",
+  mediaGallery: "Media Gallery", separator: "Separator",
   actionRow: "Action Row", button: "Button", selectMenu: "Dropdown",
   textInput: "Text field", userSelect: "User Select", roleSelect: "Role Select",
   mentionableSelect: "Mentionable Select", channelSelect: "Channel Select",
-  embed: "Embed", bot: "Bot", openembedded: "OpenEmbedded",
-  message: "Message", modal: "Modal", schedule: "Schedule",
+  embed: "Legacy Embed", bot: "Bot", openembedded: "OpenEmbedded",
+  message: "Message", modal: "Modal", schedule: "Schedule", webhook: "Webhook",
 };
 
 function friendly(type: string) {
@@ -141,7 +160,8 @@ export const NODE_CLASS_LABELS: Record<NodeClass, string> = {
   main:        "LAYOUT",
   sub:         "COMPONENT",
   interactive: "INTERACTIVE",
-  root:        "EMBED",
+  root:        "TRIGGER",
+  relay:       "RELAY",
 };
 
 /** Accent color for the class badge. */
@@ -150,4 +170,5 @@ export const NODE_CLASS_COLORS: Record<NodeClass, string> = {
   sub:         "#3b82f6",
   interactive: "#f59e0b",
   root:        "#f59e0b",
+  relay:       "#10b981",
 };

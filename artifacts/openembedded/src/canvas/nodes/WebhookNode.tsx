@@ -2,7 +2,7 @@
 import { memo, useRef, useState } from "react";
 import { Handle, Position, NodeProps, useReactFlow } from "@xyflow/react";
 import { NodeWrapper } from "./NodeWrapper.js";
-import { Webhook, CheckCircle2, AlertCircle, Send, Loader2 } from "lucide-react";
+import { Webhook, CheckCircle2, AlertCircle, ArrowRight, Loader2 } from "lucide-react";
 
 const DISCORD_WEBHOOK_RE =
   /^https:\/\/(?:ptb\.|canary\.)?discord(?:app)?\.com\/api\/webhooks\/(\d+)\/([^/?#\s]+)/;
@@ -33,9 +33,7 @@ function WebhookNodeComponent({ id, data }: NodeProps) {
       const res = await fetch(
         `https://discord.com/api/webhooks/${match[1]}/${match[2]}`,
       );
-      if (!res.ok) {
-        throw new Error(`Discord returned ${res.status}`);
-      }
+      if (!res.ok) throw new Error(`Discord returned ${res.status}`);
       const wh = (await res.json()) as {
         id: string;
         name: string;
@@ -66,7 +64,6 @@ function WebhookNodeComponent({ id, data }: NodeProps) {
       webhookAvatar: null,
     });
     setFetchError(null);
-
     if (debounceRef.current) clearTimeout(debounceRef.current);
     if (url.trim().length > 0) {
       debounceRef.current = setTimeout(() => fetchWebhookInfo(url), 900);
@@ -76,24 +73,24 @@ function WebhookNodeComponent({ id, data }: NodeProps) {
   return (
     <NodeWrapper
       id={id}
-      typeName="Webhook · Advanced"
-      icon={<Webhook size={18} />}
+      typeName="Webhook"
+      icon={<Webhook size={14} />}
       accentColor="#5865F2"
-      nodeClass="root"
-      showSendHandle
+      nodeClass="relay"
+      showBothHandles
     >
-      <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
         {/* URL input */}
         <div>
           <label
             style={{
               display: "block",
-              color: "#484848",
+              color: "#3d3d3d",
               fontSize: 9,
               fontWeight: 700,
               textTransform: "uppercase",
               letterSpacing: "0.07em",
-              marginBottom: 4,
+              marginBottom: 3,
             }}
           >
             Webhook URL
@@ -107,12 +104,12 @@ function WebhookNodeComponent({ id, data }: NodeProps) {
             style={{
               width: "100%",
               boxSizing: "border-box",
-              background: "rgba(255,255,255,0.04)",
-              border: `1px solid ${fetchError && webhookUrl ? "rgba(248,81,73,0.4)" : "rgba(255,255,255,0.09)"}`,
-              borderRadius: 6,
-              color: "#e0e0e0",
+              background: "rgba(255,255,255,0.03)",
+              border: `1px solid ${fetchError && webhookUrl ? "rgba(248,81,73,0.35)" : "rgba(255,255,255,0.07)"}`,
+              borderRadius: 5,
+              color: "#d0d0d0",
               fontSize: 10,
-              padding: "5px 8px",
+              padding: "5px 7px",
               outline: "none",
               fontFamily: "inherit",
               transition: "border-color 0.12s",
@@ -120,109 +117,69 @@ function WebhookNodeComponent({ id, data }: NodeProps) {
           />
         </div>
 
-        {/* Status row */}
+        {/* Status */}
         {loading && (
-          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-            <Loader2
-              size={11}
-              color="#818cf8"
-              style={{ animation: "webhook-spin 1s linear infinite" }}
-            />
-            <span style={{ color: "#818cf8", fontSize: 11 }}>Fetching webhook…</span>
+          <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+            <Loader2 size={10} color="#818cf8" style={{ animation: "wh-spin 1s linear infinite" }} />
+            <span style={{ color: "#818cf8", fontSize: 10 }}>Fetching…</span>
           </div>
         )}
 
         {!loading && connected && webhookName && (
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
             {webhookAvatar ? (
-              <img
-                src={webhookAvatar}
-                alt=""
-                style={{ width: 26, height: 26, borderRadius: "50%", flexShrink: 0 }}
-              />
+              <img src={webhookAvatar} alt="" style={{ width: 20, height: 20, borderRadius: "50%", flexShrink: 0 }} />
             ) : (
-              <div
-                style={{
-                  width: 26,
-                  height: 26,
-                  borderRadius: "50%",
-                  background: "#5865f2",
-                  flexShrink: 0,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontSize: 13,
-                }}
-              >
+              <div style={{ width: 20, height: 20, borderRadius: "50%", background: "#5865f2", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11 }}>
                 🪝
               </div>
             )}
             <div style={{ minWidth: 0, flex: 1 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                <CheckCircle2 size={11} color="#3fb950" />
-                <span
-                  style={{
-                    color: "#3fb950",
-                    fontSize: 11,
-                    fontWeight: 600,
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    whiteSpace: "nowrap",
-                    maxWidth: 140,
-                  }}
-                >
+                <CheckCircle2 size={10} color="#3fb950" />
+                <span style={{ color: "#3fb950", fontSize: 10, fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: 130 }}>
                   {webhookName}
                 </span>
               </div>
-              <div style={{ color: "#2e4040", fontSize: 9, marginTop: 1 }}>Connected</div>
             </div>
           </div>
         )}
 
         {!loading && fetchError && webhookUrl.trim().length > 0 && (
-          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-            <AlertCircle size={11} color="#f85149" />
-            <span style={{ color: "#f85149", fontSize: 11 }}>{fetchError}</span>
+          <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+            <AlertCircle size={10} color="#f85149" />
+            <span style={{ color: "#f85149", fontSize: 10 }}>{fetchError}</span>
           </div>
         )}
 
         {!loading && !connected && !fetchError && webhookUrl.trim().length === 0 && (
-          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-            <AlertCircle size={12} color="#484848" />
-            <span style={{ color: "#484848", fontSize: 11 }}>Paste a webhook URL above</span>
+          <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+            <AlertCircle size={10} color="#333" />
+            <span style={{ color: "#3d3d3d", fontSize: 10 }}>Paste a webhook URL above</span>
           </div>
         )}
 
-        {/* Send hint */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 5,
-            marginTop: 2,
-            paddingTop: 6,
-            borderTop: "1px solid rgba(255,255,255,0.04)",
-          }}
-        >
-          <Send size={9} color="#3fb950" />
-          <span style={{ color: "#2e4a32", fontSize: 10 }}>
-            Drag right handle → Container or Embed
-          </span>
+        {/* Connection hint */}
+        <div style={{ display: "flex", alignItems: "center", gap: 4, paddingTop: 4, borderTop: "1px solid rgba(255,255,255,0.04)" }}>
+          <ArrowRight size={8} color="#3fb950" />
+          <span style={{ color: "#2a3d2a", fontSize: 9 }}>Connect to Container or Embed →</span>
         </div>
       </div>
 
+      {/* Target handle — accepts connections from Schedule etc. */}
+      <Handle
+        type="target"
+        position={Position.Left}
+        style={{ background: "#3fb950", border: "2px solid #1a1a1a", width: 10, height: 10 }}
+      />
+      {/* Source handle — sends to Container / Embedd */}
       <Handle
         type="source"
         position={Position.Right}
-        style={{
-          background: "#3fb950",
-          border: "2px solid #252525",
-          width: 12,
-          height: 12,
-        }}
+        style={{ background: "#5865F2", border: "2px solid #1a1a1a", width: 10, height: 10 }}
       />
 
-      <style>{`@keyframes webhook-spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}`}</style>
+      <style>{`@keyframes wh-spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}`}</style>
     </NodeWrapper>
   );
 }

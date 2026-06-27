@@ -10,7 +10,7 @@ function EmbedNodeComponent({ id, data }: NodeProps) {
   const accentHex = color != null ? `#${color.toString(16).padStart(6, "0")}` : "#5865F2";
 
   return (
-    <NodeWrapper id={id} typeName="Embed (Legacy)" icon={<MessageSquare size={18} />} accentColor={accentHex} nodeClass="root">
+    <NodeWrapper id={id} typeName="Embed (Legacy)" icon={<MessageSquare size={14} />} accentColor={accentHex} nodeClass="root">
       <div style={{ display: "flex", alignItems: "stretch", gap: 8 }}>
         <div style={{ width: 2, borderRadius: 2, background: accentHex, flexShrink: 0, minHeight: 24 }} />
         <div>
@@ -24,8 +24,8 @@ function EmbedNodeComponent({ id, data }: NodeProps) {
           )}
         </div>
       </div>
-      <Handle type="target" position={Position.Left} style={{ background: "#3fb950", border: "2px solid #252525", width: 12, height: 12 }} />
-      <Handle type="source" position={Position.Right} style={{ background: accentHex, border: "2px solid #252525", width: 12, height: 12 }} />
+      <Handle type="target" position={Position.Left} style={{ background: "#3fb950", border: "2px solid #1a1a1a", width: 10, height: 10 }} />
+      <Handle type="source" position={Position.Right} style={{ background: accentHex, border: "2px solid #1a1a1a", width: 10, height: 10 }} />
     </NodeWrapper>
   );
 }

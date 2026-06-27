@@ -2,8 +2,8 @@
 import { ReactNode } from "react";
 import { useStore } from "@xyflow/react";
 import { useGraphStore } from "../../lib/graphStore.js";
-import { NodeClass, NODE_CLASS_LABELS, NODE_CLASS_COLORS } from "../../lib/connectionRules.js";
-import { Trash2 } from "lucide-react";
+import { NodeClass } from "../../lib/connectionRules.js";
+import { X } from "lucide-react";
 
 interface NodeWrapperProps {
   id: string;
@@ -13,12 +13,20 @@ interface NodeWrapperProps {
   accentColor: string;
   nodeClass?: NodeClass;
   showInteractionHandle?: boolean;
-  /** When true (bot nodes), show the right (source) handle but hide the left (target) handle. */
   showSendHandle?: boolean;
+  showBothHandles?: boolean;
 }
 
 export function NodeWrapper({
-  id, children, typeName, icon, accentColor, nodeClass = "sub", showInteractionHandle = false, showSendHandle = false,
+  id,
+  children,
+  typeName,
+  icon,
+  accentColor,
+  nodeClass = "sub",
+  showInteractionHandle = false,
+  showSendHandle = false,
+  showBothHandles = false,
 }: NodeWrapperProps) {
   const selectedNodeId = useGraphStore((s) => s.selectedNodeId);
   const setSelectedNode = useGraphStore((s) => s.setSelectedNode);
@@ -27,31 +35,27 @@ export function NodeWrapper({
   const connectionToNodeId = useStore((s) => s.connection?.toNode?.id);
   const isConnectionTarget = connectionToNodeId === id;
 
-  const badgeColor = NODE_CLASS_COLORS[nodeClass];
-  const badgeLabel = NODE_CLASS_LABELS[nodeClass];
-
-  /* Parse "Action Row · 1" → label="Action Row", subtitle="1" */
   const dotIdx = typeName.indexOf(" · ");
   const label = dotIdx >= 0 ? typeName.slice(0, dotIdx) : typeName;
   const subtitle = dotIdx >= 0 ? typeName.slice(dotIdx + 3) : null;
 
   let borderColor: string;
-  let shadow: string;
+  let boxShadow: string;
 
   if (isConnectionTarget) {
-    borderColor = "rgba(255,255,255,0.22)";
-    shadow = `0 0 0 2px rgba(255,255,255,0.05)`;
+    borderColor = `${accentColor}90`;
+    boxShadow = `0 0 0 2px ${accentColor}25, 0 4px 20px rgba(0,0,0,0.5)`;
   } else if (isSelected) {
-    borderColor = accentColor + "80";
-    shadow = `0 0 0 2px ${accentColor}18, 0 4px 24px rgba(0,0,0,0.55)`;
+    borderColor = `${accentColor}70`;
+    boxShadow = `0 0 0 1px ${accentColor}20, 0 4px 20px rgba(0,0,0,0.5)`;
   } else {
-    borderColor = "rgba(255,255,255,0.08)";
-    shadow = "0 2px 10px rgba(0,0,0,0.45)";
+    borderColor = "rgba(255,255,255,0.07)";
+    boxShadow = "0 1px 6px rgba(0,0,0,0.4)";
   }
 
   return (
     <div style={{ position: "relative" }}>
-      {/* Delete tooltip button — visible when selected */}
+      {/* Delete button — appears when selected */}
       {isSelected && (
         <button
           onClick={(e) => {
@@ -61,36 +65,34 @@ export function NodeWrapper({
           title="Delete node"
           style={{
             position: "absolute",
-            top: -32,
+            top: -28,
             right: 0,
             zIndex: 10,
             display: "flex",
             alignItems: "center",
-            gap: 5,
-            background: "rgba(30,30,30,0.96)",
-            border: "1px solid rgba(248,81,73,0.35)",
-            borderRadius: 7,
+            gap: 4,
+            background: "#1a1a1a",
+            border: "1px solid rgba(248,81,73,0.3)",
+            borderRadius: 6,
             color: "#f85149",
             fontSize: 11,
             fontWeight: 600,
-            padding: "4px 9px",
+            padding: "3px 8px",
             cursor: "pointer",
-            backdropFilter: "blur(8px)",
-            WebkitBackdropFilter: "blur(8px)",
-            boxShadow: "0 2px 10px rgba(0,0,0,0.5)",
-            transition: "background 0.12s, border-color 0.12s",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.5)",
             whiteSpace: "nowrap",
+            transition: "background 0.1s, border-color 0.1s",
           }}
           onMouseEnter={(e) => {
-            (e.currentTarget as HTMLElement).style.background = "rgba(248,81,73,0.12)";
-            (e.currentTarget as HTMLElement).style.borderColor = "rgba(248,81,73,0.6)";
+            (e.currentTarget as HTMLElement).style.background = "rgba(248,81,73,0.1)";
+            (e.currentTarget as HTMLElement).style.borderColor = "rgba(248,81,73,0.55)";
           }}
           onMouseLeave={(e) => {
-            (e.currentTarget as HTMLElement).style.background = "rgba(30,30,30,0.96)";
-            (e.currentTarget as HTMLElement).style.borderColor = "rgba(248,81,73,0.35)";
+            (e.currentTarget as HTMLElement).style.background = "#1a1a1a";
+            (e.currentTarget as HTMLElement).style.borderColor = "rgba(248,81,73,0.3)";
           }}
         >
-          <Trash2 size={12} />
+          <X size={10} strokeWidth={2.5} />
           Delete
         </button>
       )}
@@ -99,13 +101,13 @@ export function NodeWrapper({
         data-testid={`node-${id}`}
         onClick={() => setSelectedNode(id)}
         style={{
-          background: "#252525",
+          background: "#1a1a1a",
           border: `1px solid ${borderColor}`,
-          borderRadius: 12,
-          minWidth: 210,
+          borderRadius: 8,
+          minWidth: 220,
           cursor: "pointer",
           position: "relative",
-          boxShadow: shadow,
+          boxShadow,
           transition: "border-color 0.12s, box-shadow 0.12s",
           overflow: "hidden",
           display: "flex",
@@ -116,43 +118,58 @@ export function NodeWrapper({
         {isConnectionTarget && (
           <div
             style={{
-              position: "absolute", inset: -4, borderRadius: 16,
-              border: "1px solid rgba(255,255,255,0.14)",
+              position: "absolute", inset: -3, borderRadius: 10,
+              border: `1px solid ${accentColor}40`,
               pointerEvents: "none",
-              animation: "pulseRing 0.65s ease-in-out infinite alternate",
+              animation: "pulseRing 0.7s ease-in-out infinite alternate",
             }}
           />
         )}
 
-        {/* Handle visibility overrides */}
+        {/* Left accent bar */}
+        <div
+          style={{
+            position: "absolute",
+            left: 0, top: 0, bottom: 0,
+            width: 3,
+            background: isSelected ? accentColor : `${accentColor}70`,
+            borderRadius: "8px 0 0 8px",
+            transition: "background 0.12s",
+          }}
+        />
+
+        {/* Handle visibility rules */}
         {nodeClass === "sub" && (
           <style>{`[data-testid="node-${id}"] .react-flow__handle-right{opacity:0!important;pointer-events:none!important}`}</style>
         )}
         {nodeClass === "interactive" && !showInteractionHandle && (
           <style>{`[data-testid="node-${id}"] .react-flow__handle-right{opacity:0!important;pointer-events:none!important}`}</style>
         )}
-        {nodeClass === "root" && !showSendHandle && (
+        {nodeClass === "root" && !showSendHandle && !showBothHandles && (
           <style>{`[data-testid="node-${id}"] .react-flow__handle{opacity:0!important;pointer-events:none!important}`}</style>
         )}
-        {nodeClass === "root" && showSendHandle && (
+        {nodeClass === "root" && showSendHandle && !showBothHandles && (
           <style>{`[data-testid="node-${id}"] .react-flow__handle-left{opacity:0!important;pointer-events:none!important}`}</style>
         )}
 
         {/* ── Header ── */}
         <div
           style={{
-            padding: "12px 13px 11px",
-            display: "flex", alignItems: "center", gap: 11,
+            padding: "10px 12px 10px 16px",
+            display: "flex",
+            alignItems: "center",
+            gap: 9,
           }}
         >
-          {/* Large icon box */}
+          {/* Icon */}
           <div
             style={{
-              width: 36, height: 36, borderRadius: 9,
-              background: accentColor + "22",
-              border: `1px solid ${accentColor}35`,
+              width: 28, height: 28, borderRadius: 7,
+              background: `${accentColor}18`,
+              border: `1px solid ${accentColor}28`,
               display: "flex", alignItems: "center", justifyContent: "center",
-              color: "rgba(255,255,255,0.88)", flexShrink: 0,
+              color: accentColor,
+              flexShrink: 0,
             }}
           >
             {icon}
@@ -162,9 +179,14 @@ export function NodeWrapper({
           <div style={{ flex: 1, minWidth: 0 }}>
             <div
               style={{
-                color: "#e2e2e2", fontSize: 13, fontWeight: 600,
-                lineHeight: 1.25, letterSpacing: "-0.01em",
-                overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                color: "#e0e0e0",
+                fontSize: 12.5,
+                fontWeight: 600,
+                lineHeight: 1.25,
+                letterSpacing: "-0.01em",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
               }}
             >
               {label}
@@ -172,40 +194,38 @@ export function NodeWrapper({
             {subtitle && (
               <div
                 style={{
-                  color: "#3d3d3d", fontSize: 10, fontWeight: 500,
-                  marginTop: 2, letterSpacing: "0.02em",
+                  color: "#404040",
+                  fontSize: 10,
+                  fontWeight: 500,
+                  marginTop: 1.5,
+                  letterSpacing: "0.01em",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
                 }}
               >
-                {isNaN(Number(subtitle)) ? subtitle : `Component ${subtitle}`}
+                {isNaN(Number(subtitle)) ? subtitle : `#${subtitle}`}
               </div>
             )}
           </div>
 
-          {/* Node class badge */}
-          <span
+          {/* Status dot */}
+          <div
             style={{
-              color: badgeColor, fontSize: 8, fontWeight: 700,
-              opacity: 0.45, textTransform: "uppercase",
-              letterSpacing: "0.07em", flexShrink: 0,
+              width: 6, height: 6, borderRadius: "50%",
+              background: isSelected ? accentColor : `${accentColor}40`,
+              flexShrink: 0,
+              boxShadow: isSelected ? `0 0 5px ${accentColor}80` : "none",
+              transition: "background 0.12s, box-shadow 0.12s",
             }}
-          >
-            {badgeLabel}
-          </span>
-
-          {/* Selected indicator dot */}
-          {isSelected && (
-            <div
-              style={{
-                width: 5, height: 5, borderRadius: "50%",
-                background: accentColor, flexShrink: 0,
-                boxShadow: `0 0 6px ${accentColor}`,
-              }}
-            />
-          )}
+          />
         </div>
 
+        {/* Divider */}
+        <div style={{ height: 1, background: "rgba(255,255,255,0.04)", marginLeft: 16 }} />
+
         {/* ── Body ── */}
-        <div style={{ padding: "0 13px 12px" }}>
+        <div style={{ padding: "9px 12px 10px 16px" }}>
           {children}
         </div>
       </div>

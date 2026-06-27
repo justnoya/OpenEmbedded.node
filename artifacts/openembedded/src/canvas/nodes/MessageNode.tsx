@@ -9,7 +9,7 @@ function MessageNodeComponent({ id, data }: NodeProps) {
   const username = (data.username as string) ?? "";
 
   return (
-    <NodeWrapper id={id} typeName="Message" icon={<MessageCircle size={18} />} accentColor="#10b981" nodeClass="root" showSendHandle>
+    <NodeWrapper id={id} typeName="Message" icon={<MessageCircle size={14} />} accentColor="#10b981" nodeClass="root" showSendHandle>
       <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
         {username && (
           <div style={{ color: "#10b981", fontSize: 11, fontWeight: 600 }}>
@@ -35,8 +35,8 @@ function MessageNodeComponent({ id, data }: NodeProps) {
           </span>
         )}
       </div>
-      <Handle type="target" position={Position.Left} style={{ background: "#3fb950", border: "2px solid #252525", width: 12, height: 12 }} />
-      <Handle type="source" position={Position.Right} style={{ background: "#10b981", border: "2px solid #252525", width: 12, height: 12 }} />
+      <Handle type="target" position={Position.Left} style={{ background: "#3fb950", border: "2px solid #1a1a1a", width: 10, height: 10 }} />
+      <Handle type="source" position={Position.Right} style={{ background: "#10b981", border: "2px solid #1a1a1a", width: 10, height: 10 }} />
     </NodeWrapper>
   );
 }

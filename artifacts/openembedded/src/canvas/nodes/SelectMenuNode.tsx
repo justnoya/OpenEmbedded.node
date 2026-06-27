@@ -9,7 +9,7 @@ function SelectMenuNodeComponent({ id, data }: NodeProps) {
   const options = (data.options as { label: string; value: string }[]) ?? [];
 
   return (
-    <NodeWrapper id={id} typeName="String Select · 3" icon={<ChevronDown size={18} />} accentColor="#f97316" nodeClass="interactive" showInteractionHandle>
+    <NodeWrapper id={id} typeName="String Select · 3" icon={<ChevronDown size={14} />} accentColor="#f97316" nodeClass="interactive" showInteractionHandle>
       <div
         style={{
           display: "flex", alignItems: "center", justifyContent: "space-between",
@@ -27,8 +27,8 @@ function SelectMenuNodeComponent({ id, data }: NodeProps) {
       <div style={{ color: "#404040", fontSize: 10, marginTop: 5 }}>
         {options.length} option{options.length !== 1 ? "s" : ""}
       </div>
-      <Handle type="target" position={Position.Left} style={{ background: "#3fb950", border: "2px solid #252525", width: 12, height: 12 }} />
-      <Handle type="source" position={Position.Right} style={{ background: "#f59e0b", border: "2px solid #252525", width: 12, height: 12 }} />
+      <Handle type="target" position={Position.Left} style={{ background: "#3fb950", border: "2px solid #1a1a1a", width: 10, height: 10 }} />
+      <Handle type="source" position={Position.Right} style={{ background: "#f59e0b", border: "2px solid #1a1a1a", width: 10, height: 10 }} />
     </NodeWrapper>
   );
 }

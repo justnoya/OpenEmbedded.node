@@ -83,7 +83,7 @@ function OpenEmbeddedNodeComponent({ id, data }: NodeProps) {
         position={Position.Right}
         style={{
           background: isReady ? "#3fb950" : "#3a3a3a",
-          border: "2px solid #252525",
+          border: "2px solid #1a1a1a",
           width: 12,
           height: 12,
         }}

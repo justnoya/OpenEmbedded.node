@@ -7,7 +7,7 @@ import { Type } from "lucide-react";
 function TextDisplayNodeComponent({ id, data }: NodeProps) {
   const content = (data.content as string) ?? "";
   return (
-    <NodeWrapper id={id} typeName="Text Display · 10" icon={<Type size={18} />} accentColor="#3b82f6">
+    <NodeWrapper id={id} typeName="Text Display · 10" icon={<Type size={14} />} accentColor="#3b82f6">
       <div
         style={{
           color: "#c0c0c0", fontSize: 12, lineHeight: 1.55,
@@ -18,8 +18,8 @@ function TextDisplayNodeComponent({ id, data }: NodeProps) {
       >
         {content || <span style={{ color: "#404040", fontStyle: "italic" }}>Empty text…</span>}
       </div>
-      <Handle type="target" position={Position.Left} style={{ background: "#3fb950", border: "2px solid #252525", width: 12, height: 12 }} />
-      <Handle type="source" position={Position.Right} style={{ background: "#3b82f6", border: "2px solid #252525", width: 12, height: 12 }} />
+      <Handle type="target" position={Position.Left} style={{ background: "#3fb950", border: "2px solid #1a1a1a", width: 10, height: 10 }} />
+      <Handle type="source" position={Position.Right} style={{ background: "#3b82f6", border: "2px solid #1a1a1a", width: 10, height: 10 }} />
     </NodeWrapper>
   );
 }
