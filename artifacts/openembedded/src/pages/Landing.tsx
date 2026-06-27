@@ -371,7 +371,7 @@ export function Landing() {
               onMouseLeave={blurpleBtn.out}
             >
               <DiscordIcon size={16} />
-              Start Building Free
+              Start Building
             </button>
             <a
               href="/docs"
@@ -390,10 +390,6 @@ export function Landing() {
             </a>
           </div>
 
-          {/* Trust strip */}
-          <p style={{ marginTop: 22, fontSize: 11, color: C.t4, letterSpacing: "0.02em" }}>
-            Free · No credit card · Sign in with Discord
-          </p>
         </div>
 
         {/* Product mockup */}
@@ -668,10 +664,10 @@ export function Landing() {
             padding: "80px 64px",
             textAlign: "center",
             background: C.panel,
+            backgroundImage: "url(/cta-bg.png)",
+            backgroundSize: "cover",
+            backgroundPosition: "center",
           }}>
-            <p style={{ margin: "0 0 20px", fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: C.t4 }}>
-              Free forever · No credit card · Discord OAuth
-            </p>
             <h2 style={{ fontSize: "clamp(32px, 5vw, 60px)", fontWeight: 900, letterSpacing: "-0.048em", color: C.t1, margin: "0 0 20px", lineHeight: 1.0 }}>
               Your next Discord message<br />is one canvas away.
             </h2>
@@ -685,7 +681,7 @@ export function Landing() {
               onMouseLeave={blurpleBtn.out}
             >
               <DiscordIcon size={17} />
-              Get Started Free
+              Get Started
             </button>
           </div>
         </div>
@@ -716,11 +712,45 @@ export function Landing() {
       <style>{`
         * { box-sizing: border-box; }
         @media (max-width: 720px) {
-          .oe-bento { grid-template-columns: 1fr !important; border: none !important; }
-          .oe-bento-wide { grid-column: span 1 !important; border-right: none !important; }
+          .oe-bento {
+            grid-template-columns: 1fr !important;
+            border: none !important;
+            overflow: visible !important;
+            border-radius: 0 !important;
+            gap: 8px !important;
+          }
+          .oe-bento > div {
+            border-right: 1px solid rgba(255,255,255,0.07) !important;
+            border-bottom: 1px solid rgba(255,255,255,0.07) !important;
+            border-radius: 12px !important;
+          }
+          .oe-bento-wide {
+            grid-column: span 1 !important;
+          }
           .oe-feat-header { grid-template-columns: 1fr !important; }
-          .oe-compare-grid { grid-template-columns: 1fr !important; }
-          .oe-steps { grid-template-columns: 1fr !important; }
+          .oe-compare-grid {
+            grid-template-columns: 1fr !important;
+            overflow: visible !important;
+            border: none !important;
+            border-radius: 0 !important;
+            gap: 8px !important;
+          }
+          .oe-compare-grid > div {
+            border-right: 1px solid rgba(255,255,255,0.07) !important;
+            border-radius: 12px !important;
+          }
+          .oe-steps {
+            grid-template-columns: 1fr !important;
+            overflow: visible !important;
+            border: none !important;
+            border-radius: 0 !important;
+            gap: 8px !important;
+          }
+          .oe-steps > div {
+            border-right: none !important;
+            border-radius: 12px !important;
+            border: 1px solid rgba(255,255,255,0.07) !important;
+          }
         }
       `}</style>
     </div>
