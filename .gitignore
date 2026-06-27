@@ -44,6 +44,9 @@ Thumbs.db
 .cursor/rules/nx-rules.mdc
 .github/instructions/nx.instructions.md
 
+# Vercel CJS function bundle (generated during build)
+/api/_dist/
+
 # Replit
 .cache/
 .local/
