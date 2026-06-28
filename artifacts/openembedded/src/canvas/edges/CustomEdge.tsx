@@ -12,7 +12,6 @@ export function CustomEdge({
   sourcePosition,
   targetPosition,
   selected,
-  markerEnd,
 }: EdgeProps) {
   const [edgePath, labelX, labelY] = getBezierPath({
     sourceX,
@@ -34,15 +33,30 @@ export function CustomEdge({
 
   const strokeColor = selected ? "#666666" : "#3a3a3a";
   const strokeWidth = selected ? 2 : 1.5;
+  const markerId = `arrow-custom-${id}`;
 
   return (
     <>
+      <defs>
+        <marker
+          id={markerId}
+          markerWidth="8"
+          markerHeight="8"
+          refX="6"
+          refY="3"
+          orient="auto"
+          markerUnits="strokeWidth"
+        >
+          <path d="M0,0 L0,6 L8,3 z" fill={strokeColor} />
+        </marker>
+      </defs>
+
       <path d={edgePath} fill="none" stroke="transparent" strokeWidth={18} style={{ cursor: "pointer" }} />
 
       <BaseEdge
         id={id}
         path={edgePath}
-        markerEnd={markerEnd}
+        markerEnd={`url(#${markerId})`}
         style={{
           stroke: strokeColor,
           strokeWidth,

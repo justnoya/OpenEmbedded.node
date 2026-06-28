@@ -30,14 +30,30 @@ export function InteractionEdge({
   };
 
   const strokeColor = selected ? "#666666" : "#3a3a3a";
+  const markerId = `arrow-interaction-${id}`;
 
   return (
     <>
+      <defs>
+        <marker
+          id={markerId}
+          markerWidth="8"
+          markerHeight="8"
+          refX="6"
+          refY="3"
+          orient="auto"
+          markerUnits="strokeWidth"
+        >
+          <path d="M0,0 L0,6 L8,3 z" fill={strokeColor} />
+        </marker>
+      </defs>
+
       <path d={edgePath} fill="none" stroke="transparent" strokeWidth={18} style={{ cursor: "pointer" }} />
 
       <BaseEdge
         id={id}
         path={edgePath}
+        markerEnd={`url(#${markerId})`}
         style={{
           stroke: strokeColor,
           strokeWidth: selected ? 2 : 1.5,
