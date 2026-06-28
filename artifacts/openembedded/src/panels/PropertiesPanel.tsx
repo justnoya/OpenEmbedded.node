@@ -275,7 +275,7 @@ function ScheduleProperties({ nodeId, d, updateNodeData }: {
   const amber = "#f59e0b";
 
   const focusBorder = (e: React.FocusEvent) => {
-    (e.currentTarget as HTMLElement).style.borderColor = "rgba(245,158,11,0.45)";
+    (e.currentTarget as HTMLElement).style.borderColor = "rgba(88,101,242,0.6)";
   };
   const blurBorder = (e: React.FocusEvent) => {
     (e.currentTarget as HTMLElement).style.borderColor = BORDER;

@@ -19,7 +19,7 @@ function ButtonNodeComponent({ id, data }: NodeProps) {
   const s = STYLE_MAP[style] ?? STYLE_MAP.Primary;
 
   return (
-    <NodeWrapper id={id} typeName="Button · 2" icon={<MousePointerClick size={14} />} accentColor="#5865F2" nodeClass="interactive" showInteractionHandle>
+    <NodeWrapper id={id} typeName="Button" icon={<MousePointerClick size={14} />} accentColor="#5865F2" nodeClass="interactive" showInteractionHandle>
       <div
         style={{
           display: "inline-flex", alignItems: "center",

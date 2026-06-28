@@ -7,7 +7,7 @@ import { Type } from "lucide-react";
 function TextDisplayNodeComponent({ id, data }: NodeProps) {
   const content = (data.content as string) ?? "";
   return (
-    <NodeWrapper id={id} typeName="Text Display · 10" icon={<Type size={14} />} accentColor="#3b82f6">
+    <NodeWrapper id={id} typeName="Text Display" icon={<Type size={14} />} accentColor="#3b82f6">
       <div
         style={{
           color: "#c0c0c0", fontSize: 12, lineHeight: 1.55,

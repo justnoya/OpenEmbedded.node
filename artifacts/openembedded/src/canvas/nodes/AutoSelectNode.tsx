@@ -5,10 +5,10 @@ import { NodeWrapper } from "./NodeWrapper.js";
 import { Users, Shield, AtSign, Hash, ChevronDown } from "lucide-react";
 
 const SELECT_META: Record<number, { label: string; typeName: string; icon: React.ReactNode; color: string }> = {
-  5: { label: "User Select",        typeName: "User Select · 5",        icon: <Users size={14} />,  color: "#06b6d4" },
-  6: { label: "Role Select",        typeName: "Role Select · 6",        icon: <Shield size={14} />, color: "#a855f7" },
-  7: { label: "Mentionable Select", typeName: "Mentionable · 7",        icon: <AtSign size={14} />, color: "#ec4899" },
-  8: { label: "Channel Select",     typeName: "Channel Select · 8",     icon: <Hash size={14} />,   color: "#22c55e" },
+  5: { label: "User Select",        typeName: "User Select",        icon: <Users size={14} />,  color: "#06b6d4" },
+  6: { label: "Role Select",        typeName: "Role Select",        icon: <Shield size={14} />, color: "#a855f7" },
+  7: { label: "Mentionable Select", typeName: "Mentionable Select", icon: <AtSign size={14} />, color: "#ec4899" },
+  8: { label: "Channel Select",     typeName: "Channel Select",     icon: <Hash size={14} />,   color: "#22c55e" },
 };
 
 function AutoSelectNodeComponent({ id, data }: NodeProps) {

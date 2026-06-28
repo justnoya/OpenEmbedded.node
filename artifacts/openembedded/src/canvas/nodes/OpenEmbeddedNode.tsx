@@ -2,7 +2,7 @@
 import { memo } from "react";
 import { Handle, Position, NodeProps } from "@xyflow/react";
 import { NodeWrapper } from "./NodeWrapper.js";
-import { Sparkles, CheckCircle2, AlertCircle, Hash, Server, Send, Zap } from "lucide-react";
+import { Sparkles, AlertCircle, Hash, Server, Send, Zap } from "lucide-react";
 import { useGraphStore } from "../../lib/graphStore.js";
 
 function OpenEmbeddedNodeComponent({ id, data }: NodeProps) {
@@ -23,7 +23,7 @@ function OpenEmbeddedNodeComponent({ id, data }: NodeProps) {
     <NodeWrapper
       id={id}
       typeName="OpenEmbedded"
-      icon={<Sparkles size={16} />}
+      icon={<Sparkles size={14} />}
       accentColor="#818cf8"
       nodeClass="root"
       showSendHandle
@@ -33,7 +33,7 @@ function OpenEmbeddedNodeComponent({ id, data }: NodeProps) {
           <>
             {guildName && (
               <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                <Server size={9} color="#484848" />
+                <Server size={9} color="#505050" />
                 <span style={{ color: "#606060", fontSize: 10, fontWeight: 500, maxWidth: 150, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                   {guildName}
                 </span>
@@ -50,20 +50,20 @@ function OpenEmbeddedNodeComponent({ id, data }: NodeProps) {
           </>
         ) : guilds.length > 0 ? (
           <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-            <AlertCircle size={11} color="#484848" />
-            <span style={{ color: "#484848", fontSize: 11 }}>Pick a channel in Properties</span>
+            <AlertCircle size={11} color="#505050" />
+            <span style={{ color: "#505050", fontSize: 11 }}>Pick a channel in Properties</span>
           </div>
         ) : (
           <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-            <AlertCircle size={11} color="#484848" />
-            <span style={{ color: "#484848", fontSize: 11 }}>Add bot to a server first</span>
+            <AlertCircle size={11} color="#505050" />
+            <span style={{ color: "#505050", fontSize: 11 }}>Add bot to a server first</span>
           </div>
         )}
 
         {interactionCount > 0 && (
           <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-            <Zap size={9} color="#484848" />
-            <span style={{ color: "#484848", fontSize: 10 }}>
+            <Zap size={9} color="#505050" />
+            <span style={{ color: "#505050", fontSize: 10 }}>
               {interactionCount} flow{interactionCount !== 1 ? "s" : ""} defined
             </span>
           </div>
@@ -71,8 +71,8 @@ function OpenEmbeddedNodeComponent({ id, data }: NodeProps) {
 
         {/* Send hint */}
         <div style={{ display: "flex", alignItems: "center", gap: 5, marginTop: 2, paddingTop: 6, borderTop: "1px solid rgba(255,255,255,0.04)" }}>
-          <Send size={9} color={isReady ? "#3fb950" : "#484848"} />
-          <span style={{ color: isReady ? "#2e4a32" : "#484848", fontSize: 10 }}>
+          <Send size={9} color={isReady ? "#3fb950" : "#505050"} />
+          <span style={{ color: isReady ? "#505050" : "#505050", fontSize: 10 }}>
             {isReady ? "Drag right handle → Container or Embed" : "Configure in Properties panel"}
           </span>
         </div>
@@ -84,8 +84,8 @@ function OpenEmbeddedNodeComponent({ id, data }: NodeProps) {
         style={{
           background: isReady ? "#3fb950" : "#3a3a3a",
           border: "2px solid #1a1a1a",
-          width: 12,
-          height: 12,
+          width: 10,
+          height: 10,
         }}
       />
     </NodeWrapper>

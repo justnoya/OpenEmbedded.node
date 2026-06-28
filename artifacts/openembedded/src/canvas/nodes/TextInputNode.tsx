@@ -11,7 +11,7 @@ function TextInputNodeComponent({ id, data }: NodeProps) {
   const required = data.required as boolean | undefined;
 
   return (
-    <NodeWrapper id={id} typeName="Text Input · 4" icon={<TextCursorInput size={14} />} accentColor="#64748b">
+    <NodeWrapper id={id} typeName="Text Input" icon={<TextCursorInput size={14} />} accentColor="#64748b">
       <div style={{ color: "#c0c0c0", fontSize: 12, fontWeight: 600, marginBottom: 5 }}>
         {label}
         {required && <span style={{ color: "#f85149", marginLeft: 3 }}>*</span>}

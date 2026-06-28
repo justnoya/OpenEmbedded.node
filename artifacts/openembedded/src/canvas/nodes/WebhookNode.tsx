@@ -85,7 +85,7 @@ function WebhookNodeComponent({ id, data }: NodeProps) {
           <label
             style={{
               display: "block",
-              color: "#3d3d3d",
+              color: "#505050",
               fontSize: 9,
               fontWeight: 700,
               textTransform: "uppercase",
@@ -154,15 +154,15 @@ function WebhookNodeComponent({ id, data }: NodeProps) {
 
         {!loading && !connected && !fetchError && webhookUrl.trim().length === 0 && (
           <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-            <AlertCircle size={10} color="#333" />
-            <span style={{ color: "#3d3d3d", fontSize: 10 }}>Paste a webhook URL above</span>
+            <AlertCircle size={10} color="#505050" />
+            <span style={{ color: "#505050", fontSize: 10 }}>Paste a webhook URL above</span>
           </div>
         )}
 
         {/* Connection hint */}
         <div style={{ display: "flex", alignItems: "center", gap: 4, paddingTop: 4, borderTop: "1px solid rgba(255,255,255,0.04)" }}>
-          <ArrowRight size={8} color="#3fb950" />
-          <span style={{ color: "#2a3d2a", fontSize: 9 }}>Connect to Container or Embed →</span>
+          <ArrowRight size={8} color="#505050" />
+          <span style={{ color: "#505050", fontSize: 9 }}>Connect to Container or Embed →</span>
         </div>
       </div>
 

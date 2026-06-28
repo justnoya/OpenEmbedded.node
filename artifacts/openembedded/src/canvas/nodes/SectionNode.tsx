@@ -6,7 +6,7 @@ import { Layers } from "lucide-react";
 
 function SectionNodeComponent({ id }: NodeProps) {
   return (
-    <NodeWrapper id={id} typeName="Section · 9" icon={<Layers size={14} />} accentColor="#10b981" nodeClass="main">
+    <NodeWrapper id={id} typeName="Section" icon={<Layers size={14} />} accentColor="#10b981" nodeClass="main">
       <div style={{ color: "#505050", fontSize: 11 }}>
         Text + thumbnail accessory
       </div>

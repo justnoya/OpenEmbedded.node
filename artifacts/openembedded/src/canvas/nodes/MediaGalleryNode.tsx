@@ -9,7 +9,7 @@ function MediaGalleryNodeComponent({ id, data }: NodeProps) {
   const preview = items.slice(0, 4);
 
   return (
-    <NodeWrapper id={id} typeName="Media Gallery · 12" icon={<LayoutGrid size={14} />} accentColor="#ec4899">
+    <NodeWrapper id={id} typeName="Media Gallery" icon={<LayoutGrid size={14} />} accentColor="#ec4899">
       {preview.length > 0 ? (
         <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
           {preview.map((item, i) =>

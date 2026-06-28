@@ -9,7 +9,7 @@ function SelectMenuNodeComponent({ id, data }: NodeProps) {
   const options = (data.options as { label: string; value: string }[]) ?? [];
 
   return (
-    <NodeWrapper id={id} typeName="String Select · 3" icon={<ChevronDown size={14} />} accentColor="#f97316" nodeClass="interactive" showInteractionHandle>
+    <NodeWrapper id={id} typeName="String Select" icon={<ChevronDown size={14} />} accentColor="#f97316" nodeClass="interactive" showInteractionHandle>
       <div
         style={{
           display: "flex", alignItems: "center", justifyContent: "space-between",

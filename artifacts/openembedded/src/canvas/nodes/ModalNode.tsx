@@ -13,7 +13,7 @@ function ModalNodeComponent({ id, data }: NodeProps) {
       <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
         <div
           style={{
-            color: title ? "#c8c8c8" : "#404040",
+            color: title ? "#c8c8c8" : "#505050",
             fontSize: 13,
             fontWeight: 600,
             fontStyle: title ? "normal" : "italic",
@@ -26,11 +26,11 @@ function ModalNodeComponent({ id, data }: NodeProps) {
           {title || "Untitled modal…"}
         </div>
         {customId && (
-          <div style={{ color: "#404040", fontSize: 10, fontFamily: "monospace" }}>
+          <div style={{ color: "#505050", fontSize: 10, fontFamily: "monospace" }}>
             id: {customId}
           </div>
         )}
-        <div style={{ color: "#3a3a3a", fontSize: 10, marginTop: 2 }}>
+        <div style={{ color: "#505050", fontSize: 10, marginTop: 2 }}>
           Triggered by Button → Open Modal
         </div>
       </div>

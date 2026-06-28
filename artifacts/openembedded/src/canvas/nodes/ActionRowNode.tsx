@@ -6,7 +6,7 @@ import { AlignJustify } from "lucide-react";
 
 function ActionRowNodeComponent({ id }: NodeProps) {
   return (
-    <NodeWrapper id={id} typeName="Action Row · 1" icon={<AlignJustify size={14} />} accentColor="#14b8a6" nodeClass="main">
+    <NodeWrapper id={id} typeName="Action Row" icon={<AlignJustify size={14} />} accentColor="#14b8a6" nodeClass="main">
       <div style={{ color: "#505050", fontSize: 11 }}>
         Buttons &amp; select menus
       </div>

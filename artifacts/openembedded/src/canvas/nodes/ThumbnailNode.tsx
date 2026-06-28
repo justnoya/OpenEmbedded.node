@@ -7,7 +7,7 @@ import { Image } from "lucide-react";
 function ThumbnailNodeComponent({ id, data }: NodeProps) {
   const url = (data.url as string) ?? "";
   return (
-    <NodeWrapper id={id} typeName="Thumbnail · 11" icon={<Image size={14} />} accentColor="#f59e0b">
+    <NodeWrapper id={id} typeName="Thumbnail" icon={<Image size={14} />} accentColor="#f59e0b">
       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
         {url ? (
           <img

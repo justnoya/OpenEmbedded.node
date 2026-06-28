@@ -28,16 +28,16 @@ function BotNodeComponent({ id, data }: NodeProps) {
             </div>
             {guildName && (
               <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                <span style={{ color: "#333", fontSize: 9 }}>Server:</span>
-                <span style={{ color: "#666", fontSize: 9, fontWeight: 500, maxWidth: 140, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                <span style={{ color: "#505050", fontSize: 9 }}>Server:</span>
+                <span style={{ color: "#606060", fontSize: 9, fontWeight: 500, maxWidth: 140, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                   {guildName}
                 </span>
               </div>
             )}
             {channelName && (
               <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                <span style={{ color: "#333", fontSize: 9 }}>#</span>
-                <span style={{ color: "#666", fontSize: 9, fontWeight: 500, maxWidth: 140, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                <span style={{ color: "#505050", fontSize: 9 }}>#</span>
+                <span style={{ color: "#606060", fontSize: 9, fontWeight: 500, maxWidth: 140, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                   {channelName}
                 </span>
               </div>
@@ -45,14 +45,14 @@ function BotNodeComponent({ id, data }: NodeProps) {
           </>
         ) : (
           <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-            <AlertCircle size={10} color="#333" />
-            <span style={{ color: "#3d3d3d", fontSize: 10 }}>Token not set — configure in panel</span>
+            <AlertCircle size={10} color="#505050" />
+            <span style={{ color: "#505050", fontSize: 10 }}>Token not set — configure in panel</span>
           </div>
         )}
 
         <div style={{ display: "flex", alignItems: "center", gap: 4, paddingTop: 4, borderTop: "1px solid rgba(255,255,255,0.04)" }}>
-          <ArrowRight size={8} color="#3fb950" />
-          <span style={{ color: "#2a3d2a", fontSize: 9 }}>Connect to Container or Embed →</span>
+          <ArrowRight size={8} color="#505050" />
+          <span style={{ color: "#505050", fontSize: 9 }}>Connect to Container or Embed →</span>
         </div>
       </div>
 
