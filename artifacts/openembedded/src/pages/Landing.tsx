@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "../lib/authContext.js";
+import { ContainerScroll } from "../components/ui/container-scroll-animation";
 
 /* ── Builder design tokens (mirrors index.css) ─────────────────────────────── */
 const C = {
@@ -238,6 +239,82 @@ const STEPS = [
   { n: "03", color: "#10b981", title: "Send to Discord", desc: "Click Send. Your canvas is compiled, validated, and delivered to Discord in under a second." },
 ];
 
+/* ── Mobile Discord preview mockup ────────────────────────────────────────── */
+function MobileMockup() {
+  return (
+    <div style={{ position: "relative", width: "100%", height: "100%" }}>
+      <svg width="100%" height="100%" viewBox="0 0 390 720" preserveAspectRatio="xMidYMid meet" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="mBg" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#313338" /><stop offset="100%" stopColor="#2b2d31" />
+          </linearGradient>
+          <linearGradient id="mHeader" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#1e1f22" /><stop offset="100%" stopColor="#232428" />
+          </linearGradient>
+        </defs>
+        {/* Phone body */}
+        <rect width="390" height="720" rx="0" fill="url(#mBg)" />
+        {/* Top bar */}
+        <rect width="390" height="52" fill="url(#mHeader)" />
+        <rect y="52" width="390" height="1" fill="rgba(0,0,0,0.3)" />
+        {/* Channel name */}
+        <circle cx="20" cy="26" r="8" fill="#3d944d" />
+        <text x="36" y="31" fill="#dbdee1" fontSize="15" fontWeight="700"># welcome</text>
+        {/* Sidebar icon */}
+        <rect x="352" y="14" width="24" height="2" rx="1" fill="#949ba4" />
+        <rect x="352" y="20" width="24" height="2" rx="1" fill="#949ba4" />
+        <rect x="352" y="26" width="24" height="2" rx="1" fill="#949ba4" />
+        {/* Bot message bubble */}
+        <g transform="translate(12, 70)">
+          {/* Avatar */}
+          <circle cx="20" cy="20" r="18" fill="#5865F2" />
+          <text x="13" y="26" fill="#fff" fontSize="18">🤖</text>
+          {/* Name + time */}
+          <text x="46" y="14" fill="#dbdee1" fontSize="13" fontWeight="700">OpenBot</text>
+          <text x="46" y="28" fill="#949ba4" fontSize="11">Today at 12:00 PM</text>
+          {/* Embed card */}
+          <rect x="46" y="36" width="316" height="260" rx="6" fill="#2b2d31" stroke="rgba(255,255,255,0.06)" strokeWidth="1" />
+          <rect x="46" y="36" width="4" height="260" rx="2" fill="#5865F2" />
+          {/* Embed title */}
+          <rect x="58" y="52" width="140" height="12" rx="3" fill="#dbdee1" opacity="0.9" />
+          {/* Embed body */}
+          <rect x="58" y="72" width="240" height="8" rx="2" fill="#949ba4" opacity="0.55" />
+          <rect x="58" y="84" width="200" height="8" rx="2" fill="#949ba4" opacity="0.4" />
+          <rect x="58" y="96" width="220" height="8" rx="2" fill="#949ba4" opacity="0.3" />
+          {/* Thumbnail */}
+          <rect x="268" y="52" width="80" height="60" rx="4" fill="rgba(88,101,242,0.2)" stroke="rgba(88,101,242,0.3)" strokeWidth="1" />
+          <text x="296" y="88" fill="#818cf8" fontSize="24">🖼</text>
+          {/* Divider */}
+          <rect x="58" y="120" width="296" height="1" fill="rgba(255,255,255,0.06)" />
+          {/* Action buttons */}
+          <rect x="58" y="132" width="130" height="34" rx="4" fill="#5865F2" />
+          <text x="78" y="154" fill="#fff" fontSize="12" fontWeight="700">Get Started</text>
+          <rect x="198" y="132" width="130" height="34" rx="4" fill="rgba(255,255,255,0.07)" stroke="rgba(255,255,255,0.12)" strokeWidth="1" />
+          <text x="218" y="154" fill="#dbdee1" fontSize="12" fontWeight="700">Learn More</text>
+          {/* Select menu */}
+          <rect x="58" y="176" width="296" height="36" rx="4" fill="rgba(0,0,0,0.2)" stroke="rgba(255,255,255,0.08)" strokeWidth="1" />
+          <text x="70" y="199" fill="#949ba4" fontSize="12">Choose a category…</text>
+          <path d="M338 190L346 190L342 196Z" fill="#949ba4" />
+          {/* Text display */}
+          <rect x="58" y="220" width="260" height="8" rx="2" fill="#949ba4" opacity="0.35" />
+          <rect x="58" y="232" width="200" height="8" rx="2" fill="#949ba4" opacity="0.25" />
+          <rect x="58" y="244" width="220" height="8" rx="2" fill="#949ba4" opacity="0.2" />
+          <rect x="58" y="256" width="160" height="8" rx="2" fill="#949ba4" opacity="0.15" />
+          {/* Reaction chip */}
+          <rect x="58" y="276" width="52" height="22" rx="11" fill="rgba(88,101,242,0.15)" stroke="rgba(88,101,242,0.3)" strokeWidth="1" />
+          <text x="64" y="291" fill="#818cf8" fontSize="12">👋 2</text>
+        </g>
+        {/* Text input bar */}
+        <rect x="0" y="656" width="390" height="64" fill="#383a40" />
+        <rect x="12" y="668" width="310" height="40" rx="8" fill="#1e1f22" />
+        <text x="26" y="693" fill="#6d6f78" fontSize="13">Message #welcome</text>
+        <circle cx="346" cy="688" r="16" fill="#5865F2" />
+        <text x="340" y="694" fill="#fff" fontSize="16">↑</text>
+      </svg>
+    </div>
+  );
+}
+
 /* ── Reusable section label ────────────────────────────────────────────────── */
 function SectionLabel({ children }: { children: string }) {
   return (
@@ -391,28 +468,69 @@ export function Landing() {
           </div>
 
         </div>
-
-        {/* Product mockup */}
-        <div style={{
-          position: "relative", marginTop: 56, padding: "0 20px",
-          opacity: visible ? 1 : 0, transform: visible ? "none" : "translateY(28px)",
-          transition: "opacity 0.65s ease 0.18s, transform 0.65s ease 0.18s",
-        }}>
-          <div aria-hidden style={{
-            position: "absolute", bottom: 0, left: 0, right: 0, height: 180,
-            background: `linear-gradient(to bottom, transparent, ${C.canvas})`,
-            zIndex: 2, pointerEvents: "none",
-          }} />
-          <div style={{
-            maxWidth: 1060, margin: "0 auto", borderRadius: 14, overflow: "hidden",
-            border: `1px solid ${C.b3}`,
-            boxShadow: `0 0 0 1px rgba(0,0,0,0.6), ${C.shadow.xxl}, 0 0 100px rgba(88,101,242,0.09)`,
-            aspectRatio: "900/520", background: C.canvas,
-          }}>
-            <NodeMockup />
-          </div>
-        </div>
       </section>
+
+      {/* ── Scroll Animation Showcase ────────────────────────────────────────── */}
+      <div style={{ background: C.canvas, marginTop: -40 }}>
+        <ContainerScroll
+          titleComponent={
+            <div style={{ marginBottom: 24 }}>
+              <p style={{
+                fontSize: "clamp(11px, 1.4vw, 13px)",
+                fontWeight: 700,
+                letterSpacing: "0.1em",
+                textTransform: "uppercase",
+                color: C.t3,
+                marginBottom: 12,
+              }}>
+                See it in action
+              </p>
+              <h2 style={{
+                fontSize: "clamp(28px, 4vw, 52px)",
+                fontWeight: 900,
+                letterSpacing: "-0.04em",
+                lineHeight: 1.05,
+                color: C.t1,
+                margin: "0 auto",
+                maxWidth: 700,
+                padding: "0 20px",
+              }}>
+                Your canvas.{" "}
+                <span style={{
+                  background: "linear-gradient(135deg, #5865F2 0%, #818cf8 50%, #a78bfa 100%)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                  backgroundClip: "text",
+                }}>
+                  Any screen.
+                </span>
+              </h2>
+              <p style={{
+                fontSize: "clamp(13px, 1.6vw, 15px)",
+                color: C.t3,
+                maxWidth: 440,
+                lineHeight: 1.7,
+                margin: "16px auto 0",
+                padding: "0 20px",
+              }}>
+                Build complex Discord messages visually — from the full node canvas on desktop to previewing exactly how it looks on mobile.
+              </p>
+            </div>
+          }
+        >
+          {/* Responsive content: desktop canvas on md+, mobile Discord UI on small */}
+          <div style={{ width: "100%", height: "100%", position: "relative" }}>
+            {/* Desktop node canvas mockup */}
+            <div className="hidden md:block" style={{ width: "100%", height: "100%" }}>
+              <NodeMockup />
+            </div>
+            {/* Mobile Discord preview */}
+            <div className="block md:hidden" style={{ width: "100%", height: "100%" }}>
+              <MobileMockup />
+            </div>
+          </div>
+        </ContainerScroll>
+      </div>
 
       {/* ── Features Grid ───────────────────────────────────────────────────── */}
       <section style={{ padding: "112px 20px 80px", maxWidth: 1060, margin: "0 auto" }}>
