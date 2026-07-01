@@ -7,7 +7,7 @@ export async function ensureSchema(
   const client = await pool.connect();
   try {
     await client.query(`
-      DO $$
+      DO $oe$
       BEGIN
         CREATE TABLE discord_users (
           discord_id    VARCHAR(32)  PRIMARY KEY,
@@ -22,11 +22,11 @@ export async function ensureSchema(
         WHEN duplicate_table   THEN NULL;
         WHEN unique_violation  THEN NULL;
         WHEN duplicate_object  THEN NULL;
-      END $$
+      END $oe$
     `);
 
     await client.query(`
-      DO $$
+      DO $oe$
       BEGIN
         CREATE TABLE user_sessions (
           sid    VARCHAR      NOT NULL PRIMARY KEY,
@@ -37,22 +37,22 @@ export async function ensureSchema(
         WHEN duplicate_table   THEN NULL;
         WHEN unique_violation  THEN NULL;
         WHEN duplicate_object  THEN NULL;
-      END $$
+      END $oe$
     `);
 
     await client.query(`
-      DO $$
+      DO $oe$
       BEGIN
         CREATE INDEX "IDX_session_expire" ON user_sessions (expire);
       EXCEPTION
         WHEN duplicate_table   THEN NULL;
         WHEN unique_violation  THEN NULL;
         WHEN duplicate_object  THEN NULL;
-      END $$
+      END $oe$
     `);
 
     await client.query(`
-      DO $$
+      DO $oe$
       BEGIN
         CREATE TABLE projects (
           id         UUID         PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -65,7 +65,7 @@ export async function ensureSchema(
         WHEN duplicate_table   THEN NULL;
         WHEN unique_violation  THEN NULL;
         WHEN duplicate_object  THEN NULL;
-      END $$
+      END $oe$
     `);
 
     await client.query(`
@@ -79,7 +79,7 @@ export async function ensureSchema(
     `);
 
     await client.query(`
-      DO $$
+      DO $oe$
       BEGIN
         CREATE TABLE scheduled_jobs (
           id              UUID         PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -102,11 +102,11 @@ export async function ensureSchema(
         WHEN duplicate_table   THEN NULL;
         WHEN unique_violation  THEN NULL;
         WHEN duplicate_object  THEN NULL;
-      END $$
+      END $oe$
     `);
 
     await client.query(`
-      DO $$
+      DO $oe$
       BEGIN
         CREATE TABLE user_authorized_guilds (
           id        UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -119,12 +119,12 @@ export async function ensureSchema(
         WHEN duplicate_table   THEN NULL;
         WHEN unique_violation  THEN NULL;
         WHEN duplicate_object  THEN NULL;
-      END $$
+      END $oe$
     `);
 
     /* ── Bot registrations — one per project ──────────────────────────────── */
     await client.query(`
-      DO $$
+      DO $oe$
       BEGIN
         CREATE TABLE bot_registrations (
           id                UUID         PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -145,24 +145,24 @@ export async function ensureSchema(
         WHEN duplicate_table   THEN NULL;
         WHEN unique_violation  THEN NULL;
         WHEN duplicate_object  THEN NULL;
-      END $$
+      END $oe$
     `);
 
     /* ── Per-application index for fast interaction lookups ─────────────── */
     await client.query(`
-      DO $$
+      DO $oe$
       BEGIN
         CREATE INDEX idx_bot_reg_app_id ON bot_registrations (application_id);
       EXCEPTION
         WHEN duplicate_table   THEN NULL;
         WHEN unique_violation  THEN NULL;
         WHEN duplicate_object  THEN NULL;
-      END $$
+      END $oe$
     `);
 
     /* ── Interaction handlers — custom_id → response payload ─────────────── */
     await client.query(`
-      DO $$
+      DO $oe$
       BEGIN
         CREATE TABLE bot_interaction_handlers (
           id               UUID         PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -179,20 +179,29 @@ export async function ensureSchema(
         WHEN duplicate_table   THEN NULL;
         WHEN unique_violation  THEN NULL;
         WHEN duplicate_object  THEN NULL;
-      END $$
+      END $oe$
     `);
 
     /* ── Index for the hot path: application_id + custom_id lookup ───────── */
     await client.query(`
-      DO $$
+      DO $oe$
       BEGIN
         CREATE INDEX idx_bot_handler_lookup ON bot_interaction_handlers (application_id, custom_id);
       EXCEPTION
         WHEN duplicate_table   THEN NULL;
         WHEN unique_violation  THEN NULL;
         WHEN duplicate_object  THEN NULL;
-      END $$
+      END $oe$
     `);
+
+    /* ── Moderation columns on discord_users ─────────────────────────────── */
+    await client.query(`
+      ALTER TABLE discord_users
+        ADD COLUMN IF NOT EXISTS status            VARCHAR(16)  NOT NULL DEFAULT 'active',
+        ADD COLUMN IF NOT EXISTS suspended_until   TIMESTAMP,
+        ADD COLUMN IF NOT EXISTS suspension_reason VARCHAR(512)
+    `);
+
   } finally {
     client.release();
   }

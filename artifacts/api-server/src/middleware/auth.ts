@@ -93,3 +93,20 @@ export const requireAuth: RequestHandler = (req, res, next) => {
   req.tokenUser = user;
   next();
 };
+
+// ── Admin guard ────────────────────────────────────────────────────────────
+// Must be used AFTER requireAuth. Checks that the authenticated user matches
+// the ADMIN_DISCORD_ID environment secret. Returns 403 for everyone else.
+
+export const requireAdmin: RequestHandler = (req, res, next) => {
+  const adminId = process.env["ADMIN_DISCORD_ID"]?.trim();
+  if (!adminId) {
+    res.status(503).json({ error: "Admin access is not configured on this server." });
+    return;
+  }
+  if (req.tokenUser?.sub !== adminId) {
+    res.status(403).json({ error: "Forbidden." });
+    return;
+  }
+  next();
+};

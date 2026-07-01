@@ -10,6 +10,7 @@ import botInteractionsRouter from "./bot-interactions";
 import openbotRouter from "./openbot";
 import schedulesRouter from "./schedules";
 import uploadRouter from "./upload";
+import adminRouter from "./admin";
 
 const router = Router();
 
@@ -23,5 +24,6 @@ router.use(botInteractionsRouter);
 router.use(openbotRouter);
 router.use(schedulesRouter);
 router.use(uploadRouter);
+router.use(adminRouter);
 
 export default router;

@@ -17,6 +17,7 @@ const Builder = lazy(() => import("./pages/Builder.js").then((m) => ({ default: 
 const Docs    = lazy(() => import("./pages/Docs.js").then((m) => ({ default: m.Docs })));
 const Terms   = lazy(() => import("./pages/Terms.js").then((m) => ({ default: m.Terms })));
 const Privacy = lazy(() => import("./pages/Privacy.js").then((m) => ({ default: m.Privacy })));
+const Admin   = lazy(() => import("./pages/Admin.js").then((m) => ({ default: m.Admin })));
 
 const queryClient = new QueryClient();
 
@@ -137,6 +138,15 @@ function Router() {
             <Builder />
           </Suspense>
         </AuthGuard>
+      </Route>
+
+      {/* ── Admin dashboard — gated client-side by Discord ID match ──── */}
+      <Route path="/:adminId">
+        {(params) => (
+          <Suspense fallback={<PageLoader />}>
+            <Admin />
+          </Suspense>
+        )}
       </Route>
 
       <Route component={NotFound} />

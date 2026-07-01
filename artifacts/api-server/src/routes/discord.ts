@@ -350,6 +350,9 @@ router.get("/v1/auth/session", async (req, res) => {
         globalName: usersTable.globalName,
         discriminator: usersTable.discriminator,
         avatar: usersTable.avatar,
+        status: usersTable.status,
+        suspendedUntil: usersTable.suspendedUntil,
+        suspensionReason: usersTable.suspensionReason,
       })
       .from(usersTable)
       .where(eq(usersTable.discordId, payload.sub))
@@ -361,7 +364,37 @@ router.get("/v1/auth/session", async (req, res) => {
       return;
     }
 
-    res.json({ authenticated: true, user });
+    // Enforce moderation status on session check
+    const status = user.status ?? "active";
+
+    if (status === "banned") {
+      clearAuthCookie(res);
+      res.json({ authenticated: false, user: null, banned: true });
+      return;
+    }
+
+    if (status === "suspended") {
+      const now = new Date();
+      if (!user.suspendedUntil || user.suspendedUntil > now) {
+        clearAuthCookie(res);
+        res.json({
+          authenticated: false,
+          user: null,
+          suspended: true,
+          until: user.suspendedUntil?.toISOString() ?? null,
+          reason: user.suspensionReason ?? null,
+        });
+        return;
+      }
+      // Suspension expired — auto-heal and continue
+      await db
+        .update(usersTable)
+        .set({ status: "active", suspendedUntil: null, suspensionReason: null })
+        .where(eq(usersTable.discordId, payload.sub));
+    }
+
+    const { status: _s, suspendedUntil: _u, suspensionReason: _r, ...safeUser } = user;
+    res.json({ authenticated: true, user: safeUser });
   } catch (err) {
     req.log.error({ err }, "Session lookup failed");
     res.status(500).json({ error: "Session lookup failed" });
