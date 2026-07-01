@@ -4,12 +4,24 @@ A visual node-graph builder for Discord embeds and Components V2 messages.
 
 ## Run & Operate
 
-- `pnpm --filter @workspace/api-server run dev` — run the API server (port 5000)
+Two workflows handle the app on Replit:
+- **API Server** (port 8080, console): `pnpm --filter @workspace/api-server run build && PORT=8080 pnpm --filter @workspace/api-server run start`
+- **OpenEmbedded** (port 5000, webview): `PORT=5000 pnpm --filter @workspace/openembedded run dev`
+
+Other commands:
 - `pnpm run typecheck` — full typecheck across all packages
 - `pnpm run build` — typecheck + build all packages
 - `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from the OpenAPI spec
 - `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
-- Required env: `DATABASE_URL` — Postgres connection string
+
+Required env (auto-provisioned by Replit):
+- `DATABASE_URL` — Postgres connection string (runtime-managed, no manual setup needed)
+
+Required env (must be added as Replit Secrets to enable full functionality):
+- `SESSION_SECRET` — already set ✓
+- `DISCORD_CLIENT_ID`, `DISCORD_CLIENT_SECRET`, `DISCORD_REDIRECT_URI` — Discord OAuth (for sign-in)
+- `OPENBOT_TOKEN` — Discord bot token (for sending messages)
+- `OPENBOT_API_KEY`, `OPENBOT_API_URL` — API bridge between api-server and openbot service
 
 ## Stack
 
