@@ -19,6 +19,7 @@ import { InteractionEdge } from "../canvas/edges/InteractionEdge.js";
 import { SendEdge } from "../canvas/edges/SendEdge.js";
 import { isValidNodeConnection, isInteractionConnection, isBotSendConnection, getConnectionError } from "../lib/connectionRules.js";
 import { NodeLibraryPanel } from "../panels/NodeLibraryPanel.js";
+import { CanvasNodeBar } from "../canvas/CanvasNodeBar.js";
 import { PropertiesPanel } from "../panels/PropertiesPanel.js";
 import { DiscordPreview } from "../preview/DiscordPreview.js";
 import { ExportPanel } from "../panels/ExportPanel.js";
@@ -912,6 +913,9 @@ export function Builder() {
               </span>
             )}
           </div>
+        </Panel>
+        <Panel position="bottom-center" style={{ marginBottom: 14 }}>
+          <CanvasNodeBar />
         </Panel>
       </ReactFlow>
 
