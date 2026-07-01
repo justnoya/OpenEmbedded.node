@@ -560,10 +560,29 @@ export function Admin() {
   const [toast, setToast] = useState<{ msg: string; type: "success" | "error" } | null>(null);
   const searchTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
 
-  // ── Access control ───────────────────────────────────────────────────────
+  // ── Access control (computed before any early returns) ───────────────────
   const isAuthorised =
     auth.status === "authenticated" && user?.id === adminId;
 
+  // ── Data fetching — hooks must be called unconditionally ─────────────────
+  // enabled:false when not authorised so no network request fires yet
+  const { data, isLoading, isError } = useQuery<UsersResponse>({
+    queryKey: ["admin-users", page, search, statusFilter],
+    queryFn: () =>
+      adminFetch(
+        `/v1/admin/users?page=${page}&limit=30${search ? `&search=${encodeURIComponent(search)}` : ""}${statusFilter ? `&status=${statusFilter}` : ""}`
+      ),
+    enabled: isAuthorised,
+    staleTime: 30_000,
+  });
+
+  // ── Toast helper ─────────────────────────────────────────────────────────
+  const showToast = useCallback((msg: string, type: "success" | "error") => {
+    setToast({ msg, type });
+    setTimeout(() => setToast(null), 3500);
+  }, []);
+
+  // ── Early returns (AFTER all hooks) ──────────────────────────────────────
   if (auth.status === "loading") {
     return (
       <div style={{ minHeight: "100vh", background: "#111", display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -580,22 +599,6 @@ export function Admin() {
     navigate("/");
     return null;
   }
-
-  // ── Data fetching ────────────────────────────────────────────────────────
-  const { data, isLoading, isError } = useQuery<UsersResponse>({
-    queryKey: ["admin-users", page, search, statusFilter],
-    queryFn: () =>
-      adminFetch(
-        `/v1/admin/users?page=${page}&limit=30${search ? `&search=${encodeURIComponent(search)}` : ""}${statusFilter ? `&status=${statusFilter}` : ""}`
-      ),
-    staleTime: 30_000,
-  });
-
-  // ── Toast helper ─────────────────────────────────────────────────────────
-  const showToast = useCallback((msg: string, type: "success" | "error") => {
-    setToast({ msg, type });
-    setTimeout(() => setToast(null), 3500);
-  }, []);
 
   // ── Mutations ────────────────────────────────────────────────────────────
   const invalidate = () => qc.invalidateQueries({ queryKey: ["admin-users"] });

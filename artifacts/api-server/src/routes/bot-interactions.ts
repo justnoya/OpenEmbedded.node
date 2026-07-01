@@ -2,6 +2,7 @@
 import { Router } from "express";
 import { pool } from "@workspace/db";
 import { requireAuth } from "../middleware/auth";
+import { requireActive } from "../middleware/userStatus";
 import { botLimiter, interactionsLimiter } from "../middleware/security";
 import { encryptToken, decryptToken } from "../lib/crypto";
 import { verifyDiscordSignature } from "../lib/discordVerify";
@@ -36,8 +37,8 @@ function buildInteractionUrl(req: any): string {
  *
  *  Body: { token, projectId, botName, botAvatar }
  * ─────────────────────────────────────────────────────────────────────────── */
-router.post("/v1/bot/register", requireAuth, botLimiter, async (req, res) => {
-  const userId = (req as any).tokenUser?.discordId as string | undefined;
+router.post("/v1/bot/register", requireAuth, requireActive, botLimiter, async (req, res) => {
+  const userId = (req as any).tokenUser?.sub as string | undefined;
   if (!userId) { res.status(401).json({ success: false, message: "Not authenticated" }); return; }
 
   const { token, projectId, botName, botAvatar } = req.body as {
@@ -117,7 +118,7 @@ router.post("/v1/bot/register", requireAuth, botLimiter, async (req, res) => {
  *  Returns the bot registration for a project (without the token).
  * ─────────────────────────────────────────────────────────────────────────── */
 router.get("/v1/bot/registration/:projectId", requireAuth, async (req, res) => {
-  const userId = (req as any).tokenUser?.discordId as string | undefined;
+  const userId = (req as any).tokenUser?.sub as string | undefined;
   if (!userId) { res.status(401).json({ success: false, message: "Not authenticated" }); return; }
 
   const { projectId } = req.params;
@@ -152,7 +153,7 @@ router.get("/v1/bot/registration/:projectId", requireAuth, async (req, res) => {
  *  Removes the bot registration (and all its handlers) for a project.
  * ─────────────────────────────────────────────────────────────────────────── */
 router.delete("/v1/bot/registration/:projectId", requireAuth, async (req, res) => {
-  const userId = (req as any).tokenUser?.discordId as string | undefined;
+  const userId = (req as any).tokenUser?.sub as string | undefined;
   if (!userId) { res.status(401).json({ success: false, message: "Not authenticated" }); return; }
 
   await pool.query(
@@ -168,8 +169,8 @@ router.delete("/v1/bot/registration/:projectId", requireAuth, async (req, res) =
  *
  *  Body: { handlers: Array<{ customId, mode, responsePayload }> }
  * ─────────────────────────────────────────────────────────────────────────── */
-router.post("/v1/bot/deploy/:projectId", requireAuth, botLimiter, async (req, res) => {
-  const userId = (req as any).tokenUser?.discordId as string | undefined;
+router.post("/v1/bot/deploy/:projectId", requireAuth, requireActive, botLimiter, async (req, res) => {
+  const userId = (req as any).tokenUser?.sub as string | undefined;
   if (!userId) { res.status(401).json({ success: false, message: "Not authenticated" }); return; }
 
   const { projectId } = req.params;

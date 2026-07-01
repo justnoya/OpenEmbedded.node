@@ -290,10 +290,11 @@ export function Docs() {
   );
 
   return (
-    <div style={{
+    <div className="docs-outer" style={{
       minHeight: "100dvh", background: BG,
       color: TEXT_PRI, fontFamily: `"Inter", system-ui, sans-serif`,
       display: "flex", flexDirection: "column",
+      overflowX: "hidden",
     }}>
 
       {/* ── Top navbar (card) ───────────────────────────────────────────── */}
@@ -312,12 +313,12 @@ export function Docs() {
             }}
           >
             <AppLogo size={26} />
-            <span style={{ fontSize: 14, fontWeight: 700, color: TEXT_PRI, letterSpacing: "-0.03em" }}>
+            <span className="docs-brand-name" style={{ fontSize: 14, fontWeight: 700, color: TEXT_PRI, letterSpacing: "-0.03em" }}>
               OpenEmbedded
             </span>
           </button>
 
-          <div style={{ width: 1, height: 16, background: BORDER, flexShrink: 0 }} />
+          <div className="docs-brand-divider" style={{ width: 1, height: 16, background: BORDER, flexShrink: 0 }} />
 
           <span style={{
             fontSize: 12, fontWeight: 600, color: ACCENT,
@@ -345,13 +346,15 @@ export function Docs() {
             href="/"
             style={{
               display: "flex", alignItems: "center", gap: 5,
-              background: `linear-gradient(135deg, ${ACCENT}, ${ACCENT2})`,
-              border: "none", borderRadius: 7, color: "#fff",
+              background: "#efefef",
+              border: "none", borderRadius: 7, color: "#111",
               fontSize: 13, fontWeight: 600, padding: "6px 14px",
               textDecoration: "none",
-              boxShadow: "0 2px 12px rgba(88,101,242,0.35)",
               flexShrink: 0,
+              transition: "background 0.15s",
             }}
+            onMouseEnter={(e) => (e.currentTarget.style.background = "#ffffff")}
+            onMouseLeave={(e) => (e.currentTarget.style.background = "#efefef")}
           >
             Open Builder
             <ArrowRight size={13} />
@@ -1042,9 +1045,14 @@ const { success, message } = await res.json();`}</CodeBlock>
         ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 3px; }
         @media (max-width: 768px) {
           .docs-mobile-menu { display: flex !important; }
-          aside { display: none; }
+          aside { display: none !important; }
           main { padding-left: 0 !important; }
         }
+        @media (max-width: 420px) {
+          .docs-brand-name { display: none !important; }
+          .docs-brand-divider { display: none !important; }
+        }
+        .docs-outer { overflow-x: hidden; }
       `}</style>
     </div>
   );

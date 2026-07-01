@@ -5,6 +5,7 @@ import { createHash } from "crypto";
 import { mkdirSync } from "fs";
 import { join } from "path";
 import { requireAuth } from "../middleware/auth";
+import { requireActive } from "../middleware/userStatus";
 
 export const UPLOAD_DIR = join(process.env["NODE_ENV"] === "production" ? "/tmp" : process.cwd(), "uploads");
 try { mkdirSync(UPLOAD_DIR, { recursive: true }); } catch { /* already exists or read-only */ }
@@ -32,7 +33,7 @@ const upload = multer({
 
 const router = Router();
 
-router.post("/v1/upload/image", requireAuth, upload.single("image"), (req, res) => {
+router.post("/v1/upload/image", requireAuth, requireActive, upload.single("image"), (req, res) => {
   if (!req.file) {
     res.status(400).json({ error: "No image file received" });
     return;

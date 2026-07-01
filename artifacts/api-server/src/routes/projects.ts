@@ -11,6 +11,7 @@ import {
   DeleteProjectParams,
 } from "@workspace/api-zod";
 import { requireAuth } from "../middleware/auth";
+import { requireActive } from "../middleware/userStatus";
 
 const router = Router();
 
@@ -32,7 +33,7 @@ function logDbError(req: import("express").Request, err: unknown, msg: string) {
 }
 
 /* ── GET /v1/projects ─────────────────────────────────────────────────────── */
-router.get("/v1/projects", requireAuth, async (req, res) => {
+router.get("/v1/projects", requireAuth, requireActive, async (req, res) => {
   const userId = req.tokenUser!.sub;
   try {
     const projects = await db
@@ -59,7 +60,7 @@ router.get("/v1/projects", requireAuth, async (req, res) => {
 });
 
 /* ── POST /v1/projects ────────────────────────────────────────────────────── */
-router.post("/v1/projects", requireAuth, async (req, res) => {
+router.post("/v1/projects", requireAuth, requireActive, async (req, res) => {
   const userId = req.tokenUser!.sub;
   const parsed = CreateProjectBody.safeParse(req.body);
   if (!parsed.success) {
@@ -90,7 +91,7 @@ router.post("/v1/projects", requireAuth, async (req, res) => {
 });
 
 /* ── GET /v1/projects/:id ─────────────────────────────────────────────────── */
-router.get("/v1/projects/:id", requireAuth, async (req, res) => {
+router.get("/v1/projects/:id", requireAuth, requireActive, async (req, res) => {
   const userId = req.tokenUser!.sub;
   const params = GetProjectParams.safeParse(req.params);
   if (!params.success) {
@@ -128,7 +129,7 @@ router.get("/v1/projects/:id", requireAuth, async (req, res) => {
 });
 
 /* ── PUT /v1/projects/:id ─────────────────────────────────────────────────── */
-router.put("/v1/projects/:id", requireAuth, async (req, res) => {
+router.put("/v1/projects/:id", requireAuth, requireActive, async (req, res) => {
   const userId = req.tokenUser!.sub;
   const params = UpdateProjectParams.safeParse(req.params);
   if (!params.success) {
@@ -176,7 +177,7 @@ router.put("/v1/projects/:id", requireAuth, async (req, res) => {
 });
 
 /* ── DELETE /v1/projects/:id ──────────────────────────────────────────────── */
-router.delete("/v1/projects/:id", requireAuth, async (req, res) => {
+router.delete("/v1/projects/:id", requireAuth, requireActive, async (req, res) => {
   const userId = req.tokenUser!.sub;
   const params = DeleteProjectParams.safeParse(req.params);
   if (!params.success) {

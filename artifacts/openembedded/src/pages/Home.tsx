@@ -273,6 +273,7 @@ export function Home() {
         fontFamily: `"DM Sans", system-ui, sans-serif`,
         display: "flex",
         flexDirection: "column",
+        overflowX: "hidden",
       }}
       onClick={() => setOpenMenuId(null)}
     >
