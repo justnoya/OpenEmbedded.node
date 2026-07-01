@@ -40,15 +40,15 @@ function DiscordIcon({ size = 18 }: { size?: number }) {
 /* ── Builder screenshot mockup ─────────────────────────────────────────────── */
 function NodeMockup() {
   return (
-    <div style={{ position: "relative", width: "100%", height: "100%", background: "#111111", display: "flex", alignItems: "center", justifyContent: "center" }}>
+    <div style={{ position: "relative", width: "100%", height: "100%", background: "#111111" }}>
       <img
         src="/builder-preview.png"
         alt="OpenEmbedded builder — node graph with Discord preview"
         style={{
           width: "100%",
           height: "100%",
-          objectFit: "contain",
-          objectPosition: "center center",
+          objectFit: "cover",
+          objectPosition: "top center",
           display: "block",
         }}
       />
@@ -98,15 +98,15 @@ const STEPS = [
 /* ── Mobile Discord preview mockup ────────────────────────────────────────── */
 function MobileMockup() {
   return (
-    <div style={{ position: "relative", width: "100%", height: "100%", background: "#111111", display: "flex", alignItems: "center", justifyContent: "center" }}>
+    <div style={{ position: "relative", width: "100%", height: "100%", background: "#111111" }}>
       <img
         src="/builder-preview-mobile.jpg"
         alt="OpenEmbedded builder on mobile — canvas view"
         style={{
           width: "100%",
           height: "100%",
-          objectFit: "contain",
-          objectPosition: "center center",
+          objectFit: "cover",
+          objectPosition: "top center",
           display: "block",
         }}
       />
