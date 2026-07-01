@@ -313,7 +313,7 @@ export default function NotFound() {
         {[
           { label: "Home", href: "/" },
           { label: "Docs", href: "/docs" },
-          { label: "Support", href: "/support" },
+          { label: "Support", href: "https://discord.gg/FG7zPH7DTv" },
           { label: "Privacy", href: "/privacy" },
         ].map((l) => (
           <a

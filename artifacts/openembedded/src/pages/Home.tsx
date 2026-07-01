@@ -1020,7 +1020,7 @@ export function Home() {
             { label: "Docs",            href: "/docs" },
             { label: "Terms of Service", href: "/tos" },
             { label: "Privacy Policy",  href: "/privacy" },
-            { label: "Support",         href: "https://discord.gg/P84XzN2UKh" },
+            { label: "Support",         href: "https://discord.gg/FG7zPH7DTv" },
           ].map((l) => (
             <a key={l.label} href={l.href}
               style={{

@@ -1003,7 +1003,7 @@ const { success, message } = await res.json();`}</CodeBlock>
 
             <Callout type="info">
               Still stuck? Join our{" "}
-              <a href="https://discord.gg/P84XzN2UKh" target="_blank" rel="noreferrer"
+              <a href="https://discord.gg/FG7zPH7DTv" target="_blank" rel="noreferrer"
                 style={{ color: "#818cf8", textDecoration: "none", fontWeight: 600 }}>
                 Discord support server
               </a>
@@ -1026,7 +1026,7 @@ const { success, message } = await res.json();`}</CodeBlock>
             { label: "Home",           href: "/" },
             { label: "Terms of Service", href: "/tos" },
             { label: "Privacy Policy", href: "/privacy" },
-            { label: "Support",        href: "https://discord.gg/P84XzN2UKh" },
+            { label: "Support",        href: "https://discord.gg/FG7zPH7DTv" },
           ].map((l) => (
             <a key={l.label} href={l.href}
               style={{ fontSize: 13, color: TEXT_MUT, textDecoration: "none", transition: "color 0.12s" }}

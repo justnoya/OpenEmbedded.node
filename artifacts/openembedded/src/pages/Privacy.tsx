@@ -135,7 +135,7 @@ export function Privacy() {
           <Em>OpenEmbedded</Em> is a free, open visual tool for building Discord Components V2
           messages. We do not have a formal legal entity at this time. For privacy-related inquiries,
           contact us via our{" "}
-          <a href="https://discord.gg/P84XzN2UKh" target="_blank" rel="noreferrer"
+          <a href="https://discord.gg/FG7zPH7DTv" target="_blank" rel="noreferrer"
             style={{ color: TEXT_PRI, textDecoration: "underline", textDecorationColor: BORDER }}>
             Discord support server
           </a>.
@@ -298,7 +298,7 @@ export function Privacy() {
         <H2>11. Contact</H2>
         <P>
           For privacy-related questions or data deletion requests, reach us via our{" "}
-          <a href="https://discord.gg/P84XzN2UKh" target="_blank" rel="noreferrer"
+          <a href="https://discord.gg/FG7zPH7DTv" target="_blank" rel="noreferrer"
             style={{ color: TEXT_PRI, textDecoration: "underline", textDecorationColor: BORDER }}>
             Discord support server
           </a>.
@@ -316,7 +316,7 @@ export function Privacy() {
               { label: "Home", href: "/" },
               { label: "Terms of Service", href: "/tos" },
               { label: "Docs", href: "/docs" },
-              { label: "Support", href: "https://discord.gg/P84XzN2UKh" },
+              { label: "Support", href: "https://discord.gg/FG7zPH7DTv" },
             ].map((l) => (
               <a key={l.label} href={l.href}
                 style={{ fontSize: 13, color: TEXT_SEC, textDecoration: "none" }}

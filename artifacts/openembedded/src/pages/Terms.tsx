@@ -269,7 +269,7 @@ export function Terms() {
         <H2>14. Contact</H2>
         <P>
           For questions about these Terms, reach us via our{" "}
-          <a href="https://discord.gg/P84XzN2UKh" target="_blank" rel="noreferrer"
+          <a href="https://discord.gg/FG7zPH7DTv" target="_blank" rel="noreferrer"
             style={{ color: TEXT_PRI, textDecoration: "underline", textDecorationColor: BORDER }}>
             Discord support server
           </a>.
@@ -287,7 +287,7 @@ export function Terms() {
               { label: "Home", href: "/" },
               { label: "Privacy Policy", href: "/privacy" },
               { label: "Docs", href: "/docs" },
-              { label: "Support", href: "https://discord.gg/P84XzN2UKh" },
+              { label: "Support", href: "https://discord.gg/FG7zPH7DTv" },
             ].map((l) => (
               <a key={l.label} href={l.href}
                 style={{ fontSize: 13, color: TEXT_SEC, textDecoration: "none" }}

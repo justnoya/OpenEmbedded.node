@@ -22,7 +22,7 @@ const Admin   = lazy(() => import("./pages/Admin.js").then((m) => ({ default: m.
 const queryClient = new QueryClient();
 
 function Support() {
-  window.location.replace("https://discord.gg/P84XzN2UKh");
+  window.location.replace("https://discord.gg/FG7zPH7DTv");
   return null;
 }
 

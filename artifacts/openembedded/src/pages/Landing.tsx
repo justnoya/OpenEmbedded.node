@@ -595,7 +595,7 @@ export function Landing() {
           <span style={{ fontSize: 12, color: C.t4, fontWeight: 600 }}>OpenEmbedded</span>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
-          {[["Docs", "/docs"], ["Terms", "/tos"], ["Privacy", "/privacy"], ["Support", "/support"]].map(([label, href]) => (
+          {[["Docs", "/docs"], ["Terms", "/tos"], ["Privacy", "/privacy"], ["Support", "https://discord.gg/FG7zPH7DTv"]].map(([label, href]) => (
             <a key={href} href={href} style={{ fontSize: 12, color: C.t4, textDecoration: "none", transition: "color 0.12s" }}
               onMouseEnter={(e) => ((e.target as HTMLElement).style.color = C.t2)}
               onMouseLeave={(e) => ((e.target as HTMLElement).style.color = C.t4)}>
