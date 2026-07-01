@@ -121,6 +121,78 @@ export async function ensureSchema(
         WHEN duplicate_object  THEN NULL;
       END $$
     `);
+
+    /* ── Bot registrations — one per project ──────────────────────────────── */
+    await client.query(`
+      DO $$
+      BEGIN
+        CREATE TABLE bot_registrations (
+          id                UUID         PRIMARY KEY DEFAULT gen_random_uuid(),
+          owner_id          VARCHAR(32)  NOT NULL REFERENCES discord_users(discord_id) ON DELETE CASCADE,
+          project_id        UUID         NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+          application_id    VARCHAR(32)  NOT NULL,
+          public_key        VARCHAR(128) NOT NULL,
+          token_encrypted   TEXT         NOT NULL,
+          bot_name          VARCHAR(255),
+          bot_avatar        TEXT,
+          deployed_at       TIMESTAMP,
+          interaction_url   TEXT,
+          created_at        TIMESTAMP    NOT NULL DEFAULT NOW(),
+          updated_at        TIMESTAMP    NOT NULL DEFAULT NOW(),
+          CONSTRAINT bot_reg_project_unique UNIQUE (project_id)
+        );
+      EXCEPTION
+        WHEN duplicate_table   THEN NULL;
+        WHEN unique_violation  THEN NULL;
+        WHEN duplicate_object  THEN NULL;
+      END $$
+    `);
+
+    /* ── Per-application index for fast interaction lookups ─────────────── */
+    await client.query(`
+      DO $$
+      BEGIN
+        CREATE INDEX idx_bot_reg_app_id ON bot_registrations (application_id);
+      EXCEPTION
+        WHEN duplicate_table   THEN NULL;
+        WHEN unique_violation  THEN NULL;
+        WHEN duplicate_object  THEN NULL;
+      END $$
+    `);
+
+    /* ── Interaction handlers — custom_id → response payload ─────────────── */
+    await client.query(`
+      DO $$
+      BEGIN
+        CREATE TABLE bot_interaction_handlers (
+          id               UUID         PRIMARY KEY DEFAULT gen_random_uuid(),
+          bot_id           UUID         NOT NULL REFERENCES bot_registrations(id) ON DELETE CASCADE,
+          application_id   VARCHAR(32)  NOT NULL,
+          owner_id         VARCHAR(32)  NOT NULL,
+          custom_id        VARCHAR(200) NOT NULL,
+          response_type    VARCHAR(20)  NOT NULL DEFAULT 'send_new',
+          response_payload JSONB        NOT NULL,
+          created_at       TIMESTAMP    NOT NULL DEFAULT NOW(),
+          CONSTRAINT bot_handler_unique UNIQUE (bot_id, custom_id)
+        );
+      EXCEPTION
+        WHEN duplicate_table   THEN NULL;
+        WHEN unique_violation  THEN NULL;
+        WHEN duplicate_object  THEN NULL;
+      END $$
+    `);
+
+    /* ── Index for the hot path: application_id + custom_id lookup ───────── */
+    await client.query(`
+      DO $$
+      BEGIN
+        CREATE INDEX idx_bot_handler_lookup ON bot_interaction_handlers (application_id, custom_id);
+      EXCEPTION
+        WHEN duplicate_table   THEN NULL;
+        WHEN unique_violation  THEN NULL;
+        WHEN duplicate_object  THEN NULL;
+      END $$
+    `);
   } finally {
     client.release();
   }

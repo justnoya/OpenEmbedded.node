@@ -4,7 +4,8 @@ import { useGraphStore } from "../lib/graphStore.js";
 import { usePreviewStore } from "../lib/previewStore.js";
 import { ALLOWED_CHILDREN, INTERACTION_MODES, getInteractionModeMeta, type InteractionMode } from "../lib/connectionRules.js";
 import { useBotValidate, useBotGetChannels, useBotSend, useOpenBotGuilds, useOpenBotChannels, useOpenBotSend, useSendWebhook } from "@workspace/api-client-react";
-import { compileGraph } from "../lib/compiler.js";
+import { compileGraph, compileInteractionHandlers } from "../lib/compiler.js";
+import { useRoute } from "wouter";
 import {
   Package, LayoutTemplate, FileText, ImageIcon, GalleryHorizontalEnd,
   Minus, Rows3, PointerIcon, ListFilter, UserRound, ShieldCheck,
@@ -562,7 +563,7 @@ function ScheduleProperties({ nodeId, d, updateNodeData }: {
 }
 
 // ─────────────────────────────────────────────────────────────
-//  BotProperties (unchanged)
+//  BotProperties
 // ─────────────────────────────────────────────────────────────
 function BotProperties({ nodeId, d, updateNodeData }: {
   nodeId: string;
@@ -572,10 +573,25 @@ function BotProperties({ nodeId, d, updateNodeData }: {
   const payload = usePreviewStore((s) => s.payload);
   const isValid = usePreviewStore((s) => s.isValid);
   const compileErrors = usePreviewStore((s) => s.errors);
+  const nodes = useGraphStore((s) => s.nodes);
+  const edges = useGraphStore((s) => s.edges);
+
   const [tokenInput, setTokenInput] = useState((d.token as string) ?? "");
   const [sendStatus, setSendStatus] = useState<"idle" | "sending" | "success" | "error">("idle");
   const [sendMsg, setSendMsg] = useState("");
   const [fetchingChannels, setFetchingChannels] = useState(false);
+
+  // Go Live state
+  const [deployStatus, setDeployStatus] = useState<"idle" | "deploying" | "deployed" | "error">("idle");
+  const [deployMsg, setDeployMsg] = useState("");
+  const [interactionUrl, setInteractionUrl] = useState<string | null>(null);
+  const [deployedAt, setDeployedAt] = useState<string | null>(null);
+  const [urlCopied, setUrlCopied] = useState(false);
+  const [goLiveOpen, setGoLiveOpen] = useState(false);
+
+  // Get projectId from URL
+  const [, builderParams] = useRoute("/builder/:id");
+  const projectId = builderParams?.id ?? null;
 
   const botValidate = useBotValidate();
   const botGetChannels = useBotGetChannels();
@@ -588,6 +604,21 @@ function BotProperties({ nodeId, d, updateNodeData }: {
   const channels = (d.channels as Array<{ id: string; name: string }>) ?? [];
   const selectedGuildId = d.selectedGuildId as string | null;
   const selectedChannelId = d.selectedChannelId as string | null;
+
+  // Load existing registration on mount
+  useEffect(() => {
+    if (!projectId || !connected) return;
+    fetch(`/api/v1/bot/registration/${projectId}`, { credentials: "include" })
+      .then((r) => r.ok ? r.json() : null)
+      .then((data) => {
+        if (data?.registration) {
+          setInteractionUrl(data.registration.interactionUrl);
+          setDeployedAt(data.registration.deployedAt ?? null);
+          if (data.registration.deployedAt) setDeployStatus("deployed");
+        }
+      })
+      .catch(() => {});
+  }, [projectId, connected]);
 
   const focusBorder = (e: React.FocusEvent) => {
     (e.currentTarget as HTMLElement).style.borderColor = "rgba(88,101,242,0.6)";
@@ -644,6 +675,9 @@ function BotProperties({ nodeId, d, updateNodeData }: {
       token: "", connected: false, botName: null, botAvatar: null,
       guilds: [], channels: [], selectedGuildId: null, selectedChannelId: null,
     });
+    setInteractionUrl(null);
+    setDeployedAt(null);
+    setDeployStatus("idle");
   };
 
   const handleSend = () => {
@@ -665,7 +699,81 @@ function BotProperties({ nodeId, d, updateNodeData }: {
     );
   };
 
+  const handleGoLive = async () => {
+    const token = (d.token as string)?.trim();
+    if (!token || !projectId) return;
+
+    setDeployStatus("deploying");
+    setDeployMsg("");
+
+    try {
+      // Step 1: Register (save encrypted token + get public key)
+      const regRes = await fetch("/api/v1/bot/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          token,
+          projectId,
+          botName: botName ?? undefined,
+          botAvatar: botAvatar ?? undefined,
+        }),
+      });
+      const regData = await regRes.json() as { success: boolean; message?: string; interactionUrl?: string };
+      if (!regData.success) {
+        setDeployStatus("error");
+        setDeployMsg(regData.message ?? "Registration failed. Check your bot token.");
+        return;
+      }
+
+      setInteractionUrl(regData.interactionUrl ?? null);
+
+      // Step 2: Compile interaction handlers from current graph
+      const { handlers } = compileInteractionHandlers(nodes, edges);
+
+      // Step 3: Deploy handlers
+      const deployRes = await fetch(`/api/v1/bot/deploy/${projectId}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ handlers }),
+      });
+      const deployData = await deployRes.json() as {
+        success: boolean; message?: string;
+        deployedAt?: string; interactionUrl?: string; handlerCount?: number;
+      };
+
+      if (!deployData.success) {
+        setDeployStatus("error");
+        setDeployMsg(deployData.message ?? "Deploy failed. Please try again.");
+        return;
+      }
+
+      setDeployStatus("deployed");
+      setDeployedAt(deployData.deployedAt ?? null);
+      if (deployData.interactionUrl) setInteractionUrl(deployData.interactionUrl);
+      setDeployMsg(
+        handlers.length === 0
+          ? "Bot registered! No interaction handlers found — draw interaction edges from buttons to link responses."
+          : `Deployed ${deployData.handlerCount ?? handlers.length} interaction handler${(deployData.handlerCount ?? handlers.length) === 1 ? "" : "s"}.`
+      );
+      setTimeout(() => setDeployMsg(""), 6000);
+    } catch {
+      setDeployStatus("error");
+      setDeployMsg("Network error. Please try again.");
+    }
+  };
+
+  const handleCopyUrl = () => {
+    if (!interactionUrl) return;
+    navigator.clipboard.writeText(interactionUrl).then(() => {
+      setUrlCopied(true);
+      setTimeout(() => setUrlCopied(false), 2000);
+    });
+  };
+
   const isValidating = botValidate.isPending;
+  const isDeploying = deployStatus === "deploying";
 
   return (
     <div>
@@ -772,6 +880,126 @@ function BotProperties({ nodeId, d, updateNodeData }: {
           </div>
         </div>
       )}
+
+      {/* ── Go Live — Persistent Interactions ─────────────────────────────── */}
+      {connected && projectId && (
+        <div style={{ marginTop: 16 }}>
+          {/* Section toggle header */}
+          <button
+            onClick={() => setGoLiveOpen((o) => !o)}
+            style={{
+              width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between",
+              background: "transparent", border: "none", cursor: "pointer", padding: "6px 0",
+              borderTop: "1px solid rgba(255,255,255,0.05)",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
+              <div style={{
+                width: 7, height: 7, borderRadius: "50%",
+                background: deployStatus === "deployed" ? "#3fb950" : "#555",
+                flexShrink: 0,
+              }} />
+              <span style={{ color: deployStatus === "deployed" ? "#3fb950" : "#707070", fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                {deployStatus === "deployed" ? "Live — Interactions Active" : "Go Live"}
+              </span>
+            </div>
+            <span style={{ color: "#444", fontSize: 10 }}>{goLiveOpen ? "▲" : "▼"}</span>
+          </button>
+
+          {goLiveOpen && (
+            <div style={{ paddingTop: 10 }}>
+              {/* Explanation */}
+              <div style={{
+                padding: "9px 11px", borderRadius: 8, marginBottom: 12,
+                background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)",
+                color: "#5a5a5a", fontSize: 11, lineHeight: 1.6,
+              }}>
+                Make buttons and select menus respond <strong style={{ color: "#707070" }}>24/7, forever</strong> — even months after the message was sent. Paste the endpoint URL into your Discord app's <em>Interactions Endpoint URL</em> field.
+              </div>
+
+              {/* Deploy button */}
+              <button
+                onClick={handleGoLive}
+                disabled={isDeploying || !projectId}
+                style={{
+                  width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: 7,
+                  background: deployStatus === "deployed"
+                    ? "rgba(63,185,80,0.12)"
+                    : isDeploying
+                    ? "rgba(255,255,255,0.06)"
+                    : "rgba(255,255,255,0.08)",
+                  border: deployStatus === "deployed"
+                    ? "1px solid rgba(63,185,80,0.22)"
+                    : "1px solid rgba(255,255,255,0.1)",
+                  borderRadius: 8,
+                  color: deployStatus === "deployed" ? "#3fb950" : deployStatus === "error" ? "#f85149" : "#d0d0d0",
+                  fontSize: 13, fontWeight: 700, padding: "10px 0",
+                  cursor: isDeploying ? "wait" : "pointer",
+                  transition: "all 0.15s",
+                  opacity: isDeploying ? 0.6 : 1,
+                }}
+              >
+                {isDeploying
+                  ? <><Loader2 size={14} style={{ animation: "spin 1s linear infinite" }} /> Deploying…</>
+                  : deployStatus === "deployed"
+                  ? <><CheckCircle2 size={14} /> Re-deploy Interactions</>
+                  : <><Zap size={14} /> Deploy Interactions</>
+                }
+              </button>
+
+              {deployMsg && (
+                <div style={{
+                  marginTop: 8, padding: "7px 10px", borderRadius: 7, fontSize: 11,
+                  background: deployStatus === "error" ? "rgba(248,81,73,0.08)" : "rgba(63,185,80,0.07)",
+                  border: deployStatus === "error" ? "1px solid rgba(248,81,73,0.18)" : "1px solid rgba(63,185,80,0.15)",
+                  color: deployStatus === "error" ? "#f85149" : "#3fb950",
+                }}>
+                  {deployMsg}
+                </div>
+              )}
+
+              {/* Interactions Endpoint URL */}
+              {interactionUrl && (
+                <div style={{ marginTop: 12 }}>
+                  <div style={{ color: "#505050", fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 5 }}>
+                    Interactions Endpoint URL
+                  </div>
+                  <div style={{
+                    display: "flex", alignItems: "center", gap: 6,
+                    background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)",
+                    borderRadius: 8, padding: "7px 10px",
+                  }}>
+                    <span style={{ flex: 1, color: "#888", fontSize: 10, fontFamily: "monospace", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                      {interactionUrl}
+                    </span>
+                    <button
+                      onClick={handleCopyUrl}
+                      style={{
+                        background: urlCopied ? "rgba(63,185,80,0.12)" : "rgba(255,255,255,0.06)",
+                        border: urlCopied ? "1px solid rgba(63,185,80,0.2)" : "1px solid rgba(255,255,255,0.1)",
+                        borderRadius: 6, color: urlCopied ? "#3fb950" : "#888",
+                        cursor: "pointer", padding: "3px 8px", fontSize: 10, fontWeight: 600,
+                        flexShrink: 0, whiteSpace: "nowrap",
+                      }}
+                    >
+                      {urlCopied ? "Copied!" : "Copy"}
+                    </button>
+                  </div>
+                  <div style={{ color: "#404040", fontSize: 10, marginTop: 5, lineHeight: 1.5 }}>
+                    Paste this into <strong style={{ color: "#555" }}>Discord Developer Portal</strong> → your app → <em>General Information</em> → <em>Interactions Endpoint URL</em>
+                  </div>
+                  {deployedAt && (
+                    <div style={{ color: "#3a3a3a", fontSize: 10, marginTop: 4 }}>
+                      Last deployed: {new Date(deployedAt).toLocaleString()}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+
       <style>{`@keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }`}</style>
     </div>
   );

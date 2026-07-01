@@ -68,3 +68,14 @@ export const webhookLimiter: RequestHandler = rateLimit({
   legacyHeaders: false,
   message: { error: "Webhook send limit exceeded. Wait a moment." },
 });
+
+/** Discord interactions endpoint — 300 req / min
+ *  Needs to be generous: many users can click buttons simultaneously.
+ *  Signature verification will reject any tampered/unauthorized requests. */
+export const interactionsLimiter: RequestHandler = rateLimit({
+  windowMs: 60 * 1000,
+  max: 300,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Interactions rate limit exceeded." },
+});

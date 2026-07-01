@@ -398,3 +398,95 @@ export function compileGraph(nodes: AppNode[], edges: Edge[]): CompileResult {
 
   return { payload, isValid: errors.length === 0, errors };
 }
+
+// ─────────────────────────────────────────────────────────────
+//  Interaction Handler Compiler
+//  Scans all "interaction" edges in the graph and compiles a
+//  response payload for each source (button / select) node.
+// ─────────────────────────────────────────────────────────────
+
+export interface InteractionHandler {
+  customId: string;
+  mode: string;
+  responsePayload: Record<string, unknown>;
+}
+
+export interface InteractionCompileResult {
+  handlers: InteractionHandler[];
+  errors: { nodeId: string; message: string }[];
+}
+
+/**
+ * Collect all nodes reachable from `rootId` via structural edges
+ * (i.e., excludes "interaction", "flow", and "send" type edges).
+ */
+function getSubgraph(
+  rootId: string,
+  nodes: AppNode[],
+  edges: Edge[],
+): { nodes: AppNode[]; edges: Edge[] } {
+  const structural = edges.filter(
+    (e) => e.type !== "interaction" && e.type !== "flow" && e.type !== "send",
+  );
+  const nodeMap = new Map(nodes.map((n) => [n.id, n]));
+  const visited = new Set<string>();
+  const queue = [rootId];
+
+  while (queue.length) {
+    const id = queue.shift()!;
+    if (visited.has(id)) continue;
+    visited.add(id);
+    for (const e of structural) {
+      if (e.source === id && !visited.has(e.target)) queue.push(e.target);
+    }
+  }
+
+  const subNodes = [...visited].map((id) => nodeMap.get(id)).filter(Boolean) as AppNode[];
+  const subEdges = structural.filter((e) => visited.has(e.source) && visited.has(e.target));
+  return { nodes: subNodes, edges: subEdges };
+}
+
+/**
+ * For every "interaction" edge in the graph, compile the target node's
+ * subtree into a Discord response payload.
+ *
+ * Used by the Bot node's "Go Live" / deploy flow.
+ */
+export function compileInteractionHandlers(
+  nodes: AppNode[],
+  edges: Edge[],
+): InteractionCompileResult {
+  const interactionEdges = edges.filter((e) => e.type === "interaction");
+  const nodeMap = new Map(nodes.map((n) => [n.id, n]));
+  const handlers: InteractionHandler[] = [];
+  const errors: { nodeId: string; message: string }[] = [];
+
+  for (const edge of interactionEdges) {
+    const sourceNode = nodeMap.get(edge.source);
+    const targetNode = nodeMap.get(edge.target);
+    if (!sourceNode || !targetNode) continue;
+
+    const customId =
+      (sourceNode.data["custom_id"] as string | undefined) ??
+      (sourceNode.data["customId"] as string | undefined) ??
+      `component_${edge.source}`;
+
+    const edgeData = edge.data as Record<string, unknown> | undefined;
+    const mode = (edgeData?.["mode"] as string | undefined) ?? "send_new";
+
+    const subgraph = getSubgraph(targetNode.id, nodes, edges);
+    const result = compileGraph(subgraph.nodes, subgraph.edges);
+
+    if (result.errors.length > 0) {
+      errors.push(...result.errors);
+    }
+
+    handlers.push({
+      customId,
+      mode,
+      responsePayload: result.payload as Record<string, unknown>,
+    });
+  }
+
+  return { handlers, errors };
+}
