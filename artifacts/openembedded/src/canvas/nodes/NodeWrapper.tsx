@@ -109,7 +109,6 @@ export function NodeWrapper({
           position: "relative",
           boxShadow,
           transition: "border-color 0.12s, box-shadow 0.12s",
-          overflow: "hidden",
           display: "flex",
           flexDirection: "column",
         }}
