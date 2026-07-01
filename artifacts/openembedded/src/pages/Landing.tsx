@@ -37,165 +37,22 @@ function DiscordIcon({ size = 18 }: { size?: number }) {
   );
 }
 
-/* ── Inline SVG node-graph mockup — mirrors actual Builder canvas ─────────── */
+/* ── Builder screenshot mockup ─────────────────────────────────────────────── */
 function NodeMockup() {
   return (
-    <div style={{ position: "relative", width: "100%", height: "100%" }}>
-      <svg width="100%" height="100%" viewBox="0 0 900 520" preserveAspectRatio="xMidYMid meet" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <pattern id="dots" x="0" y="0" width="24" height="24" patternUnits="userSpaceOnUse">
-            <circle cx="1" cy="1" r="1" fill="rgba(255,255,255,0.045)" />
-          </pattern>
-          <filter id="glow">
-            <feGaussianBlur stdDeviation="3" result="coloredBlur" />
-            <feMerge><feMergeNode in="coloredBlur" /><feMergeNode in="SourceGraphic" /></feMerge>
-          </filter>
-          <linearGradient id="nodeBg" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#2a2a2a" /><stop offset="100%" stopColor="#222222" />
-          </linearGradient>
-          <linearGradient id="previewBg" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#313338" /><stop offset="100%" stopColor="#2b2d31" />
-          </linearGradient>
-          <linearGradient id="edgeGrad" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0%" stopColor="#5865F2" stopOpacity="0.6" /><stop offset="100%" stopColor="#5865F2" stopOpacity="0.15" />
-          </linearGradient>
-        </defs>
-        <rect width="900" height="520" fill="#111111" rx="16" />
-        <rect width="900" height="520" fill="url(#dots)" rx="16" />
-        <g transform="translate(36,60)">
-          <rect width="190" height="96" rx="12" fill="url(#nodeBg)" stroke="rgba(88,101,242,0.5)" strokeWidth="1.5" />
-          <rect width="190" height="96" rx="12" fill="rgba(88,101,242,0.04)" />
-          <rect x="14" y="16" width="32" height="32" rx="8" fill="rgba(88,101,242,0.22)" stroke="rgba(88,101,242,0.35)" strokeWidth="1" />
-          <path d="M30 26L30 22Q30 20 32 20L38 20Q40 20 40 22L40 26Q40 28 38 28L32 28Q30 28 30 26Z" stroke="#818cf8" strokeWidth="1.5" strokeLinecap="round" fill="none"/>
-          <path d="M26 34Q30 30 34 34" stroke="#818cf8" strokeWidth="1.5" strokeLinecap="round" fill="none"/>
-          <text x="56" y="31" fill="#e2e2e2" fontSize="13" fontWeight="600">Webhook</text>
-          <text x="56" y="46" fill="#3d3d3d" fontSize="10">Root node</text>
-          <rect x="14" y="58" width="162" height="26" rx="6" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.07)" strokeWidth="1"/>
-          <text x="24" y="76" fill="#555" fontSize="10">https://discord.com/api/webh…</text>
-          <circle cx="190" cy="48" r="5" fill="#5865F2" filter="url(#glow)"/>
-        </g>
-        <g transform="translate(36,190)">
-          <rect width="190" height="80" rx="12" fill="url(#nodeBg)" stroke="rgba(16,185,129,0.4)" strokeWidth="1.5"/>
-          <rect x="14" y="14" width="32" height="32" rx="8" fill="rgba(16,185,129,0.18)" stroke="rgba(16,185,129,0.3)" strokeWidth="1"/>
-          <path d="M22 24L38 24M22 30L34 30M22 36L36 36" stroke="#34d399" strokeWidth="1.5" strokeLinecap="round"/>
-          <text x="56" y="29" fill="#e2e2e2" fontSize="13" fontWeight="600">Message</text>
-          <text x="56" y="44" fill="#3d3d3d" fontSize="10">Flow config</text>
-          <rect x="14" y="54" width="162" height="16" rx="4" fill="rgba(255,255,255,0.03)"/>
-          <text x="20" y="66" fill="#555" fontSize="9">Welcome to our server! ✨</text>
-          <circle cx="190" cy="40" r="5" fill="#10b981"/>
-        </g>
-        <g transform="translate(290,40)">
-          <rect width="200" height="102" rx="12" fill="url(#nodeBg)" stroke="rgba(139,92,246,0.7)" strokeWidth="2"/>
-          <rect x="14" y="14" width="32" height="32" rx="8" fill="rgba(139,92,246,0.18)" stroke="rgba(139,92,246,0.3)" strokeWidth="1"/>
-          <rect x="20" y="20" width="20" height="20" rx="3" stroke="#a78bfa" strokeWidth="1.5" fill="none"/>
-          <rect x="23" y="23" width="6" height="4" rx="1" fill="#a78bfa"/>
-          <text x="56" y="29" fill="#e2e2e2" fontSize="13" fontWeight="600">Container</text>
-          <text x="56" y="44" fill="#3d3d3d" fontSize="10">Component 17</text>
-          <text x="14" y="72" fill="#555" fontSize="9">Accent color</text>
-          <rect x="14" y="78" width="80" height="14" rx="4" fill="rgba(255,255,255,0.03)"/>
-          <rect x="16" y="80" width="10" height="10" rx="2" fill="#5865F2"/>
-          <text x="30" y="89" fill="#666" fontSize="9">#5865F2</text>
-          <circle cx="0" cy="51" r="5" fill="#8b5cf6"/>
-          <circle cx="200" cy="51" r="5" fill="#8b5cf6"/>
-        </g>
-        <g transform="translate(290,180)">
-          <rect width="200" height="82" rx="12" fill="url(#nodeBg)" stroke="rgba(245,158,11,0.35)" strokeWidth="1.5"/>
-          <rect x="14" y="14" width="32" height="32" rx="8" fill="rgba(245,158,11,0.15)" stroke="rgba(245,158,11,0.28)" strokeWidth="1"/>
-          <path d="M20 22L36 22M20 28L36 28M20 34L30 34" stroke="#fbbf24" strokeWidth="1.5" strokeLinecap="round"/>
-          <text x="56" y="29" fill="#e2e2e2" fontSize="13" fontWeight="600">Section</text>
-          <text x="56" y="44" fill="#3d3d3d" fontSize="10">Component 9</text>
-          <text x="14" y="66" fill="#555" fontSize="9">Accessory: Thumbnail</text>
-          <circle cx="0" cy="41" r="5" fill="#f59e0b"/>
-          <circle cx="200" cy="41" r="5" fill="#f59e0b"/>
-        </g>
-        <g transform="translate(290,295)">
-          <rect width="200" height="72" rx="12" fill="url(#nodeBg)" stroke="rgba(99,102,241,0.35)" strokeWidth="1.5"/>
-          <rect x="14" y="14" width="32" height="32" rx="8" fill="rgba(99,102,241,0.15)" stroke="rgba(99,102,241,0.28)" strokeWidth="1"/>
-          <path d="M20 22L36 22M20 28L30 28M26 18L26 36" stroke="#818cf8" strokeWidth="1.5" strokeLinecap="round"/>
-          <text x="56" y="29" fill="#e2e2e2" fontSize="13" fontWeight="600">Text Display</text>
-          <text x="56" y="44" fill="#3d3d3d" fontSize="10">Component 10</text>
-          <text x="14" y="62" fill="#555" fontSize="9">👋 Hey there! How can we help?</text>
-          <circle cx="0" cy="36" r="5" fill="#6366f1"/>
-        </g>
-        <g transform="translate(290,400)">
-          <rect width="200" height="72" rx="12" fill="url(#nodeBg)" stroke="rgba(236,72,153,0.35)" strokeWidth="1.5"/>
-          <rect x="14" y="14" width="32" height="32" rx="8" fill="rgba(236,72,153,0.15)" stroke="rgba(236,72,153,0.28)" strokeWidth="1"/>
-          <rect x="18" y="20" width="24" height="20" rx="3" stroke="#f472b6" strokeWidth="1.5" fill="none"/>
-          <rect x="20" y="26" width="8" height="8" rx="1.5" fill="#f472b6"/>
-          <text x="56" y="29" fill="#e2e2e2" fontSize="13" fontWeight="600">Action Row</text>
-          <text x="56" y="44" fill="#3d3d3d" fontSize="10">Component 1</text>
-          <text x="14" y="62" fill="#555" fontSize="9">2 buttons attached</text>
-          <circle cx="0" cy="36" r="5" fill="#ec4899"/>
-        </g>
-        <g transform="translate(556,290)">
-          <rect width="180" height="72" rx="12" fill="url(#nodeBg)" stroke="rgba(59,130,246,0.35)" strokeWidth="1.5"/>
-          <rect x="14" y="14" width="32" height="32" rx="8" fill="rgba(59,130,246,0.15)" stroke="rgba(59,130,246,0.28)" strokeWidth="1"/>
-          <rect x="18" y="22" width="24" height="14" rx="4" fill="#3b82f6"/>
-          <text x="56" y="29" fill="#e2e2e2" fontSize="13" fontWeight="600">Button</text>
-          <text x="56" y="44" fill="#3d3d3d" fontSize="10">Component 2</text>
-          <text x="14" y="62" fill="#555" fontSize="9">Get Started · Primary</text>
-          <circle cx="0" cy="36" r="5" fill="#3b82f6"/>
-        </g>
-        <g transform="translate(556,395)">
-          <rect width="180" height="72" rx="12" fill="url(#nodeBg)" stroke="rgba(59,130,246,0.35)" strokeWidth="1.5"/>
-          <rect x="14" y="14" width="32" height="32" rx="8" fill="rgba(59,130,246,0.15)" stroke="rgba(59,130,246,0.28)" strokeWidth="1"/>
-          <rect x="18" y="22" width="24" height="14" rx="4" fill="rgba(255,255,255,0.08)" stroke="rgba(255,255,255,0.15)" strokeWidth="1"/>
-          <text x="56" y="29" fill="#e2e2e2" fontSize="13" fontWeight="600">Button</text>
-          <text x="56" y="44" fill="#3d3d3d" fontSize="10">Component 2</text>
-          <text x="14" y="62" fill="#555" fontSize="9">Learn More · Secondary</text>
-          <circle cx="0" cy="36" r="5" fill="#3b82f6"/>
-        </g>
-        <g transform="translate(556,48)">
-          <rect width="306" height="218" rx="12" fill="url(#previewBg)" stroke="rgba(255,255,255,0.06)" strokeWidth="1"/>
-          <rect width="306" height="36" rx="12" fill="rgba(0,0,0,0.2)"/>
-          <rect width="306" height="24" fill="rgba(0,0,0,0.2)" y="12"/>
-          <circle cx="16" cy="18" r="5" fill="#3d944d"/>
-          <text x="28" y="23" fill="#dbdee1" fontSize="10" fontWeight="600"># welcome</text>
-          <g transform="translate(10,48)">
-            <circle cx="16" cy="16" r="14" fill="#5865F2"/>
-            <text x="10" y="21" fill="#fff" fontSize="14">🤖</text>
-            <text x="36" y="14" fill="#dbdee1" fontSize="10" fontWeight="700">OpenBot</text>
-            <text x="36" y="24" fill="#949ba4" fontSize="9">Today at 12:00 PM</text>
-            <rect x="36" y="32" width="248" height="138" rx="4" fill="#2b2d31" stroke="rgba(255,255,255,0.05)" strokeWidth="1"/>
-            <rect x="36" y="32" width="4" height="138" rx="2" fill="#5865F2"/>
-            <rect x="44" y="42" width="80" height="8" rx="2" fill="#dbdee1" opacity="0.8"/>
-            <rect x="44" y="56" width="160" height="6" rx="2" fill="#949ba4" opacity="0.5"/>
-            <rect x="44" y="66" width="130" height="6" rx="2" fill="#949ba4" opacity="0.35"/>
-            <rect x="44" y="82" width="232" height="28" rx="4" fill="#1e1f22" stroke="rgba(255,255,255,0.06)" strokeWidth="1"/>
-            <rect x="52" y="91" width="60" height="8" rx="4" fill="#5865F2"/>
-            <rect x="118" y="91" width="60" height="8" rx="4" fill="rgba(255,255,255,0.08)" stroke="rgba(255,255,255,0.12)" strokeWidth="1"/>
-            <rect x="44" y="118" width="100" height="44" rx="4" fill="rgba(88,101,242,0.15)" stroke="rgba(88,101,242,0.2)" strokeWidth="1"/>
-            <text x="68" y="143" fill="#818cf8" fontSize="16">🖼</text>
-            <rect x="152" y="118" width="120" height="8" rx="2" fill="#949ba4" opacity="0.3"/>
-            <rect x="152" y="130" width="90" height="6" rx="2" fill="#949ba4" opacity="0.2"/>
-            <rect x="152" y="140" width="110" height="6" rx="2" fill="#949ba4" opacity="0.2"/>
-            <rect x="152" y="152" width="70" height="6" rx="2" fill="#949ba4" opacity="0.2"/>
-          </g>
-        </g>
-        <path d="M226 108C258 108,258 91,290 91" stroke="url(#edgeGrad)" strokeWidth="1.5" strokeDasharray="4 3" opacity="0.8"/>
-        <path d="M226 230C258 230,258 221,290 221" stroke="rgba(16,185,129,0.5)" strokeWidth="1.5" strokeDasharray="4 3"/>
-        <path d="M490 221C520 221,520 331,490 331" stroke="rgba(245,158,11,0.4)" strokeWidth="1.5" strokeDasharray="4 3"/>
-        <path d="M490 221C520 221,520 436,490 436" stroke="rgba(245,158,11,0.4)" strokeWidth="1.5" strokeDasharray="4 3"/>
-        <path d="M490 436C523 436,523 326,556 326" stroke="rgba(236,72,153,0.4)" strokeWidth="1.5" strokeDasharray="4 3"/>
-        <path d="M490 436C523 436,523 431,556 431" stroke="rgba(236,72,153,0.4)" strokeWidth="1.5" strokeDasharray="4 3"/>
-        <rect x="290" y="40" width="200" height="102" rx="12" stroke="rgba(139,92,246,0.7)" strokeWidth="2" fill="none"/>
-        <circle cx="490" cy="91" r="4" fill="#8b5cf6" filter="url(#glow)"/>
-        <rect x="0" y="472" width="900" height="48" fill="rgba(0,0,0,0.3)"/>
-        <rect x="0" y="472" width="900" height="1" fill="rgba(255,255,255,0.05)"/>
-        <circle cx="36" cy="496" r="14" fill="rgba(88,101,242,0.15)" stroke="rgba(88,101,242,0.3)" strokeWidth="1"/>
-        <path d="M30 496L36 490L42 496L38 496L38 502L34 502L34 496Z" fill="#818cf8"/>
-        <text x="62" y="501" fill="#555" fontSize="11">Node Library</text>
-        <rect x="170" y="485" width="1" height="22" fill="rgba(255,255,255,0.06)"/>
-        <text x="182" y="501" fill="#555" fontSize="11">Properties</text>
-        <rect x="265" y="485" width="1" height="22" fill="rgba(255,255,255,0.06)"/>
-        <text x="277" y="501" fill="#555" fontSize="11">Preview</text>
-        <rect x="760" y="484" width="60" height="24" rx="6" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.07)" strokeWidth="1"/>
-        <text x="775" y="500" fill="#555" fontSize="11">100%</text>
-        <circle cx="840" cy="496" r="12" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.07)" strokeWidth="1"/>
-        <text x="836" y="501" fill="#555" fontSize="12">+</text>
-        <circle cx="870" cy="496" r="12" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.07)" strokeWidth="1"/>
-        <text x="866" y="501" fill="#555" fontSize="14">−</text>
-      </svg>
+    <div style={{ position: "relative", width: "100%", height: "100%", borderRadius: 16, overflow: "hidden" }}>
+      <img
+        src="/builder-preview.png"
+        alt="OpenEmbedded builder — node graph with Discord preview"
+        style={{
+          width: "100%",
+          height: "100%",
+          objectFit: "cover",
+          objectPosition: "top left",
+          display: "block",
+          borderRadius: 16,
+        }}
+      />
     </div>
   );
 }
