@@ -11,8 +11,8 @@ import { helmetMiddleware, generalLimiter } from "./middleware/security";
 import { cookieMiddleware } from "./middleware/auth";
 import { pool, ensureSchema } from "@workspace/db";
 
-const UPLOAD_DIR = join(process.cwd(), "uploads");
-mkdirSync(UPLOAD_DIR, { recursive: true });
+const UPLOAD_DIR = join(process.env["NODE_ENV"] === "production" ? "/tmp" : process.cwd(), "uploads");
+try { mkdirSync(UPLOAD_DIR, { recursive: true }); } catch { /* already exists or read-only */ }
 
 /**
  * Kick off schema migration immediately when the module loads.

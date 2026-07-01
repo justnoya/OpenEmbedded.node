@@ -6,8 +6,8 @@ import { mkdirSync } from "fs";
 import { join } from "path";
 import { requireAuth } from "../middleware/auth";
 
-export const UPLOAD_DIR = join(process.cwd(), "uploads");
-mkdirSync(UPLOAD_DIR, { recursive: true });
+export const UPLOAD_DIR = join(process.env["NODE_ENV"] === "production" ? "/tmp" : process.cwd(), "uploads");
+try { mkdirSync(UPLOAD_DIR, { recursive: true }); } catch { /* already exists or read-only */ }
 
 const storage = multer.diskStorage({
   destination: (_req, _file, cb) => cb(null, UPLOAD_DIR),
