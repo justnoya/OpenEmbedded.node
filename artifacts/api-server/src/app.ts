@@ -3,11 +3,16 @@ import express from "express";
 import cors from "cors";
 import pinoHttp from "pino-http";
 import type { IncomingMessage, ServerResponse } from "http";
+import { join } from "path";
+import { mkdirSync } from "fs";
 import router from "./routes";
 import { logger } from "./lib/logger";
 import { helmetMiddleware, generalLimiter } from "./middleware/security";
 import { cookieMiddleware } from "./middleware/auth";
 import { pool, ensureSchema } from "@workspace/db";
+
+const UPLOAD_DIR = join(process.cwd(), "uploads");
+mkdirSync(UPLOAD_DIR, { recursive: true });
 
 /**
  * Kick off schema migration immediately when the module loads.
@@ -104,6 +109,9 @@ app.use(generalLimiter);
 app.use((_req, _res, next) => {
   schemaReady.then(() => next(), next);
 });
+
+/* ── Static uploads ──────────────────────────────────────────────────────*/
+app.use("/uploads", express.static(UPLOAD_DIR, { maxAge: "7d" }));
 
 /* ── Routes ──────────────────────────────────────────────────────────────*/
 app.use("/api", router);

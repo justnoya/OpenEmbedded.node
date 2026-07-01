@@ -1418,6 +1418,252 @@ function OpenEmbeddedProperties({ nodeId, d, updateNodeData }: {
 }
 
 // ─────────────────────────────────────────────────────────────
+//  ImageUploadField — upload + optional URL input for a single image
+// ─────────────────────────────────────────────────────────────
+function ImageUploadField({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  onChange: (url: string) => void;
+}) {
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState("");
+  const [dragging, setDragging] = useState(false);
+
+  const uploadFile = async (file: File) => {
+    if (!file.type.startsWith("image/")) { setError("Please select an image file."); return; }
+    if (file.size > 8 * 1024 * 1024) { setError("Image must be under 8 MB."); return; }
+    setUploading(true);
+    setError("");
+    try {
+      const fd = new FormData();
+      fd.append("image", file);
+      const r = await fetch("/api/v1/upload/image", { method: "POST", body: fd, credentials: "include" });
+      const data = await r.json();
+      if (data.url) { onChange(data.url); }
+      else setError(data.error ?? "Upload failed.");
+    } catch { setError("Upload failed — check connection."); }
+    finally { setUploading(false); }
+  };
+
+  const onDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setDragging(false);
+    const f = e.dataTransfer.files[0];
+    if (f) uploadFile(f);
+  };
+
+  return (
+    <div style={fieldWrap}>
+      <label style={labelStyle}>{label}</label>
+
+      {/* Drop / click zone */}
+      <div
+        onDrop={onDrop}
+        onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
+        onDragLeave={() => setDragging(false)}
+        onClick={() => !uploading && fileRef.current?.click()}
+        style={{
+          border: `1px dashed ${dragging ? "rgba(255,255,255,0.28)" : "rgba(255,255,255,0.11)"}`,
+          borderRadius: 8,
+          cursor: uploading ? "wait" : "pointer",
+          overflow: "hidden",
+          transition: "border-color 0.15s",
+          marginBottom: 7,
+          background: dragging ? "rgba(255,255,255,0.03)" : "transparent",
+        }}
+      >
+        {value ? (
+          <div style={{ padding: 8 }}>
+            <img
+              src={value}
+              alt=""
+              style={{ width: "100%", maxHeight: 100, objectFit: "cover", borderRadius: 5, display: "block" }}
+              onError={(e) => { (e.currentTarget as HTMLImageElement).style.opacity = "0.15"; }}
+            />
+            <div style={{ fontSize: 10, color: "#484848", textAlign: "center", marginTop: 5 }}>
+              {uploading ? "Uploading…" : "Click or drag to replace"}
+            </div>
+          </div>
+        ) : (
+          <div style={{ padding: "16px 8px", textAlign: "center" }}>
+            {uploading ? (
+              <Loader2 size={16} color="#484848" style={{ animation: "spin 1s linear infinite", display: "block", margin: "0 auto 6px" }} />
+            ) : (
+              <Upload size={16} color="#484848" style={{ display: "block", margin: "0 auto 6px" }} />
+            )}
+            <div style={{ fontSize: 12, color: "#545454", fontWeight: 500 }}>
+              {uploading ? "Uploading…" : "Upload image"}
+            </div>
+            <div style={{ fontSize: 10, color: "#3a3a3a", marginTop: 3 }}>PNG, JPG, GIF, WebP · max 8 MB</div>
+          </div>
+        )}
+        <input
+          ref={fileRef}
+          type="file"
+          accept="image/*"
+          style={{ display: "none" }}
+          onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadFile(f); e.target.value = ""; }}
+        />
+      </div>
+
+      {error && <div style={{ color: "#f85149", fontSize: 11, marginBottom: 6 }}>{error}</div>}
+
+      {/* Optional URL fallback */}
+      <input
+        type="text"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder="Or paste URL…"
+        style={{ ...inputStyle, fontSize: 11.5 }}
+      />
+      {value && (
+        <button
+          onClick={() => onChange("")}
+          style={{ marginTop: 5, background: "none", border: "none", color: "#555", fontSize: 10.5, cursor: "pointer", padding: 0, display: "flex", alignItems: "center", gap: 3 }}
+        >
+          <X size={9} /> Clear
+        </button>
+      )}
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+//  GalleryUploadField — upload + URL list for Media Gallery
+// ─────────────────────────────────────────────────────────────
+function GalleryUploadField({
+  items,
+  onChange,
+}: {
+  items: { url: string }[];
+  onChange: (items: { url: string }[]) => void;
+}) {
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
+  const [urlInput, setUrlInput] = useState("");
+  const [error, setError] = useState("");
+
+  const addUrl = (url: string) => {
+    const u = url.trim();
+    if (!u) return;
+    onChange([...items, { url: u }]);
+    setUrlInput("");
+  };
+
+  const removeItem = (i: number) => {
+    onChange(items.filter((_, idx) => idx !== i));
+  };
+
+  const uploadFile = async (file: File) => {
+    if (!file.type.startsWith("image/")) { setError("Please select an image file."); return; }
+    if (file.size > 8 * 1024 * 1024) { setError("Image must be under 8 MB."); return; }
+    setUploading(true);
+    setError("");
+    try {
+      const fd = new FormData();
+      fd.append("image", file);
+      const r = await fetch("/api/v1/upload/image", { method: "POST", body: fd, credentials: "include" });
+      const data = await r.json();
+      if (data.url) { onChange([...items, { url: data.url }]); }
+      else setError(data.error ?? "Upload failed.");
+    } catch { setError("Upload failed — check connection."); }
+    finally { setUploading(false); }
+  };
+
+  const atMax = items.length >= 10;
+
+  return (
+    <div style={fieldWrap}>
+      <label style={labelStyle}>Images ({items.length}/10)</label>
+
+      {/* Thumbnail grid */}
+      {items.length > 0 && (
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 5, marginBottom: 8 }}>
+          {items.map((item, i) => (
+            <div key={i} style={{ position: "relative", borderRadius: 6, overflow: "hidden", aspectRatio: "1", background: "#1a1a1a", border: `1px solid ${BORDER}` }}>
+              <img
+                src={item.url}
+                alt=""
+                style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+                onError={(e) => { (e.currentTarget as HTMLImageElement).style.opacity = "0.2"; }}
+              />
+              <button
+                onClick={() => removeItem(i)}
+                style={{ position: "absolute", top: 3, right: 3, width: 17, height: 17, borderRadius: "50%", background: "rgba(0,0,0,0.72)", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", padding: 0 }}
+              >
+                <X size={9} color="#ccc" />
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Upload button */}
+      {!atMax && (
+        <button
+          onClick={() => fileRef.current?.click()}
+          disabled={uploading}
+          style={{
+            width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: 7,
+            padding: "9px 0", borderRadius: 8,
+            border: "1px dashed rgba(255,255,255,0.11)",
+            background: "transparent",
+            color: "#545454", fontSize: 12, fontWeight: 500,
+            cursor: uploading ? "wait" : "pointer",
+            marginBottom: 7,
+            transition: "border-color 0.15s, color 0.15s",
+          }}
+          onMouseEnter={(e) => { const el = e.currentTarget as HTMLElement; el.style.borderColor = "rgba(255,255,255,0.22)"; el.style.color = "#888"; }}
+          onMouseLeave={(e) => { const el = e.currentTarget as HTMLElement; el.style.borderColor = "rgba(255,255,255,0.11)"; el.style.color = "#545454"; }}
+        >
+          {uploading
+            ? <Loader2 size={13} style={{ animation: "spin 1s linear infinite" }} />
+            : <Upload size={13} />}
+          {uploading ? "Uploading…" : "Add Image"}
+        </button>
+      )}
+      {atMax && <div style={{ fontSize: 11, color: MUTED, marginBottom: 7 }}>Maximum 10 images reached.</div>}
+      <input ref={fileRef} type="file" accept="image/*" style={{ display: "none" }} onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadFile(f); e.target.value = ""; }} />
+
+      {error && <div style={{ color: "#f85149", fontSize: 11, marginBottom: 6 }}>{error}</div>}
+
+      {/* URL paste */}
+      {!atMax && (
+        <div style={{ display: "flex", gap: 5 }}>
+          <input
+            type="text"
+            value={urlInput}
+            onChange={(e) => setUrlInput(e.target.value)}
+            placeholder="Or paste URL and press Enter…"
+            style={{ ...inputStyle, flex: 1, fontSize: 11.5 }}
+            onKeyDown={(e) => { if (e.key === "Enter" && urlInput.trim()) { e.preventDefault(); addUrl(urlInput); } }}
+          />
+          <button
+            onClick={() => addUrl(urlInput)}
+            disabled={!urlInput.trim()}
+            style={{
+              padding: "0 11px", borderRadius: 6,
+              background: urlInput.trim() ? "rgba(255,255,255,0.08)" : "transparent",
+              border: `1px solid ${BORDER}`,
+              color: urlInput.trim() ? "#888" : "#3a3a3a",
+              fontSize: 11, cursor: urlInput.trim() ? "pointer" : "default",
+              flexShrink: 0,
+            }}
+          >
+            Add
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
 //  InteractionFlowsSection — shown on button/select properties
 // ─────────────────────────────────────────────────────────────
 function InteractionFlowsSection({ nodeId }: { nodeId: string }) {
@@ -2117,15 +2363,23 @@ export function PropertiesPanel() {
       case 10:
         return textareaField("Content (Markdown)", "content", "Enter markdown text…");
       case 11:
-        return (<>{textField("Image URL", "url", "https://example.com/image.png")}{textField("Alt Description", "description", "Describe the image…")}</>);
+        return (
+          <>
+            <ImageUploadField
+              label="Image"
+              value={(d.url as string) ?? ""}
+              onChange={(url) => updateNodeData(node.id, { url })}
+            />
+            {textField("Alt Description", "description", "Describe the image…")}
+          </>
+        );
       case 12: {
         const items = (d.items as { url: string }[]) ?? [];
         return (
-          <div style={fieldWrap}>
-            <label style={labelStyle}>Image URLs (one per line)</label>
-            <textarea value={items.map((i) => i.url).join("\n")} placeholder={"https://example.com/image1.png\nhttps://example.com/image2.png"} onChange={(e) => { const urls = e.target.value.split("\n").map((u) => ({ url: u.trim() })).filter((i) => i.url); updateNodeData(node.id, { items: urls }); }} rows={5} data-testid="prop-items" style={{ ...inputStyle, resize: "vertical", lineHeight: 1.6 }} onFocus={focusBorder} onBlur={blurBorder} />
-            <div style={{ color: FAINT, fontSize: 10, marginTop: 4 }}>{items.length} image{items.length !== 1 ? "s" : ""} added</div>
-          </div>
+          <GalleryUploadField
+            items={items}
+            onChange={(newItems) => updateNodeData(node.id, { items: newItems })}
+          />
         );
       }
       case 14:
@@ -2172,7 +2426,28 @@ export function PropertiesPanel() {
           </>
         );
       case 0:
-        return (<>{textField("Title", "title", "Embed title…")}{textareaField("Description", "description", "Embed description…")}{colorField("Accent Color", "color")}{textField("URL (title link)", "url", "https://example.com")}{textField("Author Name", "author", "Author…")}{textField("Footer Text", "footer", "Footer…")}{textField("Image URL", "imageUrl", "https://example.com/image.png")}{textField("Thumbnail URL", "thumbnailUrl", "https://example.com/thumb.png")}{checkboxField("Show Timestamp", "timestamp")}{embedFieldsEditor()}</>);
+        return (
+          <>
+            {textField("Title", "title", "Embed title…")}
+            {textareaField("Description", "description", "Embed description…")}
+            {colorField("Accent Color", "color")}
+            {textField("URL (title link)", "url", "https://example.com")}
+            {textField("Author Name", "author", "Author…")}
+            {textField("Footer Text", "footer", "Footer…")}
+            <ImageUploadField
+              label="Image"
+              value={(d.imageUrl as string) ?? ""}
+              onChange={(url) => updateNodeData(node.id, { imageUrl: url })}
+            />
+            <ImageUploadField
+              label="Thumbnail"
+              value={(d.thumbnailUrl as string) ?? ""}
+              onChange={(url) => updateNodeData(node.id, { thumbnailUrl: url })}
+            />
+            {checkboxField("Show Timestamp", "timestamp")}
+            {embedFieldsEditor()}
+          </>
+        );
       default:
         return <div style={{ color: MUTED, fontSize: 12 }}>No editable properties.</div>;
     }
