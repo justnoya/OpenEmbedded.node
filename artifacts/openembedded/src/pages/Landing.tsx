@@ -37,21 +37,28 @@ function DiscordIcon({ size = 18 }: { size?: number }) {
   );
 }
 
-/* ── Builder screenshot mockup ─────────────────────────────────────────────── */
-function NodeMockup() {
+/* ── Builder screenshot mockup (responsive via <picture>) ──────────────────── */
+function BuilderMockup() {
   return (
-    <div style={{ position: "relative", width: "100%", height: "100%", background: "#111111" }}>
-      <img
-        src="/builder-preview.png"
-        alt="OpenEmbedded builder — node graph with Discord preview"
-        style={{
-          width: "100%",
-          height: "100%",
-          objectFit: "cover",
-          objectPosition: "top center",
-          display: "block",
-        }}
-      />
+    <div style={{ position: "relative", width: "100%", height: "100%", background: "#111111", overflow: "hidden" }}>
+      <picture style={{ display: "contents" }}>
+        {/* Portrait mobile screenshot shown on narrow viewports */}
+        <source media="(max-width: 767px)" srcSet="/builder-preview-mobile.jpg" />
+        {/* Landscape desktop screenshot as default */}
+        <img
+          src="/builder-preview.png"
+          alt="OpenEmbedded builder — node graph with Discord preview"
+          style={{
+            position: "absolute",
+            inset: 0,
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
+            objectPosition: "top left",
+            display: "block",
+          }}
+        />
+      </picture>
     </div>
   );
 }
@@ -95,24 +102,6 @@ const STEPS = [
   { n: "03", color: "#10b981", title: "Send to Discord", desc: "Click Send. Your canvas is compiled, validated, and delivered to Discord in under a second." },
 ];
 
-/* ── Mobile Discord preview mockup ────────────────────────────────────────── */
-function MobileMockup() {
-  return (
-    <div style={{ position: "relative", width: "100%", height: "100%", background: "#111111" }}>
-      <img
-        src="/builder-preview-mobile.jpg"
-        alt="OpenEmbedded builder on mobile — canvas view"
-        style={{
-          width: "100%",
-          height: "100%",
-          objectFit: "cover",
-          objectPosition: "top center",
-          display: "block",
-        }}
-      />
-    </div>
-  );
-}
 
 /* ── Reusable section label ────────────────────────────────────────────────── */
 function SectionLabel({ children }: { children: string }) {
@@ -317,17 +306,7 @@ export function Landing() {
             </div>
           }
         >
-          {/* Responsive content: desktop canvas on md+, mobile Discord UI on small */}
-          <div style={{ width: "100%", height: "100%", position: "relative" }}>
-            {/* Desktop node canvas mockup */}
-            <div className="hidden md:block" style={{ width: "100%", height: "100%" }}>
-              <NodeMockup />
-            </div>
-            {/* Mobile Discord preview */}
-            <div className="block md:hidden" style={{ width: "100%", height: "100%" }}>
-              <MobileMockup />
-            </div>
-          </div>
+          <BuilderMockup />
         </ContainerScroll>
       </div>
 
