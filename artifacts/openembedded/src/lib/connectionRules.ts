@@ -7,16 +7,30 @@
  * Interactive nodes — sub-nodes that also emit interaction edges (button, selects)
  * Root nodes        — standalone, no parent or children (embed, bot, openembedded)
  * Relay nodes       — accept incoming AND emit outgoing connections (webhook)
+ * Trigger nodes     — automation flow sources (no incoming flow edge)
+ * Flow action nodes — automation steps: one in, one out
+ * Flow logic nodes  — branching/control: one in, multiple out
  */
 
-export type NodeClass = "main" | "sub" | "interactive" | "root" | "relay";
+export type NodeClass =
+  | "main"
+  | "sub"
+  | "interactive"
+  | "root"
+  | "relay"
+  | "trigger"
+  | "flow_action"
+  | "flow_logic";
 
 export const NODE_CLASSES: Record<string, NodeClass> = {
+  // Discord Components
   container:         "main",
   embedd:            "main",
   section:           "main",
   actionRow:         "main",
   modal:             "main",
+  checkboxGroup:     "main",
+  radioGroup:        "main",
   embed:             "root",
   bot:               "root",
   openembedded:      "root",
@@ -28,23 +42,60 @@ export const NODE_CLASSES: Record<string, NodeClass> = {
   mediaGallery:      "sub",
   separator:         "sub",
   textInput:         "sub",
+  file:              "sub",
+  checkbox:          "sub",
+  radioButton:       "sub",
+  label:             "sub",
+  fileUpload:        "sub",
   button:            "interactive",
   selectMenu:        "interactive",
   userSelect:        "interactive",
   roleSelect:        "interactive",
   mentionableSelect: "interactive",
   channelSelect:     "interactive",
+  // Automation triggers
+  eventTrigger:        "trigger",
+  slashCommand:        "trigger",
+  interactionTrigger:  "trigger",
+  // Automation actions
+  sendMessageAction:   "flow_action",
+  editMessageAction:   "flow_action",
+  deleteMessageAction: "flow_action",
+  addRoleAction:       "flow_action",
+  removeRoleAction:    "flow_action",
+  moderateAction:      "flow_action",
+  sendDMAction:        "flow_action",
+  addReactionAction:   "flow_action",
+  createThreadAction:  "flow_action",
+  replyAction:         "flow_action",
+  pinMessageAction:    "flow_action",
+  createChannelAction: "flow_action",
+  fetchMemberAction:   "flow_action",
+  // Automation flow control
+  condition:   "flow_logic",
+  delay:       "flow_action",
+  variable:    "flow_action",
+  httpRequest: "flow_action",
+  randomPick:  "flow_action",
 };
 
 /**
  * Allowed child node types for structural (parent-child) edges.
  */
 export const ALLOWED_CHILDREN: Record<string, string[]> = {
-  container: ["section", "textDisplay", "thumbnail", "mediaGallery", "separator", "actionRow"],
+  container: [
+    "section", "textDisplay", "thumbnail", "mediaGallery", "separator",
+    "actionRow", "file", "checkboxGroup", "radioGroup", "label", "fileUpload",
+  ],
   embedd:    ["textDisplay", "thumbnail", "separator"],
   section:   ["textDisplay", "thumbnail"],
-  actionRow: ["button", "selectMenu", "textInput", "userSelect", "roleSelect", "mentionableSelect", "channelSelect"],
-  modal:     ["actionRow"],
+  actionRow: [
+    "button", "selectMenu", "textInput",
+    "userSelect", "roleSelect", "mentionableSelect", "channelSelect",
+  ],
+  modal:         ["actionRow"],
+  checkboxGroup: ["checkbox", "label"],
+  radioGroup:    ["radioButton", "label"],
 };
 
 /**
@@ -58,6 +109,26 @@ const INTERACTION_SOURCES = new Set([
  * Target node types that can receive interaction edges (the "response" panels).
  */
 const INTERACTION_TARGETS = new Set(["container", "embedd", "embed", "section", "modal", "message"]);
+
+/**
+ * Automation flow: all node types that can be connected with flow edges.
+ */
+export const FLOW_SOURCES = new Set([
+  "eventTrigger", "slashCommand", "interactionTrigger",
+  "sendMessageAction", "editMessageAction", "deleteMessageAction",
+  "addRoleAction", "removeRoleAction", "moderateAction", "sendDMAction",
+  "addReactionAction", "createThreadAction", "replyAction",
+  "pinMessageAction", "createChannelAction", "fetchMemberAction",
+  "condition", "delay", "variable", "httpRequest", "randomPick",
+]);
+
+export const FLOW_TARGETS = new Set([
+  "sendMessageAction", "editMessageAction", "deleteMessageAction",
+  "addRoleAction", "removeRoleAction", "moderateAction", "sendDMAction",
+  "addReactionAction", "createThreadAction", "replyAction",
+  "pinMessageAction", "createChannelAction", "fetchMemberAction",
+  "condition", "delay", "variable", "httpRequest", "randomPick",
+]);
 
 /** Returns true if a structural (parent-child) connection is valid. */
 export function isValidNodeConnection(sourceType: string, targetType: string): boolean {
@@ -93,6 +164,11 @@ export function isInteractionConnection(sourceType: string, targetType: string):
   return INTERACTION_SOURCES.has(sourceType) && INTERACTION_TARGETS.has(targetType);
 }
 
+/** Returns true if an automation flow connection is valid. */
+export function isFlowConnection(sourceType: string, targetType: string): boolean {
+  return FLOW_SOURCES.has(sourceType) && FLOW_TARGETS.has(targetType);
+}
+
 const FRIENDLY_NAMES: Record<string, string> = {
   container: "Container", embedd: "Embed", section: "Section",
   textDisplay: "Text block", thumbnail: "Thumbnail",
@@ -102,6 +178,19 @@ const FRIENDLY_NAMES: Record<string, string> = {
   mentionableSelect: "Mentionable Select", channelSelect: "Channel Select",
   embed: "Legacy Embed", bot: "Bot", openembedded: "OpenEmbedded",
   message: "Message", modal: "Modal", schedule: "Schedule", webhook: "Webhook",
+  file: "File", checkboxGroup: "Checkbox Group", checkbox: "Checkbox",
+  radioGroup: "Radio Group", radioButton: "Radio Button",
+  label: "Label", fileUpload: "File Upload",
+  eventTrigger: "Event Trigger", slashCommand: "Slash Command", interactionTrigger: "Interaction Trigger",
+  sendMessageAction: "Send Message", editMessageAction: "Edit Message",
+  deleteMessageAction: "Delete Message", addRoleAction: "Add Role",
+  removeRoleAction: "Remove Role", moderateAction: "Moderate",
+  sendDMAction: "Send DM", addReactionAction: "Add Reaction",
+  createThreadAction: "Create Thread", replyAction: "Reply",
+  pinMessageAction: "Pin Message", createChannelAction: "Create Channel",
+  fetchMemberAction: "Fetch Member",
+  condition: "Condition", delay: "Delay", variable: "Variable",
+  httpRequest: "HTTP Request", randomPick: "Random Pick",
 };
 
 function friendly(type: string) {
@@ -162,6 +251,9 @@ export const NODE_CLASS_LABELS: Record<NodeClass, string> = {
   interactive: "INTERACTIVE",
   root:        "TRIGGER",
   relay:       "RELAY",
+  trigger:     "TRIGGER",
+  flow_action: "ACTION",
+  flow_logic:  "LOGIC",
 };
 
 /** Accent color for the class badge. */
@@ -171,4 +263,7 @@ export const NODE_CLASS_COLORS: Record<NodeClass, string> = {
   interactive: "#f59e0b",
   root:        "#f59e0b",
   relay:       "#10b981",
+  trigger:     "#8b5cf6",
+  flow_action: "#3b82f6",
+  flow_logic:  "#f59e0b",
 };

@@ -12,6 +12,12 @@ import {
   Plus, X, Bot, Webhook, Clock,
   CheckCircle2, AlertCircle, Loader2, Send, RefreshCw, Zap, Circle,
   ArrowRight, Info, MessageCircle, PanelTop, GripVertical,
+  // New icons for CV2 forms
+  FileIcon, CheckSquare, Type, Upload,
+  // Automation
+  Terminal, MousePointerClick, PencilLine, UserPlus, UserMinus,
+  ShieldAlert, MessageSquare, SmilePlus, MessageSquarePlus, Reply,
+  Pin, UserSearch, GitBranch, Timer, Variable, Globe, Dices,
 } from "lucide-react";
 import { ReactNode } from "react";
 import { AgentIcon } from "../canvas/AgentIcon.js";
@@ -32,12 +38,45 @@ const TYPE_META: Record<number, { label: string; icon: ReactNode; color: string 
   7:    { label: "Mentionable Select", icon: <AtSign size={14} />,               color: "#ec4899" },
   8:    { label: "Channel Select",     icon: <Hash size={14} />,                 color: "#22c55e" },
   0:    { label: "Embed (V1)",         icon: <MessageSquareCode size={14} />,    color: "#f59e0b" },
+  // CV2 Forms
+  13:   { label: "File",               icon: <FileIcon size={14} />,             color: "#6b7280" },
+  20:   { label: "Checkbox",           icon: <CheckSquare size={14} />,          color: "#0ea5e9" },
+  21:   { label: "Checkbox Group",     icon: <CheckSquare size={14} />,          color: "#06b6d4" },
+  22:   { label: "Radio Button",       icon: <Circle size={14} />,               color: "#8b5cf6" },
+  23:   { label: "Radio Group",        icon: <Circle size={14} />,               color: "#a855f7" },
+  24:   { label: "Label",              icon: <Type size={14} />,                 color: "#94a3b8" },
+  25:   { label: "File Upload",        icon: <Upload size={14} />,               color: "#22c55e" },
+  // Utility
   [-1]: { label: "Bot",               icon: <Bot size={14} />,                  color: "#5865F2" },
   [-2]: { label: "OpenEmbedded",       icon: <AgentIcon size={14} color="rgba(255,255,255,0.75)" />, color: "#6366f1" },
   [-3]: { label: "Message",            icon: <MessageCircle size={14} />,        color: "#10b981" },
   [-4]: { label: "Modal",              icon: <PanelTop size={14} />,             color: "#3b82f6" },
   [-5]: { label: "Webhook",            icon: <Webhook size={14} />,              color: "#5865F2" },
   [-6]: { label: "Schedule",           icon: <Clock size={14} />,               color: "#f59e0b" },
+  // Automation Triggers
+  [-10]: { label: "Event Trigger",     icon: <Zap size={14} />,                  color: "#8b5cf6" },
+  [-11]: { label: "Slash Command",     icon: <Terminal size={14} />,             color: "#6366f1" },
+  [-12]: { label: "Interaction Trigger", icon: <MousePointerClick size={14} />, color: "#f59e0b" },
+  // Automation Actions
+  [-20]: { label: "Send Message",      icon: <Send size={14} />,                 color: "#3b82f6" },
+  [-21]: { label: "Edit Message",      icon: <PencilLine size={14} />,           color: "#64748b" },
+  [-22]: { label: "Delete Message",    icon: <Trash2 size={14} />,               color: "#ef4444" },
+  [-23]: { label: "Add Role",          icon: <UserPlus size={14} />,             color: "#22c55e" },
+  [-24]: { label: "Remove Role",       icon: <UserMinus size={14} />,            color: "#f97316" },
+  [-25]: { label: "Moderate",          icon: <ShieldAlert size={14} />,          color: "#ef4444" },
+  [-26]: { label: "Send DM",           icon: <MessageSquare size={14} />,        color: "#06b6d4" },
+  [-27]: { label: "Add Reaction",      icon: <SmilePlus size={14} />,            color: "#fbbf24" },
+  [-28]: { label: "Create Thread",     icon: <MessageSquarePlus size={14} />,    color: "#0ea5e9" },
+  [-29]: { label: "Reply",             icon: <Reply size={14} />,                color: "#3b82f6" },
+  [-30]: { label: "Pin Message",       icon: <Pin size={14} />,                  color: "#fbbf24" },
+  [-31]: { label: "Create Channel",    icon: <Hash size={14} />,                 color: "#22c55e" },
+  [-32]: { label: "Fetch Member",      icon: <UserSearch size={14} />,           color: "#06b6d4" },
+  // Flow Control
+  [-33]: { label: "Condition",         icon: <GitBranch size={14} />,            color: "#f59e0b" },
+  [-34]: { label: "Delay",             icon: <Timer size={14} />,                color: "#78716c" },
+  [-35]: { label: "Variable",          icon: <Variable size={14} />,             color: "#a78bfa" },
+  [-36]: { label: "HTTP Request",      icon: <Globe size={14} />,                color: "#0ea5e9" },
+  [-37]: { label: "Random Pick",       icon: <Dices size={14} />,                color: "#ec4899" },
 };
 
 const BG = "#161616";
@@ -1581,6 +1620,267 @@ export function PropertiesPanel() {
         </>
       );
     }
+    // ── CV2 Forms ──────────────────────────────────────────────────────────
+    if ((d.componentType as number) === 13) {
+      return (<>{textField("Filename / URL", "filename", "attachment.png")}{textField("Description", "description", "What this file contains…")}{checkboxField("Spoiler (blur)", "spoiler")}</>);
+    }
+    if ((d.componentType as number) === 20) {
+      return (<>{textField("Label", "label", "Check me")}{textField("Value (unique key)", "value", "option_a")}{checkboxField("Checked by default", "defaultChecked")}</>);
+    }
+    if ((d.componentType as number) === 21) {
+      return (<>{textField("Group Label", "label", "Pick options…")}{checkboxField("Required", "required")}{childOrder()}</>);
+    }
+    if ((d.componentType as number) === 22) {
+      return (<>{textField("Label", "label", "Option A")}{textField("Value (unique key)", "value", "option_a")}{checkboxField("Selected by default", "defaultSelected")}</>);
+    }
+    if ((d.componentType as number) === 23) {
+      return (<>{textField("Group Label", "label", "Choose one…")}{checkboxField("Required", "required")}{childOrder()}</>);
+    }
+    if ((d.componentType as number) === 24) {
+      return textField("Label Text", "label", "Full Name");
+    }
+    if ((d.componentType as number) === 25) {
+      return (<>{textField("Label", "label", "Upload a file")}{textField("Custom ID", "custom_id", "file_upload_1")}{checkboxField("Required", "required")}</>);
+    }
+
+    // ── Automation Triggers ────────────────────────────────────────────────
+    if ((d.componentType as number) === -10) {
+      const EVENT_OPTIONS = [
+        "messageCreate", "messageUpdate", "messageDelete",
+        "guildMemberAdd", "guildMemberRemove", "guildMemberUpdate",
+        "messageReactionAdd", "messageReactionRemove",
+        "voiceStateUpdate", "presenceUpdate",
+        "guildBanAdd", "guildBanRemove",
+        "channelCreate", "channelDelete",
+        "roleCreate", "roleDelete",
+        "threadCreate", "guildCreate", "guildDelete",
+        "autoModerationActionExecution",
+      ];
+      return (
+        <>
+          {selectField("Gateway Event", "event", EVENT_OPTIONS)}
+          <div style={{ padding: "8px 10px", borderRadius: 8, background: "rgba(139,92,246,0.05)", border: "1px solid rgba(139,92,246,0.15)", marginBottom: 14 }}>
+            <div style={{ color: "#8b5cf6", fontSize: 10, fontWeight: 700, marginBottom: 3, textTransform: "uppercase", letterSpacing: "0.06em" }}>Automation Flow</div>
+            <div style={{ color: "#404040", fontSize: 11, lineHeight: 1.55 }}>
+              Connect the right handle → an Action node to define what happens when this event fires.
+            </div>
+          </div>
+        </>
+      );
+    }
+    if ((d.componentType as number) === -11) {
+      return (
+        <>
+          {textField("Command Name", "name", "greet")}
+          {textField("Description", "description", "Greets a server member")}
+          <div style={{ padding: "8px 10px", borderRadius: 8, background: "rgba(99,102,241,0.05)", border: "1px solid rgba(99,102,241,0.15)", marginBottom: 14 }}>
+            <div style={{ color: "#6366f1", fontSize: 10, fontWeight: 700, marginBottom: 3, textTransform: "uppercase", letterSpacing: "0.06em" }}>Slash Command</div>
+            <div style={{ color: "#404040", fontSize: 11, lineHeight: 1.55 }}>
+              The bot will register <code style={{ color: "#818cf8", fontSize: 10 }}>/{(d.name as string) || "command"}</code> on startup. Connect → a Reply action to respond.
+            </div>
+          </div>
+        </>
+      );
+    }
+    if ((d.componentType as number) === -12) {
+      return (
+        <>
+          {selectField("Trigger Type", "triggerType", ["button", "selectMenu", "modalSubmit", "autocomplete"])}
+          {textField("Custom ID (match pattern)", "custom_id", "my_button_id")}
+          <div style={{ padding: "8px 10px", borderRadius: 8, background: "rgba(245,158,11,0.05)", border: "1px solid rgba(245,158,11,0.15)", marginBottom: 14 }}>
+            <div style={{ color: "#f59e0b", fontSize: 10, fontWeight: 700, marginBottom: 3, textTransform: "uppercase", letterSpacing: "0.06em" }}>Interaction Trigger</div>
+            <div style={{ color: "#404040", fontSize: 11, lineHeight: 1.55 }}>
+              Fires when a user clicks a button or interacts with a component whose custom_id matches.
+            </div>
+          </div>
+        </>
+      );
+    }
+
+    // ── Automation Actions ─────────────────────────────────────────────────
+    if ((d.componentType as number) === -20) {
+      return (
+        <>
+          {textareaField("Message Content", "content", "Hello {{user.username}}! Welcome!", 4)}
+          {selectField("Target Channel", "channelMode", ["same", "specific", "from_variable"])}
+          {(d.channelMode as string) === "specific" && textField("Channel ID", "channelId", "123456789")}
+          {(d.channelMode as string) === "from_variable" && textField("Variable Name", "channelIdVar", "channelId")}
+          {checkboxField("Ephemeral (only visible to trigger user)", "ephemeral")}
+        </>
+      );
+    }
+    if ((d.componentType as number) === -21) {
+      return (
+        <>
+          {selectField("Message to Edit", "messageIdMode", ["from_trigger", "specific", "from_variable"])}
+          {(d.messageIdMode as string) === "specific" && textField("Message ID", "messageId", "123456789")}
+          {(d.messageIdMode as string) === "from_variable" && textField("Variable Name", "messageIdVar", "messageId")}
+          {textareaField("New Content", "content", "Updated content…", 4)}
+        </>
+      );
+    }
+    if ((d.componentType as number) === -22) {
+      return (
+        <>
+          {selectField("Message to Delete", "messageIdMode", ["from_trigger", "specific", "from_variable"])}
+          {(d.messageIdMode as string) === "specific" && textField("Message ID", "messageId", "123456789")}
+          {numberField("Delay (seconds)", "delaySeconds", 0, 86400)}
+        </>
+      );
+    }
+    if ((d.componentType as number) === -23 || (d.componentType as number) === -24) {
+      return (
+        <>
+          {textField("Role ID", "roleId", "123456789")}
+          {textField("Role Name (display only)", "roleName", "Members")}
+          {selectField("Target User", "userMode", ["from_trigger", "specific", "from_variable"])}
+          {(d.userMode as string) === "specific" && textField("User ID", "userId", "123456789")}
+        </>
+      );
+    }
+    if ((d.componentType as number) === -25) {
+      return (
+        <>
+          {selectField("Action", "mode", ["kick", "ban", "unban", "timeout"])}
+          {(d.mode as string) === "timeout" && numberField("Duration (seconds)", "timeoutDuration", 1, 2419200)}
+          {textField("Reason", "reason", "Violated server rules")}
+          {selectField("Target User", "userMode", ["from_trigger", "specific"])}
+          {(d.userMode as string) === "specific" && textField("User ID", "userId", "123456789")}
+        </>
+      );
+    }
+    if ((d.componentType as number) === -26) {
+      return (
+        <>
+          {selectField("Target User", "userMode", ["from_trigger", "specific", "from_variable"])}
+          {(d.userMode as string) === "specific" && textField("User ID", "userId", "123456789")}
+          {textareaField("Message Content", "content", "Hello {{user.username}}!", 4)}
+        </>
+      );
+    }
+    if ((d.componentType as number) === -27) {
+      return (
+        <>
+          {textField("Emoji", "emoji", "👍 or :thumbsup:")}
+          {selectField("Target Message", "messageIdMode", ["from_trigger", "specific", "from_variable"])}
+          {(d.messageIdMode as string) === "specific" && textField("Message ID", "messageId", "123456789")}
+        </>
+      );
+    }
+    if ((d.componentType as number) === -28) {
+      return (
+        <>
+          {textField("Thread Name", "name", "Discussion Thread")}
+          {selectField("Auto-Archive After", "autoArchiveDuration", ["60", "1440", "4320", "10080"])}
+          {checkboxField("Private Thread", "isPrivate")}
+          {selectField("From Message", "messageIdMode", ["from_trigger", "specific"])}
+          {(d.messageIdMode as string) === "specific" && textField("Message ID", "messageId", "123456789")}
+        </>
+      );
+    }
+    if ((d.componentType as number) === -29) {
+      return (
+        <>
+          {selectField("Reply Mode", "mode", ["reply", "ephemeral", "followup", "defer", "defer_ephemeral", "update"])}
+          {(d.mode as string) !== "defer" && (d.mode as string) !== "defer_ephemeral" && textareaField("Content", "content", "Response text…", 4)}
+        </>
+      );
+    }
+    if ((d.componentType as number) === -30) {
+      return (
+        <>
+          {selectField("Action", "action", ["pin", "unpin"])}
+          {selectField("Target Message", "messageIdMode", ["from_trigger", "specific"])}
+          {(d.messageIdMode as string) === "specific" && textField("Message ID", "messageId", "123456789")}
+        </>
+      );
+    }
+    if ((d.componentType as number) === -31) {
+      return (
+        <>
+          {selectField("Channel Type", "channelType", ["text", "voice", "category", "announcement", "forum", "stage"])}
+          {textField("Channel Name", "name", "new-channel")}
+          {textField("Store Result As", "storeAs", "newChannel")}
+        </>
+      );
+    }
+    if ((d.componentType as number) === -32) {
+      return (
+        <>
+          {selectField("Target User", "userMode", ["from_trigger", "specific", "from_variable"])}
+          {(d.userMode as string) === "specific" && textField("User ID", "userId", "123456789")}
+          {textField("Store Result As", "storeAs", "member")}
+        </>
+      );
+    }
+
+    // ── Flow Control ───────────────────────────────────────────────────────
+    if ((d.componentType as number) === -33) {
+      const CONDITION_TYPES = [
+        "hasRole", "notHasRole", "messageContains", "messageStartsWith",
+        "messageMatchesRegex", "isBot", "isNotBot", "channelIs", "userIs",
+        "memberJoinedBefore", "custom",
+      ];
+      return (
+        <>
+          {selectField("Condition Type", "conditionType", CONDITION_TYPES)}
+          {textField("Value", "value", "Role ID, keyword, or expression…")}
+          <div style={{ padding: "8px 10px", borderRadius: 8, background: "rgba(245,158,11,0.05)", border: "1px solid rgba(245,158,11,0.15)", marginBottom: 14 }}>
+            <div style={{ color: "#f59e0b", fontSize: 10, fontWeight: 700, marginBottom: 3, textTransform: "uppercase", letterSpacing: "0.06em" }}>Branching</div>
+            <div style={{ color: "#404040", fontSize: 11, lineHeight: 1.55 }}>
+              True branch (green handle) and False branch (red handle) on the right side. Connect each to different action chains.
+            </div>
+          </div>
+        </>
+      );
+    }
+    if ((d.componentType as number) === -34) {
+      return (
+        <>
+          {numberField("Duration", "duration", 0, 86400)}
+          {selectField("Unit", "unit", ["seconds", "minutes", "hours"])}
+        </>
+      );
+    }
+    if ((d.componentType as number) === -35) {
+      return (
+        <>
+          {selectField("Operation", "operation", ["set", "get", "increment", "decrement", "append", "delete", "toggle"])}
+          {textField("Variable Name", "varName", "myVar")}
+          {(d.operation as string) !== "delete" && (d.operation as string) !== "get" && textField("Value", "value", "Hello world or {{event.content}}")}
+        </>
+      );
+    }
+    if ((d.componentType as number) === -36) {
+      return (
+        <>
+          {selectField("Method", "method", ["GET", "POST", "PUT", "PATCH", "DELETE"])}
+          {textField("URL", "url", "https://api.example.com/endpoint")}
+          {textareaField("Request Body (JSON)", "body", '{"key": "value"}', 3)}
+          {textField("Store Response As", "storeAs", "response")}
+        </>
+      );
+    }
+    if ((d.componentType as number) === -37) {
+      const choices = (d.choices as string[]) ?? [];
+      return (
+        <>
+          <div style={fieldWrap}>
+            <label style={labelStyle}>Choices (one per line)</label>
+            <textarea
+              value={choices.join("\n")}
+              placeholder={"option one\noption two\noption three"}
+              onChange={(e) => updateNodeData(node.id, { choices: e.target.value.split("\n").filter((s) => s.trim()) })}
+              rows={5}
+              style={{ ...inputStyle, resize: "vertical", lineHeight: 1.6 }}
+            />
+            <div style={{ color: "#3a3a3a", fontSize: 10, marginTop: 4 }}>{choices.length} choice{choices.length !== 1 ? "s" : ""}</div>
+          </div>
+          {textField("Store Result As", "storeAs", "randomPick")}
+        </>
+      );
+    }
+
     switch (d.componentType) {
       case 17:
         return (<>{colorField("Accent Color", "accent_color")}{checkboxField("Spoiler (blur content)", "spoiler")}{childOrder()}</>);

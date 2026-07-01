@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { create } from 'zustand';
 import { Node, Edge, Connection, addEdge, applyNodeChanges, applyEdgeChanges, NodeChange, EdgeChange } from '@xyflow/react';
-import { isValidNodeConnection, isInteractionConnection, isBotSendConnection, InteractionMode } from './connectionRules.js';
+import { isValidNodeConnection, isInteractionConnection, isBotSendConnection, isFlowConnection, InteractionMode } from './connectionRules.js';
 
 export type DiscordComponentType = 'container' | 'section' | 'text' | 'thumbnail' | 'media' | 'separator' | 'actionRow' | 'button' | 'embed';
 
@@ -166,6 +166,26 @@ export const useGraphStore = create<GraphState>((set, get) => ({
         past: [...past.slice(-MAX_HISTORY + 1), snap(nodes, edges)],
         future: [],
         edges: [...edges, interactionEdge],
+      });
+      return;
+    }
+
+    // ── Automation flow edge (trigger/action → action/logic) ────────────────
+    if (isFlowConnection(srcType, tgtType)) {
+      const flowEdge: Edge = {
+        id: `flow_${edgeIdCounter++}`,
+        source: connection.source,
+        target: connection.target,
+        sourceHandle: connection.sourceHandle ?? undefined,
+        targetHandle: connection.targetHandle ?? undefined,
+        type: "flow",
+        style: { stroke: "#8b5cf6", strokeWidth: 2, strokeDasharray: "6 3" },
+        markerEnd: { type: "arrowclosed" as const, color: "#8b5cf6", width: 14, height: 14 },
+      };
+      set({
+        past: [...past.slice(-MAX_HISTORY + 1), snap(nodes, edges)],
+        future: [],
+        edges: [...edges, flowEdge],
       });
       return;
     }

@@ -15,6 +15,98 @@ export interface CompileResult {
   errors: { nodeId: string; message: string }[];
 }
 
+// ─────────────────────────────────────────────────────────────
+//  Flow Compiler — produces a FlowDefinition for the bot
+// ─────────────────────────────────────────────────────────────
+
+export interface FlowStep {
+  id: string;
+  type: string;
+  data: Record<string, unknown>;
+  next?: string;    // default next step id
+  nextTrue?: string;  // condition true branch
+  nextFalse?: string; // condition false branch
+}
+
+export interface FlowDefinition {
+  trigger: { type: string; config: Record<string, unknown> };
+  steps: FlowStep[];
+}
+
+export interface FlowCompileResult {
+  flows: FlowDefinition[];
+  errors: { nodeId: string; message: string }[];
+}
+
+const TRIGGER_TYPES = new Set(["eventTrigger", "slashCommand", "interactionTrigger"]);
+
+export function compileFlowGraph(nodes: AppNode[], edges: Edge[]): FlowCompileResult {
+  const errors: { nodeId: string; message: string }[] = [];
+  const flowEdges = edges.filter((e) => e.type === "flow");
+  const nodeMap = new Map(nodes.map((n) => [n.id, n]));
+
+  // Build adjacency: outgoing flow edges per source
+  const flowNext = new Map<string, { targetId: string; handleId?: string }[]>();
+  for (const e of flowEdges) {
+    if (!flowNext.has(e.source)) flowNext.set(e.source, []);
+    flowNext.get(e.source)!.push({ targetId: e.target, handleId: e.sourceHandle ?? undefined });
+  }
+
+  // Find all trigger nodes
+  const triggerNodes = nodes.filter((n) => TRIGGER_TYPES.has(n.type ?? ""));
+  if (triggerNodes.length === 0) return { flows: [], errors };
+
+  const flows: FlowDefinition[] = [];
+
+  for (const trigger of triggerNodes) {
+    const visited = new Set<string>();
+    visited.add(trigger.id); // mark trigger as visited so it's skipped as a step
+    const steps: FlowStep[] = [];
+
+    // Seed queue with the trigger's direct successors
+    const initialNexts = flowNext.get(trigger.id) ?? [];
+    const queue: string[] = initialNexts.map((n) => n.targetId);
+
+    while (queue.length) {
+      const nodeId = queue.shift()!;
+      if (visited.has(nodeId)) continue;
+      visited.add(nodeId);
+
+      const node = nodeMap.get(nodeId);
+      if (!node) continue;
+
+      const nexts = flowNext.get(nodeId) ?? [];
+      const step: FlowStep = {
+        id: nodeId,
+        type: node.type ?? "",
+        data: { ...node.data } as Record<string, unknown>,
+      };
+
+      if (node.type === "condition") {
+        const trueEdge = nexts.find((n) => n.handleId === "true");
+        const falseEdge = nexts.find((n) => n.handleId === "false");
+        if (trueEdge) { step.nextTrue = trueEdge.targetId; queue.push(trueEdge.targetId); }
+        if (falseEdge) { step.nextFalse = falseEdge.targetId; queue.push(falseEdge.targetId); }
+      } else {
+        const next = nexts[0];
+        if (next) { step.next = next.targetId; queue.push(next.targetId); }
+      }
+      steps.push(step);
+    }
+
+    flows.push({
+      trigger: {
+        type: trigger.type ?? "",
+        config: { ...trigger.data } as Record<string, unknown>,
+      },
+      steps,
+    });
+  }
+
+  return { flows, errors };
+}
+
+// ─────────────────────────────────────────────────────────────
 export function compileGraph(nodes: AppNode[], edges: Edge[]): CompileResult {
   const errors: { nodeId: string; message: string }[] = [];
 
@@ -27,8 +119,10 @@ export function compileGraph(nodes: AppNode[], edges: Edge[]): CompileResult {
   const parentOf = new Map<string, string>();
 
   // Only structural edges (type "default" or undefined) define the message hierarchy.
-  // Interaction edges (type "interaction") and send edges (type "send") are not structural.
-  const structuralEdges = edges.filter((e) => e.type !== "interaction" && e.type !== "send");
+  // Interaction, send, and flow edges are not structural.
+  const structuralEdges = edges.filter(
+    (e) => e.type !== "interaction" && e.type !== "send" && e.type !== "flow"
+  );
 
   for (const edge of structuralEdges) {
     if (!childrenOf.has(edge.source)) childrenOf.set(edge.source, []);
@@ -176,6 +270,72 @@ export function compileGraph(nodes: AppNode[], edges: Edge[]): CompileResult {
         if (d.required != null) ti.required = Boolean(d.required);
         if (d.value) ti.value = d.value;
         return ti;
+      }
+      case 13: {
+        // File component (CV2)
+        hasV2 = true;
+        const url = ((d.filename as string) ?? "").trim();
+        if (!url) {
+          errors.push({ nodeId: id, message: "File component needs a filename or attachment URL" });
+          return null;
+        }
+        const fileComp: Record<string, unknown> = { type: 13, file: { url } };
+        if (d.spoiler) fileComp.spoiler = true;
+        return fileComp;
+      }
+      case 20: {
+        // Checkbox (CV2 form)
+        hasV2 = true;
+        if (!d.value) errors.push({ nodeId: id, message: "Checkbox needs a unique value" });
+        const cb: Record<string, unknown> = {
+          type: 20, value: d.value ?? `cb_${id}`, label: d.label ?? "Checkbox",
+        };
+        if (d.defaultChecked) cb.default_state = true;
+        return cb;
+      }
+      case 21: {
+        // CheckboxGroup (CV2 form)
+        hasV2 = true;
+        const checkboxKids = kids.map(buildComponent).filter(Boolean) as Record<string, unknown>[];
+        const cg: Record<string, unknown> = { type: 21, components: checkboxKids };
+        if (d.label) cg.label = d.label;
+        if (d.required) cg.required = true;
+        return cg;
+      }
+      case 22: {
+        // RadioButton (CV2 form)
+        hasV2 = true;
+        if (!d.value) errors.push({ nodeId: id, message: "Radio Button needs a unique value" });
+        const rb: Record<string, unknown> = {
+          type: 22, value: d.value ?? `rb_${id}`, label: d.label ?? "Option",
+        };
+        if (d.defaultSelected) rb.default_state = true;
+        return rb;
+      }
+      case 23: {
+        // RadioGroup (CV2 form)
+        hasV2 = true;
+        const radioKids = kids.map(buildComponent).filter(Boolean) as Record<string, unknown>[];
+        const rg: Record<string, unknown> = { type: 23, components: radioKids };
+        if (d.label) rg.label = d.label;
+        if (d.required) rg.required = true;
+        return rg;
+      }
+      case 24: {
+        // Label (CV2 form)
+        hasV2 = true;
+        if (!d.label) errors.push({ nodeId: id, message: "Label component needs text content" });
+        return { type: 24, label: d.label ?? "" };
+      }
+      case 25: {
+        // FileUpload (CV2 form)
+        hasV2 = true;
+        if (!d.custom_id) errors.push({ nodeId: id, message: "File Upload needs a unique custom_id" });
+        const fu: Record<string, unknown> = {
+          type: 25, custom_id: d.custom_id ?? `fu_${id}`, label: d.label ?? "Upload File",
+        };
+        if (d.required) fu.required = true;
+        return fu;
       }
       case 5:
       case 6:
