@@ -2,7 +2,8 @@
 import { memo } from "react";
 import { Handle, Position, NodeProps } from "@xyflow/react";
 import { NodeWrapper } from "./NodeWrapper.js";
-import { Sparkles, AlertCircle, Hash, Server, Send, Zap } from "lucide-react";
+import { AlertCircle, Hash, Server, Send, Zap } from "lucide-react";
+import { AgentIcon } from "../AgentIcon.js";
 import { useGraphStore } from "../../lib/graphStore.js";
 
 function OpenEmbeddedNodeComponent({ id, data }: NodeProps) {
@@ -23,7 +24,7 @@ function OpenEmbeddedNodeComponent({ id, data }: NodeProps) {
     <NodeWrapper
       id={id}
       typeName="OpenEmbedded"
-      icon={<Sparkles size={14} />}
+      icon={<AgentIcon size={14} color="rgba(255,255,255,0.75)" />}
       accentColor="#818cf8"
       nodeClass="root"
       showSendHandle

@@ -1,7 +1,8 @@
 // @ts-nocheck
 import { useState, useRef, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
-import { X, Settings, Paperclip, Send, User, Sparkles, ChevronRight } from "lucide-react";
+import { X, Settings, Paperclip, Send, User } from "lucide-react";
+import { AgentIcon } from "./AgentIcon.js";
 
 interface Message {
   role: "agent" | "user";
@@ -156,7 +157,7 @@ function ChatBubble({ msg }: { msg: Message }) {
       >
         {isAgent ? (
           <>
-            <Sparkles size={10} color="#818cf8" />
+            <AgentIcon size={10} color="#818cf8" />
             Agent Response
           </>
         ) : (
@@ -297,7 +298,7 @@ export function AgentModal({ onClose }: AgentModalProps) {
               boxShadow: "0 4px 16px rgba(99,102,241,0.35)",
             }}
           >
-            <Sparkles size={18} color="#ffffff" />
+            <AgentIcon size={18} color="#ffffff" />
           </div>
 
           {/* Title + badge + time */}
@@ -403,7 +404,7 @@ export function AgentModal({ onClose }: AgentModalProps) {
           {loading && (
             <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
               <div style={{ fontSize: 10, fontWeight: 600, color: "#404040", textTransform: "uppercase", letterSpacing: "0.07em", display: "flex", alignItems: "center", gap: 5 }}>
-                <Sparkles size={10} color="#818cf8" />
+                <AgentIcon size={10} color="#818cf8" />
                 Agent Response
               </div>
               <div

@@ -2,11 +2,12 @@
 import { useCallback, useState, useRef, useEffect, type ReactNode } from "react";
 import { useGraphStore, type AppNode, type AppNodeData } from "../lib/graphStore.js";
 import { AgentModal } from "./AgentModal.js";
+import { AgentIcon } from "./AgentIcon.js";
 import {
   Box, AlignJustify, AlignLeft, Image, LayoutGrid, Minus,
   LayoutList, MousePointerClick, ListFilter, User, Shield,
   AtSign, Hash, TextCursorInput, Layers, Bot, Workflow,
-  Search, MessageCircle, PanelTop, Webhook, Clock, BookMarked, X, Sparkles,
+  Search, MessageCircle, PanelTop, Webhook, Clock, BookMarked, X,
 } from "lucide-react";
 
 interface NodeDef {
@@ -456,7 +457,7 @@ export function CanvasNodeBar() {
             if (!agentOpen) (e.currentTarget as HTMLElement).style.background = "transparent";
           }}
         >
-          <Sparkles
+          <AgentIcon
             size={14}
             color={agentOpen ? "#818cf8" : "#555"}
             style={{ transition: "color 0.12s", flexShrink: 0 }}

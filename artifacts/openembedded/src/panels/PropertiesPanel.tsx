@@ -9,11 +9,12 @@ import {
   Package, LayoutTemplate, FileText, ImageIcon, GalleryHorizontalEnd,
   Minus, Rows3, PointerIcon, ListFilter, UserRound, ShieldCheck,
   AtSign, Hash, FormInput, MessageSquareCode, Trash2,
-  Plus, X, Bot, Sparkles, Webhook, Clock,
+  Plus, X, Bot, Webhook, Clock,
   CheckCircle2, AlertCircle, Loader2, Send, RefreshCw, Zap, Circle,
   ArrowRight, Info, MessageCircle, PanelTop, GripVertical,
 } from "lucide-react";
 import { ReactNode } from "react";
+import { AgentIcon } from "../canvas/AgentIcon.js";
 
 const TYPE_META: Record<number, { label: string; icon: ReactNode; color: string }> = {
   17:   { label: "Container",          icon: <Package size={14} />,              color: "#8b5cf6" },
@@ -32,7 +33,7 @@ const TYPE_META: Record<number, { label: string; icon: ReactNode; color: string 
   8:    { label: "Channel Select",     icon: <Hash size={14} />,                 color: "#22c55e" },
   0:    { label: "Embed (V1)",         icon: <MessageSquareCode size={14} />,    color: "#f59e0b" },
   [-1]: { label: "Bot",               icon: <Bot size={14} />,                  color: "#5865F2" },
-  [-2]: { label: "OpenEmbedded",       icon: <Sparkles size={14} />,             color: "#6366f1" },
+  [-2]: { label: "OpenEmbedded",       icon: <AgentIcon size={14} color="rgba(255,255,255,0.75)" />, color: "#6366f1" },
   [-3]: { label: "Message",            icon: <MessageCircle size={14} />,        color: "#10b981" },
   [-4]: { label: "Modal",              icon: <PanelTop size={14} />,             color: "#3b82f6" },
   [-5]: { label: "Webhook",            icon: <Webhook size={14} />,              color: "#5865F2" },
@@ -901,7 +902,7 @@ function OpenEmbeddedProperties({ nodeId, d, updateNodeData }: {
         }}>
           {(guildsQuery.isLoading || myGuildsLoading)
             ? <Loader2 size={13} color="#555" style={{ animation: "spin 1s linear infinite" }} />
-            : <Sparkles size={13} color="#818cf8" />}
+            : <AgentIcon size={13} color="#818cf8" />}
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ color: "#d0d0d0", fontSize: 12, fontWeight: 600 }}>OpenEmbedded Bot</div>
