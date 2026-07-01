@@ -40,7 +40,7 @@ function DiscordIcon({ size = 18 }: { size?: number }) {
 /* ── Builder screenshot mockup (responsive via <picture>) ──────────────────── */
 function BuilderMockup() {
   return (
-    <div style={{ position: "relative", width: "100%", height: "100%", background: "#111111", overflow: "hidden" }}>
+    <div style={{ position: "relative", width: "100%", height: "100%", background: "#111111", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center" }}>
       <picture style={{ display: "contents" }}>
         {/* Portrait mobile screenshot shown on narrow viewports */}
         <source media="(max-width: 767px)" srcSet="/builder-preview-mobile.jpg" />
@@ -48,14 +48,17 @@ function BuilderMockup() {
         <img
           src="/builder-preview.png"
           alt="OpenEmbedded builder — node graph with Discord preview"
+          width={2524}
+          height={1364}
+          fetchPriority="high"
+          decoding="sync"
           style={{
-            position: "absolute",
-            inset: 0,
             width: "100%",
             height: "100%",
-            objectFit: "cover",
-            objectPosition: "top left",
+            objectFit: "contain",
+            objectPosition: "center center",
             display: "block",
+            imageRendering: "auto",
           }}
         />
       </picture>
