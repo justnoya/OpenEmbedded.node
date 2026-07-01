@@ -1,8 +1,6 @@
 // @ts-nocheck
 import { useCallback, useState, useRef, useEffect, type ReactNode } from "react";
 import { useGraphStore, type AppNode, type AppNodeData } from "../lib/graphStore.js";
-import { AgentModal } from "./AgentModal.js";
-import { AgentIcon } from "./AgentIcon.js";
 import {
   Box, AlignJustify, AlignLeft, Image, LayoutGrid, Minus,
   LayoutList, MousePointerClick, ListFilter, User, Shield,
@@ -238,7 +236,6 @@ let nodeIdCounter = Date.now();
 export function CanvasNodeBar() {
   const addNode = useGraphStore((s) => s.addNode);
   const [open, setOpen] = useState(false);
-  const [agentOpen, setAgentOpen] = useState(false);
   const [search, setSearch] = useState("");
   const searchRef = useRef<HTMLInputElement>(null);
   const barRef = useRef<HTMLDivElement>(null);
@@ -256,6 +253,19 @@ export function CanvasNodeBar() {
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
+  }, [open]);
+
+  // Close drawer on click outside
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: MouseEvent) => {
+      if (barRef.current && !barRef.current.contains(e.target as Node)) {
+        setOpen(false);
+        setSearch("");
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
   }, [open]);
 
   const handleAdd = useCallback(
@@ -427,57 +437,7 @@ export function CanvasNodeBar() {
           )}
         </div>
 
-        {/* Divider */}
-        <div style={{ width: 1, height: 20, background: "rgba(255,255,255,0.10)", flexShrink: 0 }} />
-
-        {/* Agent button */}
-        <button
-          onClick={() => { setAgentOpen((v) => !v); if (open) { setOpen(false); setSearch(""); } }}
-          title="AI Agent"
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: 6,
-            height: 44,
-            padding: "0 16px",
-            background: agentOpen
-              ? "linear-gradient(135deg, rgba(99,102,241,0.22) 0%, rgba(79,70,229,0.16) 100%)"
-              : "transparent",
-            border: "none",
-            cursor: "pointer",
-            flexShrink: 0,
-            transition: "background 0.14s",
-            borderRadius: "0 22px 22px 0",
-          }}
-          onMouseEnter={(e) => {
-            if (!agentOpen) (e.currentTarget as HTMLElement).style.background = "rgba(129,140,248,0.08)";
-          }}
-          onMouseLeave={(e) => {
-            if (!agentOpen) (e.currentTarget as HTMLElement).style.background = "transparent";
-          }}
-        >
-          <AgentIcon
-            size={14}
-            color={agentOpen ? "#818cf8" : "#555"}
-            style={{ transition: "color 0.12s", flexShrink: 0 }}
-          />
-          <span
-            style={{
-              fontSize: 13,
-              fontWeight: 500,
-              color: agentOpen ? "#a5b4fc" : "#555",
-              transition: "color 0.12s",
-              userSelect: "none",
-            }}
-          >
-            Agent
-          </span>
-        </button>
       </div>
-
-      {/* Agent modal */}
-      {agentOpen && <AgentModal onClose={() => setAgentOpen(false)} />}
 
       <style>{`
         @keyframes nodeBarSlideUp {

@@ -21,6 +21,8 @@ import { isValidNodeConnection, isInteractionConnection, isBotSendConnection, ge
 import { NodeLibraryPanel } from "../panels/NodeLibraryPanel.js";
 import { CanvasNodeBar } from "../canvas/CanvasNodeBar.js";
 import { PropertiesPanel } from "../panels/PropertiesPanel.js";
+import { AgentPanel } from "../panels/AgentPanel.js";
+import { AgentIcon } from "../canvas/AgentIcon.js";
 import { DiscordPreview } from "../preview/DiscordPreview.js";
 import { ExportPanel } from "../panels/ExportPanel.js";
 import { DiscordActivityBadge } from "../components/DiscordActivityBadge.js";
@@ -47,8 +49,8 @@ import {
 
 const edgeTypes = { default: CustomEdge, interaction: InteractionEdge, send: SendEdge };
 
-type RightTab = "properties" | "preview";
-type MobilePanel = "library" | "canvas" | "properties" | "preview";
+type RightTab = "properties" | "preview" | "agent";
+type MobilePanel = "agent" | "canvas" | "properties" | "preview";
 
 function useIsMobile() {
   const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768);
@@ -790,9 +792,9 @@ export function Builder() {
           gap: 2,
         }}
       >
-        {(["library", "canvas", "properties", "preview"] as MobilePanel[]).map((panel) => {
-          const meta = {
-            library: { label: "Add", icon: <Boxes size={17} /> },
+        {(["agent", "canvas", "properties", "preview"] as MobilePanel[]).map((panel) => {
+          const meta: Record<string, { label: string; icon: React.ReactNode }> = {
+            agent: { label: "Agent", icon: <AgentIcon size={17} color="currentColor" /> },
             canvas: { label: "Canvas", icon: <Workflow size={17} /> },
             properties: { label: "Edit", icon: <SlidersHorizontal size={17} /> },
             preview: { label: "Preview", icon: <Smartphone size={17} /> },
@@ -1005,8 +1007,12 @@ export function Builder() {
           flexShrink: 0,
         }}
       >
-        {(["properties", "preview"] as RightTab[]).map((tab) => {
-          const meta = { properties: { label: "Properties", icon: <Settings2 size={12} /> }, preview: { label: "Preview", icon: <Eye size={12} /> } };
+        {(["properties", "preview", "agent"] as RightTab[]).map((tab) => {
+          const meta: Record<string, { label: string; icon: React.ReactNode }> = {
+            properties: { label: "Properties", icon: <Settings2 size={12} /> },
+            preview: { label: "Preview", icon: <Eye size={12} /> },
+            agent: { label: "Agent", icon: <AgentIcon size={12} color="currentColor" /> },
+          };
           const active = rightTab === tab;
           return (
             <button
@@ -1037,7 +1043,7 @@ export function Builder() {
         })}
       </div>
       <div style={{ flex: 1, overflow: "hidden", display: "flex", flexDirection: "column" }}>
-        {rightTab === "properties" ? <PropertiesPanel /> : <DiscordPreview />}
+        {rightTab === "properties" ? <PropertiesPanel /> : rightTab === "preview" ? <DiscordPreview /> : <AgentPanel />}
       </div>
     </div>
   );
@@ -1147,9 +1153,9 @@ export function Builder() {
     >
       {toolbar}
       <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
-        {mobilePanel === "library" && (
-          <div style={{ flex: 1, overflowY: "auto" }}>
-            <NodeLibraryPanel />
+        {mobilePanel === "agent" && (
+          <div style={{ flex: 1, overflow: "hidden", display: "flex", flexDirection: "column" }}>
+            <AgentPanel />
           </div>
         )}
         {mobilePanel === "canvas" && canvas}
